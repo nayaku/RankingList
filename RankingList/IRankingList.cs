@@ -3,7 +3,6 @@
     public interface IRankingList
     {
         void AddOrUpdateUser(int userId, int score, DateTime lastActive);
-        void RemoveUser(int userId);
         RankingListSingleResponse GetUserRank(int userId);
         RankingListMutiResponse GetRankingListMutiResponse(int topN, int aroundUserId, int aroundN);
     }
