@@ -96,7 +96,7 @@
         /// 删除用户
         /// </summary>
         /// <param name="user"></param>
-        public void DeleteUser(User user)
+        private void DeleteUser(User user)
         {
             Users.RemoveAll(u => u.ID == user.ID);
         }
@@ -107,7 +107,7 @@
         /// <param name="userId"></param>
         /// <param name="range"></param>
         /// <returns></returns>
-        public List<RankingListSingleResponse> GetUsersRankingAroundUser(int userId, int range)
+        private List<RankingListSingleResponse> GetUsersRankingAroundUser(int userId, int range)
         {
             List<RankingListSingleResponse> surroundingRankings = [];
             int userIndex = Users.FindIndex(u => u.ID == userId);
@@ -126,7 +126,7 @@
             return surroundingRankings;
         }
 
-        public RankingListMutiResponse GetRankingListMutiResponse(int userId, int topN, int range)
+        public RankingListMutiResponse GetRankingListMutiResponse(int userId, int topN = 10, int range = 6)
         {
             return new RankingListMutiResponse
             {
