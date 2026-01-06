@@ -19,13 +19,13 @@
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public RankingListResponse GetUserRanking(int userId)
+        public RankingListSingleResponse GetUserRanking(int userId)
         {
             for (int i = 0; i < Users.Count; i++)
             {
                 if (Users[i].ID == userId)
                 {
-                    return new RankingListResponse
+                    return new RankingListSingleResponse
                     {
                         User = Users[i],
                         Rank = i + 1
@@ -41,12 +41,12 @@
         /// </summary>
         /// <param name="n"></param>
         /// <returns></returns>
-        public List<RankingListResponse> GetTopNRankings(int n)
+        private List<RankingListSingleResponse> GetTopNRankings(int n)
         {
-            List<RankingListResponse> topRankings = [];
+            List<RankingListSingleResponse> topRankings = [];
             for (int i = 0; i < n && i < Users.Count; i++)
             {
-                topRankings.Add(new RankingListResponse
+                topRankings.Add(new RankingListSingleResponse
                 {
                     User = Users[i],
                     Rank = i + 1
@@ -107,16 +107,16 @@
         /// <param name="userId"></param>
         /// <param name="range"></param>
         /// <returns></returns>
-        public List<RankingListResponse> GetUsersRankingAroundUser(int userId, int range)
+        public List<RankingListSingleResponse> GetUsersRankingAroundUser(int userId, int range)
         {
-            List<RankingListResponse> surroundingRankings = [];
+            List<RankingListSingleResponse> surroundingRankings = [];
             int userIndex = Users.FindIndex(u => u.ID == userId);
             if (userIndex == -1) return surroundingRankings;
             int start = Math.Max(0, userIndex - range);
             int end = Math.Min(Users.Count - 1, userIndex + range);
             for (int i = start; i <= end; i++)
             {
-                surroundingRankings.Add(new RankingListResponse
+                surroundingRankings.Add(new RankingListSingleResponse
                 {
                     User = Users[i],
                     Rank = i + 1
@@ -124,6 +124,16 @@
             }
 
             return surroundingRankings;
+        }
+
+        public RankingListMutiResponse GetRankingListMutiResponse(int userId, int topN, int range)
+        {
+            return new RankingListMutiResponse
+            {
+                TopNUsers = GetTopNRankings(topN),
+                RankingAroundUsers = GetUsersRankingAroundUser(userId, range),
+                TotalUsers = GetTotalUsers()
+            };
         }
     }
 }

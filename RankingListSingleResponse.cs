@@ -1,6 +1,6 @@
 ﻿namespace RankingList
 {
-    public class RankingListResponse
+    public class RankingListSingleResponse
     {
         public User User { get; set; }
         public int Rank { get; set; }
