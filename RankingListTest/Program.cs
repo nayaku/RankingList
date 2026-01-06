@@ -1,5 +1,3 @@
-using System;
-
 namespace RankingListTest
 {
     class Program
@@ -10,8 +8,8 @@ namespace RankingListTest
             Console.WriteLine();
             
             // Test parameters
-            int initialUsers = 1000;      // Initial number of users in ranking list
-            int totalOperations = 100000;   // Total number of operations to perform
+            int initialUsers = 100_0000;      // Initial number of users in ranking list
+            int totalOperations = 1000;   // Total number of operations to perform
             int concurrencyLevel = 100;    // Number of concurrent tasks
             
             // Create and run test

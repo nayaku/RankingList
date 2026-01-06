@@ -96,3 +96,28 @@
         }
     }
 }
+/*
+2026年1月6日15:54:13
+=== Ranking List Concurrent Test ===
+
+Starting ranking list server from: RankingListServer.exe
+Server started with PID: 23132
+=== Ranking List Server ===
+Starting server...
+Ranking list initialized.
+Named pipe server started. Pipe name: RankingListPipe
+Press any key to stop the server...
+Starting concurrent test...
+Initial users: 1000000
+Total operations: 1000
+Concurrency level: 100
+
+Test Results:
+Total time elapsed: 24175 ms
+Completed operations: 1000
+Maximum concurrent operations: 27
+Average response time: 536.07 ms
+Throughput: 41.36 operations/second
+Peak memory usage: 89.75 MB
+Server process with PID 23132 stopped.
+*/
