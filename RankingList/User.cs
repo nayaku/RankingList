@@ -9,8 +9,8 @@
         {
             if (other == null) return 1;
             if (Score == other.Score)
-                return LastActive.CompareTo(other.LastActive);
-            return Score.CompareTo(other.Score);
+                return -LastActive.CompareTo(other.LastActive);
+            return -Score.CompareTo(other.Score);
         }
     }
 }
