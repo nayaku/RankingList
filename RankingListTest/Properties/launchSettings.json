@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RankingListTest": {
+      "commandName": "Project",
+      "commandLineArgs": "--test SimpleRankingList2"
+    }
+  }
+}

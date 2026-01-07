@@ -12,9 +12,9 @@
         private Dictionary<int, User> _userDictionary;
         private readonly object _lock = new();
 
-        public SimpleRankingList2(List<User> users)
+        public SimpleRankingList2(User[] users)
         {
-            _users = users;
+            _users = [.. users];
             _userDictionary = users.ToDictionary(u => u.ID);
             _users.Sort();
         }
@@ -75,13 +75,15 @@
                     TotalUsers = _users.Count
                 };
                 // Top N users
-                for (int i = 0; i < Math.Min(topN, _users.Count); i++)
+                var topNNum = Math.Min(topN, _users.Count);
+                response.TopNUsers = new RankingListSingleResponse[topNNum];
+                for (int i = 0; i < topNNum; i++)
                 {
-                    response.TopNUsers.Add(new RankingListSingleResponse
+                    response.TopNUsers[i] = new RankingListSingleResponse
                     {
                         User = _users[i],
                         Rank = i + 1
-                    });
+                    };
                 }
                 // Users around a specific user
                 if (!_userDictionary.TryGetValue(aroundUserId, out User? user))
@@ -93,13 +95,15 @@
                 {
                     int start = Math.Max(0, index - aroundN);
                     int end = Math.Min(_users.Count - 1, index + aroundN);
+                    int count = end - start + 1;
+                    response.RankingAroundUsers = new RankingListSingleResponse[count];
                     for (int i = start; i <= end; i++)
                     {
-                        response.RankingAroundUsers.Add(new RankingListSingleResponse
+                        response.RankingAroundUsers[i - start] = new RankingListSingleResponse
                         {
                             User = _users[i],
                             Rank = i + 1
-                        });
+                        };
                     }
                 }
                 return response;
@@ -108,27 +112,17 @@
     }
 }
 /*
-2026年1月6日18:29:15
-=== Ranking List Concurrent Test ===
+=== 测试结果 ===
+排行榜名称: SimpleRankingList2
+总耗时: 3494 ms
+平均耗时: 3.49 ms/操作
+内存占用: 453.57 MB
+内存峰值: 513.74 MB
+测试日期: 2026/1/7 16:00:04
 
-Starting ranking list server from: RankingListServer.exe
-Server started with PID: 23744
-=== Ranking List Server ===
-Starting server...
-Ranking list initialized.
-Named pipe server started. Pipe name: RankingListPipe
-Press any key to stop the server...
-Starting concurrent test...
-Initial users: 1000000
-Total operations: 1000
-Concurrency level: 100
-
-Test Results:
-Total time elapsed: 3354 ms
-Completed operations: 1000
-Maximum concurrent operations: 20
-Average response time: 63.01 ms
-Throughput: 298.13 operations/second
-Peak memory usage: 113.01 MB
-Server process with PID 23744 stopped.
+=== 与基准 SimpleRankingList 的对比 ===
+总耗时: 3494 ms vs 30776 ms (-88.65%)
+平均耗时: 3.49 ms vs 30.78 ms (-88.65%)
+内存占用: 453.57 MB vs 426.91 MB (+6.25%)
+内存峰值: 513.74 MB vs 487.13 MB (+5.46%)
 */

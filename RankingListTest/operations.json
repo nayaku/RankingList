@@ -1,0 +1,7002 @@
+[
+  {
+    "Type": 0,
+    "UserId": 140908,
+    "Score": 0,
+    "TopN": 13,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 262593,
+    "Score": 0,
+    "TopN": 72,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 761252,
+    "Score": 0,
+    "TopN": 24,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 320234,
+    "Score": 0,
+    "TopN": 38,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 35319,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 152194,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 44148,
+    "Score": 3315,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 906214,
+    "Score": 0,
+    "TopN": 69,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 41511,
+    "Score": 0,
+    "TopN": 31,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 1000001,
+    "Score": 28,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 384575,
+    "Score": 140549,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 51010,
+    "Score": 0,
+    "TopN": 78,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 249962,
+    "Score": 0,
+    "TopN": 77,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 143647,
+    "Score": 0,
+    "TopN": 5,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 50795,
+    "Score": 0,
+    "TopN": 42,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 218446,
+    "Score": 0,
+    "TopN": 2,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 68661,
+    "Score": 0,
+    "TopN": 72,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 12034,
+    "Score": 0,
+    "TopN": 79,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 499598,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 3075,
+    "Score": 0,
+    "TopN": 7,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 913517,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 616608,
+    "Score": 0,
+    "TopN": 5,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 436952,
+    "Score": 0,
+    "TopN": 79,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 297374,
+    "Score": 0,
+    "TopN": 90,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 1000002,
+    "Score": 77,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 332836,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000003,
+    "Score": 1,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 333251,
+    "Score": 0,
+    "TopN": 77,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 215662,
+    "Score": 0,
+    "TopN": 59,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 766227,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 714953,
+    "Score": 0,
+    "TopN": 29,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 650835,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 345409,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 265445,
+    "Score": 0,
+    "TopN": 4,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 422216,
+    "Score": 0,
+    "TopN": 10,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 106095,
+    "Score": 0,
+    "TopN": 32,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 9043,
+    "Score": 431515,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 238075,
+    "Score": 619087,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 545347,
+    "Score": 174300,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 192310,
+    "Score": 0,
+    "TopN": 30,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 230850,
+    "Score": 0,
+    "TopN": 93,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 1000004,
+    "Score": 78,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 294770,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 1000005,
+    "Score": 35,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 880933,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 4
+  },
+  {
+    "Type": 2,
+    "UserId": 463650,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 947751,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 2844,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 590799,
+    "Score": 140005,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 910694,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 333885,
+    "Score": 0,
+    "TopN": 54,
+    "AroundN": 6
+  },
+  {
+    "Type": 2,
+    "UserId": 822340,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 339687,
+    "Score": 328868,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 888007,
+    "Score": 552349,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 277127,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 81840,
+    "Score": 0,
+    "TopN": 42,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 953371,
+    "Score": 711547,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 890770,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 211242,
+    "Score": 0,
+    "TopN": 63,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 1000006,
+    "Score": 64,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 521219,
+    "Score": 0,
+    "TopN": 72,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 788644,
+    "Score": 0,
+    "TopN": 58,
+    "AroundN": 2
+  },
+  {
+    "Type": 2,
+    "UserId": 52300,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 214445,
+    "Score": 0,
+    "TopN": 32,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 270663,
+    "Score": 0,
+    "TopN": 88,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 453793,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 6
+  },
+  {
+    "Type": 2,
+    "UserId": 355729,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 183505,
+    "Score": 97678,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 612838,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 471126,
+    "Score": 0,
+    "TopN": 88,
+    "AroundN": 3
+  },
+  {
+    "Type": 2,
+    "UserId": 881417,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000007,
+    "Score": 8,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 18622,
+    "Score": 0,
+    "TopN": 89,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 655529,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 3
+  },
+  {
+    "Type": 2,
+    "UserId": 752221,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 340804,
+    "Score": 0,
+    "TopN": 66,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 521882,
+    "Score": 0,
+    "TopN": 37,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 605141,
+    "Score": 0,
+    "TopN": 64,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 665205,
+    "Score": 0,
+    "TopN": 10,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 978938,
+    "Score": 45,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 579355,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 643951,
+    "Score": 0,
+    "TopN": 11,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 655800,
+    "Score": 0,
+    "TopN": 20,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 860626,
+    "Score": 0,
+    "TopN": 36,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 428532,
+    "Score": 0,
+    "TopN": 20,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 537538,
+    "Score": 0,
+    "TopN": 67,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 974752,
+    "Score": 0,
+    "TopN": 69,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 540413,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 589269,
+    "Score": 0,
+    "TopN": 75,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 501811,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000008,
+    "Score": 17,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 163648,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 953036,
+    "Score": 0,
+    "TopN": 46,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 714633,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 796937,
+    "Score": 0,
+    "TopN": 46,
+    "AroundN": 9
+  },
+  {
+    "Type": 2,
+    "UserId": 500764,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 947244,
+    "Score": 0,
+    "TopN": 88,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 842826,
+    "Score": 0,
+    "TopN": 51,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 109057,
+    "Score": 0,
+    "TopN": 90,
+    "AroundN": 6
+  },
+  {
+    "Type": 2,
+    "UserId": 569105,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 377193,
+    "Score": 0,
+    "TopN": 14,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 5071,
+    "Score": 0,
+    "TopN": 65,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 916638,
+    "Score": 0,
+    "TopN": 82,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 598264,
+    "Score": 0,
+    "TopN": 13,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 544347,
+    "Score": 0,
+    "TopN": 5,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 94122,
+    "Score": 0,
+    "TopN": 53,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 719907,
+    "Score": 0,
+    "TopN": 90,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 404257,
+    "Score": 190033,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 941550,
+    "Score": 43881,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 89232,
+    "Score": 0,
+    "TopN": 79,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 1000009,
+    "Score": 50,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 806320,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 906803,
+    "Score": 405740,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 820619,
+    "Score": 0,
+    "TopN": 36,
+    "AroundN": 6
+  },
+  {
+    "Type": 2,
+    "UserId": 918101,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 846807,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 103828,
+    "Score": 0,
+    "TopN": 97,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 968410,
+    "Score": 667602,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 656724,
+    "Score": 0,
+    "TopN": 32,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 746628,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 382308,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 994460,
+    "Score": 817697,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 531631,
+    "Score": 0,
+    "TopN": 5,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 881682,
+    "Score": 574034,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 239169,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 1000010,
+    "Score": 68,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 837921,
+    "Score": 0,
+    "TopN": 78,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 878099,
+    "Score": 0,
+    "TopN": 14,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 459711,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 282727,
+    "Score": 0,
+    "TopN": 37,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 109379,
+    "Score": 0,
+    "TopN": 49,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 468501,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 775053,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 8
+  },
+  {
+    "Type": 2,
+    "UserId": 338458,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 280933,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 142499,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 477714,
+    "Score": 406953,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 823699,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 681702,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 721361,
+    "Score": 0,
+    "TopN": 38,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 985457,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 475039,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 275302,
+    "Score": 0,
+    "TopN": 18,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 123896,
+    "Score": 0,
+    "TopN": 18,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 727307,
+    "Score": 0,
+    "TopN": 37,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 441334,
+    "Score": 0,
+    "TopN": 4,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 154174,
+    "Score": 0,
+    "TopN": 57,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 43806,
+    "Score": 443698,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 867654,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 124690,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 269343,
+    "Score": 0,
+    "TopN": 8,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 154831,
+    "Score": 0,
+    "TopN": 65,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 80215,
+    "Score": 0,
+    "TopN": 51,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 356352,
+    "Score": 200025,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 35748,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 108441,
+    "Score": 0,
+    "TopN": 90,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 800190,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 176651,
+    "Score": 0,
+    "TopN": 5,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 917025,
+    "Score": 0,
+    "TopN": 60,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 192448,
+    "Score": 538,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 415389,
+    "Score": 0,
+    "TopN": 72,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 142905,
+    "Score": 0,
+    "TopN": 97,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 415654,
+    "Score": 0,
+    "TopN": 36,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 698005,
+    "Score": 0,
+    "TopN": 71,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 225208,
+    "Score": 0,
+    "TopN": 69,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 37612,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 252101,
+    "Score": 0,
+    "TopN": 4,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 967973,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 622295,
+    "Score": 0,
+    "TopN": 84,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 171622,
+    "Score": 0,
+    "TopN": 38,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 317510,
+    "Score": 0,
+    "TopN": 82,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 165811,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 207128,
+    "Score": 519150,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 193805,
+    "Score": 316672,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 174827,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 473333,
+    "Score": 0,
+    "TopN": 46,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 8228,
+    "Score": 0,
+    "TopN": 51,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 197549,
+    "Score": 42674,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 538276,
+    "Score": 0,
+    "TopN": 63,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 373015,
+    "Score": 0,
+    "TopN": 62,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 879842,
+    "Score": 0,
+    "TopN": 44,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 951440,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 87891,
+    "Score": 0,
+    "TopN": 43,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 904343,
+    "Score": 0,
+    "TopN": 80,
+    "AroundN": 9
+  },
+  {
+    "Type": 2,
+    "UserId": 989669,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 815773,
+    "Score": 0,
+    "TopN": 24,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 76865,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 7
+  },
+  {
+    "Type": 2,
+    "UserId": 668864,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 778566,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 820802,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 489918,
+    "Score": 0,
+    "TopN": 4,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 703030,
+    "Score": 0,
+    "TopN": 25,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 652805,
+    "Score": 0,
+    "TopN": 31,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 714516,
+    "Score": 0,
+    "TopN": 73,
+    "AroundN": 7
+  },
+  {
+    "Type": 2,
+    "UserId": 544666,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 926061,
+    "Score": 948381,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 359625,
+    "Score": 0,
+    "TopN": 22,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 91982,
+    "Score": 0,
+    "TopN": 42,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 607700,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 311967,
+    "Score": 0,
+    "TopN": 87,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 568380,
+    "Score": 365473,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 772333,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 932474,
+    "Score": 937445,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 110840,
+    "Score": 214753,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 35203,
+    "Score": 7727,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 275639,
+    "Score": 0,
+    "TopN": 67,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 617670,
+    "Score": 642215,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 699313,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 665332,
+    "Score": 24537,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 821475,
+    "Score": 0,
+    "TopN": 14,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 506647,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 184865,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 670445,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 195626,
+    "Score": 0,
+    "TopN": 31,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 412968,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 64031,
+    "Score": 0,
+    "TopN": 59,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 384284,
+    "Score": 760609,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 69514,
+    "Score": 4895,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 352820,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 840216,
+    "Score": 0,
+    "TopN": 99,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 90625,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 353725,
+    "Score": 0,
+    "TopN": 15,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 61624,
+    "Score": 0,
+    "TopN": 46,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 757934,
+    "Score": 0,
+    "TopN": 53,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 43011,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 651493,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 684277,
+    "Score": 372003,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 401184,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 603303,
+    "Score": 0,
+    "TopN": 42,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 851667,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 1000011,
+    "Score": 62,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 360368,
+    "Score": 0,
+    "TopN": 73,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 241906,
+    "Score": 169788,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 825100,
+    "Score": 0,
+    "TopN": 55,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 862863,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 406360,
+    "Score": 0,
+    "TopN": 7,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 223727,
+    "Score": 59016,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 644370,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 76286,
+    "Score": 0,
+    "TopN": 46,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 478865,
+    "Score": 99808,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 510721,
+    "Score": 0,
+    "TopN": 90,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 792573,
+    "Score": 0,
+    "TopN": 30,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 809350,
+    "Score": 0,
+    "TopN": 28,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 118209,
+    "Score": 0,
+    "TopN": 64,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 939908,
+    "Score": 13059,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 187704,
+    "Score": 0,
+    "TopN": 59,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 24499,
+    "Score": 421730,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 884542,
+    "Score": 0,
+    "TopN": 3,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 53287,
+    "Score": 0,
+    "TopN": 66,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 835116,
+    "Score": 0,
+    "TopN": 49,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 124869,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 422412,
+    "Score": 0,
+    "TopN": 34,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 806016,
+    "Score": 0,
+    "TopN": 88,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 566982,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 8
+  },
+  {
+    "Type": 2,
+    "UserId": 766345,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 527666,
+    "Score": 0,
+    "TopN": 77,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 782157,
+    "Score": 127017,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 19378,
+    "Score": 0,
+    "TopN": 46,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 953436,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 11774,
+    "Score": 0,
+    "TopN": 20,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 493492,
+    "Score": 680792,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 555402,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 560763,
+    "Score": 0,
+    "TopN": 58,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 604634,
+    "Score": 481152,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 959433,
+    "Score": 0,
+    "TopN": 29,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 314689,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 318504,
+    "Score": 0,
+    "TopN": 2,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 928736,
+    "Score": 0,
+    "TopN": 65,
+    "AroundN": 4
+  },
+  {
+    "Type": 2,
+    "UserId": 142710,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 79301,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 209481,
+    "Score": 0,
+    "TopN": 93,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 221395,
+    "Score": 0,
+    "TopN": 80,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 674522,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 853834,
+    "Score": 0,
+    "TopN": 59,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 886661,
+    "Score": 0,
+    "TopN": 87,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 174989,
+    "Score": 0,
+    "TopN": 55,
+    "AroundN": 6
+  },
+  {
+    "Type": 2,
+    "UserId": 73659,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 151455,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 99281,
+    "Score": 268786,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 925258,
+    "Score": 442917,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 205352,
+    "Score": 0,
+    "TopN": 64,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 833018,
+    "Score": 0,
+    "TopN": 20,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 467386,
+    "Score": 54929,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 518351,
+    "Score": 356972,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 223392,
+    "Score": 0,
+    "TopN": 62,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 275963,
+    "Score": 0,
+    "TopN": 28,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 647307,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 990719,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 8
+  },
+  {
+    "Type": 2,
+    "UserId": 505532,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 241268,
+    "Score": 99485,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 417046,
+    "Score": 0,
+    "TopN": 97,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 606286,
+    "Score": 993874,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 147886,
+    "Score": 0,
+    "TopN": 24,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 513438,
+    "Score": 0,
+    "TopN": 99,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 186210,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 543525,
+    "Score": 0,
+    "TopN": 32,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 553278,
+    "Score": 372031,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 958561,
+    "Score": 614142,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 76053,
+    "Score": 0,
+    "TopN": 64,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 413668,
+    "Score": 16761,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 205644,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 368590,
+    "Score": 0,
+    "TopN": 13,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 167304,
+    "Score": 0,
+    "TopN": 84,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 577091,
+    "Score": 0,
+    "TopN": 49,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 42355,
+    "Score": 0,
+    "TopN": 10,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 59205,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 971427,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 875925,
+    "Score": 352294,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 970371,
+    "Score": 0,
+    "TopN": 77,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 225992,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 132770,
+    "Score": 604617,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000012,
+    "Score": 6,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 607453,
+    "Score": 0,
+    "TopN": 36,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 106193,
+    "Score": 0,
+    "TopN": 74,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 491827,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 179253,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 291392,
+    "Score": 0,
+    "TopN": 6,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 804550,
+    "Score": 0,
+    "TopN": 18,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 837475,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 4
+  },
+  {
+    "Type": 2,
+    "UserId": 926449,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 229119,
+    "Score": 72031,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 389483,
+    "Score": 170,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 681692,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 826932,
+    "Score": 0,
+    "TopN": 6,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 718441,
+    "Score": 403462,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000013,
+    "Score": 51,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 137978,
+    "Score": 0,
+    "TopN": 58,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 907528,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 40294,
+    "Score": 0,
+    "TopN": 43,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 648245,
+    "Score": 445296,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 129786,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 233186,
+    "Score": 0,
+    "TopN": 15,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 78176,
+    "Score": 0,
+    "TopN": 22,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 718453,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 490838,
+    "Score": 0,
+    "TopN": 90,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 96680,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 728048,
+    "Score": 0,
+    "TopN": 15,
+    "AroundN": 9
+  },
+  {
+    "Type": 2,
+    "UserId": 65697,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 518616,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 841500,
+    "Score": 0,
+    "TopN": 15,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 96510,
+    "Score": 0,
+    "TopN": 99,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 152525,
+    "Score": 0,
+    "TopN": 69,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 583217,
+    "Score": 0,
+    "TopN": 6,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 310510,
+    "Score": 0,
+    "TopN": 84,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 360651,
+    "Score": 0,
+    "TopN": 97,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 650893,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 280533,
+    "Score": 0,
+    "TopN": 82,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 457341,
+    "Score": 20829,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 552078,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 40473,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 765149,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 940499,
+    "Score": 590954,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 122211,
+    "Score": 0,
+    "TopN": 26,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 596365,
+    "Score": 783349,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 779685,
+    "Score": 0,
+    "TopN": 79,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 999072,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 904813,
+    "Score": 0,
+    "TopN": 14,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 36794,
+    "Score": 0,
+    "TopN": 48,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 964759,
+    "Score": 0,
+    "TopN": 34,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 528890,
+    "Score": 0,
+    "TopN": 34,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 885439,
+    "Score": 0,
+    "TopN": 2,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 276523,
+    "Score": 163847,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 469055,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 246394,
+    "Score": 632601,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 264992,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 973423,
+    "Score": 0,
+    "TopN": 65,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 642171,
+    "Score": 101348,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 905752,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 478206,
+    "Score": 0,
+    "TopN": 44,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 440555,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 628290,
+    "Score": 938490,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 686970,
+    "Score": 0,
+    "TopN": 24,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 1000014,
+    "Score": 8,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 904892,
+    "Score": 0,
+    "TopN": 91,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 968009,
+    "Score": 0,
+    "TopN": 97,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 45978,
+    "Score": 0,
+    "TopN": 57,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 323938,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 363781,
+    "Score": 0,
+    "TopN": 7,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 281959,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 41125,
+    "Score": 39748,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 401155,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 621286,
+    "Score": 0,
+    "TopN": 14,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 383996,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 340242,
+    "Score": 0,
+    "TopN": 61,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 560560,
+    "Score": 0,
+    "TopN": 26,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 410719,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 44730,
+    "Score": 112662,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 196418,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 1
+  },
+  {
+    "Type": 2,
+    "UserId": 222787,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 972784,
+    "Score": 0,
+    "TopN": 8,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 749516,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 933662,
+    "Score": 0,
+    "TopN": 28,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 899512,
+    "Score": 0,
+    "TopN": 67,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 305125,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 687452,
+    "Score": 0,
+    "TopN": 48,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 980021,
+    "Score": 0,
+    "TopN": 58,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 78684,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 272024,
+    "Score": 0,
+    "TopN": 34,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 11600,
+    "Score": 0,
+    "TopN": 95,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 422848,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 931005,
+    "Score": 0,
+    "TopN": 18,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 2035,
+    "Score": 0,
+    "TopN": 75,
+    "AroundN": 9
+  },
+  {
+    "Type": 2,
+    "UserId": 167383,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 314724,
+    "Score": 0,
+    "TopN": 49,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 172959,
+    "Score": 441757,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 922482,
+    "Score": 0,
+    "TopN": 78,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 966748,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 428743,
+    "Score": 0,
+    "TopN": 36,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 791467,
+    "Score": 0,
+    "TopN": 28,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 585788,
+    "Score": 0,
+    "TopN": 80,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 620273,
+    "Score": 0,
+    "TopN": 32,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 117155,
+    "Score": 0,
+    "TopN": 27,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 721627,
+    "Score": 0,
+    "TopN": 26,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 238703,
+    "Score": 0,
+    "TopN": 93,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 807448,
+    "Score": 0,
+    "TopN": 36,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 82109,
+    "Score": 0,
+    "TopN": 79,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 350146,
+    "Score": 0,
+    "TopN": 50,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 6787,
+    "Score": 0,
+    "TopN": 78,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 629049,
+    "Score": 196188,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 546168,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 895101,
+    "Score": 13455,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 37058,
+    "Score": 0,
+    "TopN": 25,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 276680,
+    "Score": 399995,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 589393,
+    "Score": 0,
+    "TopN": 84,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 664213,
+    "Score": 501238,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 46498,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 2
+  },
+  {
+    "Type": 2,
+    "UserId": 92207,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 593411,
+    "Score": 0,
+    "TopN": 61,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 722728,
+    "Score": 302010,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 45747,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 530784,
+    "Score": 0,
+    "TopN": 11,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 246059,
+    "Score": 0,
+    "TopN": 73,
+    "AroundN": 9
+  },
+  {
+    "Type": 2,
+    "UserId": 240301,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 44393,
+    "Score": 40394,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 834479,
+    "Score": 914799,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 760480,
+    "Score": 0,
+    "TopN": 54,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 651199,
+    "Score": 0,
+    "TopN": 82,
+    "AroundN": 8
+  },
+  {
+    "Type": 2,
+    "UserId": 611365,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 319826,
+    "Score": 0,
+    "TopN": 8,
+    "AroundN": 8
+  },
+  {
+    "Type": 2,
+    "UserId": 517382,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000015,
+    "Score": 46,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 688570,
+    "Score": 0,
+    "TopN": 74,
+    "AroundN": 4
+  },
+  {
+    "Type": 2,
+    "UserId": 151247,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 699282,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 783377,
+    "Score": 0,
+    "TopN": 42,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 426559,
+    "Score": 630220,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 982582,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 342505,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 159658,
+    "Score": 0,
+    "TopN": 10,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 766980,
+    "Score": 0,
+    "TopN": 75,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 968162,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 926289,
+    "Score": 0,
+    "TopN": 30,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 620944,
+    "Score": 706488,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 248266,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 754109,
+    "Score": 0,
+    "TopN": 75,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 307262,
+    "Score": 0,
+    "TopN": 13,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 138190,
+    "Score": 0,
+    "TopN": 53,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 584510,
+    "Score": 0,
+    "TopN": 49,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 799434,
+    "Score": 0,
+    "TopN": 79,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 70594,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 502452,
+    "Score": 0,
+    "TopN": 54,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 166425,
+    "Score": 518913,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 784819,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 772936,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 974531,
+    "Score": 0,
+    "TopN": 84,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 419761,
+    "Score": 0,
+    "TopN": 40,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 116209,
+    "Score": 0,
+    "TopN": 29,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 458482,
+    "Score": 253801,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 455824,
+    "Score": 0,
+    "TopN": 55,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 721555,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 995007,
+    "Score": 0,
+    "TopN": 97,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 822110,
+    "Score": 0,
+    "TopN": 57,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 437173,
+    "Score": 0,
+    "TopN": 40,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 270006,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 157430,
+    "Score": 630,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 616299,
+    "Score": 0,
+    "TopN": 50,
+    "AroundN": 3
+  },
+  {
+    "Type": 2,
+    "UserId": 586347,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 553886,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 676957,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 1000016,
+    "Score": 20,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 52922,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 599063,
+    "Score": 0,
+    "TopN": 36,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 301400,
+    "Score": 0,
+    "TopN": 36,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 995833,
+    "Score": 729641,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 852512,
+    "Score": 0,
+    "TopN": 6,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 242826,
+    "Score": 0,
+    "TopN": 57,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 493652,
+    "Score": 0,
+    "TopN": 10,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 548553,
+    "Score": 817925,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 337601,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 419227,
+    "Score": 0,
+    "TopN": 63,
+    "AroundN": 8
+  },
+  {
+    "Type": 2,
+    "UserId": 17237,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 800954,
+    "Score": 0,
+    "TopN": 27,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 1000017,
+    "Score": 21,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 133899,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 676624,
+    "Score": 0,
+    "TopN": 58,
+    "AroundN": 7
+  },
+  {
+    "Type": 2,
+    "UserId": 481423,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 77030,
+    "Score": 678934,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 758303,
+    "Score": 0,
+    "TopN": 4,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 425591,
+    "Score": 435091,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 929626,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 355778,
+    "Score": 0,
+    "TopN": 88,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 855825,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 173561,
+    "Score": 0,
+    "TopN": 61,
+    "AroundN": 7
+  },
+  {
+    "Type": 2,
+    "UserId": 856686,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 578168,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 845616,
+    "Score": 393594,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 42653,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 568201,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 232343,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 712423,
+    "Score": 0,
+    "TopN": 63,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 1000018,
+    "Score": 3,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 597999,
+    "Score": 0,
+    "TopN": 5,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 1000019,
+    "Score": 9,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 182919,
+    "Score": 32963,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 156294,
+    "Score": 5049,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 524199,
+    "Score": 0,
+    "TopN": 27,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 871064,
+    "Score": 461666,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 308495,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 427945,
+    "Score": 0,
+    "TopN": 30,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 125286,
+    "Score": 0,
+    "TopN": 70,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 768683,
+    "Score": 67198,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 218100,
+    "Score": 0,
+    "TopN": 89,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 20274,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 918526,
+    "Score": 0,
+    "TopN": 3,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 109553,
+    "Score": 0,
+    "TopN": 95,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 440386,
+    "Score": 0,
+    "TopN": 14,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 649249,
+    "Score": 0,
+    "TopN": 26,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 652744,
+    "Score": 0,
+    "TopN": 74,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 306666,
+    "Score": 0,
+    "TopN": 89,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 283043,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 1
+  },
+  {
+    "Type": 2,
+    "UserId": 823697,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 850790,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 401013,
+    "Score": 862036,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 113383,
+    "Score": 0,
+    "TopN": 17,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 302585,
+    "Score": 0,
+    "TopN": 63,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 959391,
+    "Score": 145720,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000020,
+    "Score": 7,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 46883,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 39336,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 2
+  },
+  {
+    "Type": 2,
+    "UserId": 77430,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 371417,
+    "Score": 0,
+    "TopN": 29,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 768357,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 87020,
+    "Score": 0,
+    "TopN": 63,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 92744,
+    "Score": 0,
+    "TopN": 59,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 51503,
+    "Score": 441318,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 36195,
+    "Score": 25505,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 762412,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 220613,
+    "Score": 666470,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 602047,
+    "Score": 0,
+    "TopN": 75,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 250297,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 858149,
+    "Score": 0,
+    "TopN": 82,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 435940,
+    "Score": 0,
+    "TopN": 58,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 883858,
+    "Score": 0,
+    "TopN": 26,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 829553,
+    "Score": 0,
+    "TopN": 31,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 711517,
+    "Score": 0,
+    "TopN": 63,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 885911,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 640572,
+    "Score": 6754,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 662105,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 908136,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 90439,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 731783,
+    "Score": 0,
+    "TopN": 25,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 404436,
+    "Score": 0,
+    "TopN": 87,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 220413,
+    "Score": 0,
+    "TopN": 59,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 40832,
+    "Score": 0,
+    "TopN": 14,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 645874,
+    "Score": 0,
+    "TopN": 8,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 688894,
+    "Score": 138431,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 716473,
+    "Score": 0,
+    "TopN": 80,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 389333,
+    "Score": 0,
+    "TopN": 43,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 298302,
+    "Score": 674702,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 677197,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 561889,
+    "Score": 104344,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 766163,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 1000021,
+    "Score": 37,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 11089,
+    "Score": 0,
+    "TopN": 93,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 42889,
+    "Score": 0,
+    "TopN": 48,
+    "AroundN": 4
+  },
+  {
+    "Type": 2,
+    "UserId": 600909,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 278921,
+    "Score": 0,
+    "TopN": 90,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 848585,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 625195,
+    "Score": 120976,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 200536,
+    "Score": 0,
+    "TopN": 58,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 701199,
+    "Score": 0,
+    "TopN": 71,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 968404,
+    "Score": 291110,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 233696,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000022,
+    "Score": 71,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 161876,
+    "Score": 0,
+    "TopN": 28,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 1000023,
+    "Score": 88,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 323113,
+    "Score": 0,
+    "TopN": 71,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 914744,
+    "Score": 335636,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 338692,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 731591,
+    "Score": 0,
+    "TopN": 83,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 777186,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 310540,
+    "Score": 634633,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000024,
+    "Score": 98,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 895765,
+    "Score": 0,
+    "TopN": 62,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 536641,
+    "Score": 0,
+    "TopN": 75,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 510305,
+    "Score": 0,
+    "TopN": 25,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 1000025,
+    "Score": 36,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 666361,
+    "Score": 0,
+    "TopN": 79,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 1000026,
+    "Score": 3,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 760833,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 91909,
+    "Score": 0,
+    "TopN": 83,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 489372,
+    "Score": 0,
+    "TopN": 60,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 333551,
+    "Score": 0,
+    "TopN": 29,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 802078,
+    "Score": 0,
+    "TopN": 64,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 777462,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 1000027,
+    "Score": 2,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 342448,
+    "Score": 565658,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 864411,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 756159,
+    "Score": 93264,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 265766,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 868553,
+    "Score": 21602,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 208822,
+    "Score": 0,
+    "TopN": 8,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 491922,
+    "Score": 28870,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 593776,
+    "Score": 836330,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 925179,
+    "Score": 0,
+    "TopN": 6,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 278991,
+    "Score": 0,
+    "TopN": 32,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 996888,
+    "Score": 0,
+    "TopN": 43,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 973101,
+    "Score": 221786,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 788952,
+    "Score": 0,
+    "TopN": 47,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 562560,
+    "Score": 0,
+    "TopN": 89,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 193189,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 234,
+    "Score": 0,
+    "TopN": 55,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 1000028,
+    "Score": 50,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 21613,
+    "Score": 27253,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 68784,
+    "Score": 0,
+    "TopN": 80,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 782634,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 229456,
+    "Score": 0,
+    "TopN": 13,
+    "AroundN": 8
+  },
+  {
+    "Type": 2,
+    "UserId": 66235,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 677805,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 415844,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 690047,
+    "Score": 0,
+    "TopN": 57,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 533988,
+    "Score": 0,
+    "TopN": 82,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 161241,
+    "Score": 0,
+    "TopN": 17,
+    "AroundN": 9
+  },
+  {
+    "Type": 2,
+    "UserId": 333432,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 626165,
+    "Score": 0,
+    "TopN": 62,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 282826,
+    "Score": 16490,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 203619,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 378084,
+    "Score": 0,
+    "TopN": 89,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 823033,
+    "Score": 14225,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000029,
+    "Score": 13,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 274834,
+    "Score": 694386,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 995626,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 76228,
+    "Score": 0,
+    "TopN": 85,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 401463,
+    "Score": 0,
+    "TopN": 71,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 607124,
+    "Score": 0,
+    "TopN": 40,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 879451,
+    "Score": 0,
+    "TopN": 83,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 115568,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 156758,
+    "Score": 0,
+    "TopN": 40,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 261223,
+    "Score": 0,
+    "TopN": 79,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 490430,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 575709,
+    "Score": 0,
+    "TopN": 55,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 916786,
+    "Score": 0,
+    "TopN": 70,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 950654,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 675203,
+    "Score": 0,
+    "TopN": 99,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 987473,
+    "Score": 609041,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 514111,
+    "Score": 0,
+    "TopN": 7,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 348537,
+    "Score": 0,
+    "TopN": 36,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 616339,
+    "Score": 0,
+    "TopN": 17,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 549488,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 647662,
+    "Score": 0,
+    "TopN": 31,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 211448,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 419915,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 844824,
+    "Score": 0,
+    "TopN": 25,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 200076,
+    "Score": 0,
+    "TopN": 38,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 693289,
+    "Score": 0,
+    "TopN": 51,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 772135,
+    "Score": 0,
+    "TopN": 70,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 1000030,
+    "Score": 31,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 204926,
+    "Score": 905331,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 969954,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 66989,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 263321,
+    "Score": 0,
+    "TopN": 93,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 964729,
+    "Score": 99525,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 173200,
+    "Score": 0,
+    "TopN": 38,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 135844,
+    "Score": 0,
+    "TopN": 97,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 506820,
+    "Score": 0,
+    "TopN": 7,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 861872,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 223978,
+    "Score": 0,
+    "TopN": 5,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 630851,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 229209,
+    "Score": 0,
+    "TopN": 26,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 107152,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 1000031,
+    "Score": 11,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000032,
+    "Score": 85,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 67743,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 477016,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 755454,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 621759,
+    "Score": 0,
+    "TopN": 27,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 31806,
+    "Score": 0,
+    "TopN": 60,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 730041,
+    "Score": 0,
+    "TopN": 2,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 674484,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 356914,
+    "Score": 485229,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 49486,
+    "Score": 0,
+    "TopN": 2,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 508581,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 973639,
+    "Score": 0,
+    "TopN": 24,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 701731,
+    "Score": 9475,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 863833,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 588578,
+    "Score": 0,
+    "TopN": 50,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 86609,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 466540,
+    "Score": 0,
+    "TopN": 70,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 85168,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 954936,
+    "Score": 0,
+    "TopN": 61,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 269052,
+    "Score": 2881,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 356454,
+    "Score": 0,
+    "TopN": 49,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 972787,
+    "Score": 6039,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 15155,
+    "Score": 0,
+    "TopN": 89,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 156705,
+    "Score": 0,
+    "TopN": 37,
+    "AroundN": 9
+  },
+  {
+    "Type": 2,
+    "UserId": 785051,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 435837,
+    "Score": 114402,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000033,
+    "Score": 20,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 166407,
+    "Score": 0,
+    "TopN": 74,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 472960,
+    "Score": 166826,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 109299,
+    "Score": 0,
+    "TopN": 33,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 853460,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 129653,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 195402,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 588508,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 678495,
+    "Score": 0,
+    "TopN": 97,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 571638,
+    "Score": 0,
+    "TopN": 33,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 534153,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 17265,
+    "Score": 0,
+    "TopN": 42,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 47406,
+    "Score": 0,
+    "TopN": 4,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 931627,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 533620,
+    "Score": 0,
+    "TopN": 61,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 953759,
+    "Score": 0,
+    "TopN": 13,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 498932,
+    "Score": 0,
+    "TopN": 91,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 997302,
+    "Score": 0,
+    "TopN": 48,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 677955,
+    "Score": 0,
+    "TopN": 28,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 954319,
+    "Score": 0,
+    "TopN": 44,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 355949,
+    "Score": 114067,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 350845,
+    "Score": 0,
+    "TopN": 97,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 1000034,
+    "Score": 26,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 960455,
+    "Score": 0,
+    "TopN": 37,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 403264,
+    "Score": 0,
+    "TopN": 7,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 100267,
+    "Score": 0,
+    "TopN": 62,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 572101,
+    "Score": 0,
+    "TopN": 29,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 654962,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 95312,
+    "Score": 0,
+    "TopN": 46,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 597811,
+    "Score": 0,
+    "TopN": 15,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 767734,
+    "Score": 47087,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 486261,
+    "Score": 0,
+    "TopN": 38,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 653631,
+    "Score": 782424,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 145097,
+    "Score": 0,
+    "TopN": 25,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 800841,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 290484,
+    "Score": 0,
+    "TopN": 38,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 635708,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 185486,
+    "Score": 0,
+    "TopN": 69,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 458031,
+    "Score": 0,
+    "TopN": 2,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 582434,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 490217,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 511390,
+    "Score": 0,
+    "TopN": 34,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 27007,
+    "Score": 18230,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 726769,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 273361,
+    "Score": 0,
+    "TopN": 80,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 369905,
+    "Score": 0,
+    "TopN": 29,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 628371,
+    "Score": 0,
+    "TopN": 74,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 573033,
+    "Score": 0,
+    "TopN": 72,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 218912,
+    "Score": 456044,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 565284,
+    "Score": 0,
+    "TopN": 49,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 518444,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 300070,
+    "Score": 0,
+    "TopN": 78,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 502930,
+    "Score": 0,
+    "TopN": 53,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 974730,
+    "Score": 62747,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 446351,
+    "Score": 0,
+    "TopN": 72,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 289490,
+    "Score": 258527,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 453222,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 572021,
+    "Score": 0,
+    "TopN": 38,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 1000035,
+    "Score": 5,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 214292,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 210461,
+    "Score": 35070,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 39899,
+    "Score": 0,
+    "TopN": 66,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 857509,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 839347,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 879198,
+    "Score": 591724,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 363733,
+    "Score": 55779,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 124878,
+    "Score": 0,
+    "TopN": 95,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 1000036,
+    "Score": 90,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 19059,
+    "Score": 0,
+    "TopN": 89,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 556755,
+    "Score": 0,
+    "TopN": 96,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 10853,
+    "Score": 0,
+    "TopN": 66,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 116176,
+    "Score": 0,
+    "TopN": 99,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 114382,
+    "Score": 249645,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 750506,
+    "Score": 5764,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 486245,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 81247,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 908456,
+    "Score": 0,
+    "TopN": 78,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 597026,
+    "Score": 106738,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 642646,
+    "Score": 246617,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 748030,
+    "Score": 0,
+    "TopN": 80,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 430380,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 615055,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 40006,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 872897,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 574218,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 446056,
+    "Score": 0,
+    "TopN": 90,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 711198,
+    "Score": 0,
+    "TopN": 78,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 329677,
+    "Score": 0,
+    "TopN": 80,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 274847,
+    "Score": 0,
+    "TopN": 55,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 493921,
+    "Score": 447517,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 284883,
+    "Score": 52618,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 560214,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 873663,
+    "Score": 0,
+    "TopN": 42,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 61434,
+    "Score": 625407,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 94777,
+    "Score": 0,
+    "TopN": 53,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 881138,
+    "Score": 0,
+    "TopN": 83,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 938951,
+    "Score": 0,
+    "TopN": 24,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 97343,
+    "Score": 0,
+    "TopN": 33,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 858562,
+    "Score": 0,
+    "TopN": 8,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 161173,
+    "Score": 30001,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 680166,
+    "Score": 831441,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 534264,
+    "Score": 437824,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 522002,
+    "Score": 0,
+    "TopN": 70,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 467417,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 915578,
+    "Score": 504201,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 308047,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 343716,
+    "Score": 0,
+    "TopN": 19,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 104278,
+    "Score": 0,
+    "TopN": 27,
+    "AroundN": 7
+  },
+  {
+    "Type": 2,
+    "UserId": 380340,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 52226,
+    "Score": 0,
+    "TopN": 20,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 380177,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 835146,
+    "Score": 0,
+    "TopN": 40,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 830200,
+    "Score": 0,
+    "TopN": 65,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 63168,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 550947,
+    "Score": 0,
+    "TopN": 30,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 462975,
+    "Score": 0,
+    "TopN": 2,
+    "AroundN": 6
+  },
+  {
+    "Type": 2,
+    "UserId": 95883,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 966909,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 2
+  },
+  {
+    "Type": 2,
+    "UserId": 159335,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 977911,
+    "Score": 0,
+    "TopN": 71,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 619227,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 538942,
+    "Score": 568765,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 289923,
+    "Score": 15522,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 201849,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 752258,
+    "Score": 263109,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 656907,
+    "Score": 0,
+    "TopN": 37,
+    "AroundN": 8
+  },
+  {
+    "Type": 2,
+    "UserId": 370161,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 427915,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 55666,
+    "Score": 86532,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 385662,
+    "Score": 0,
+    "TopN": 87,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 207535,
+    "Score": 7147,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 655865,
+    "Score": 0,
+    "TopN": 31,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 55138,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 955613,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 52841,
+    "Score": 0,
+    "TopN": 17,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 471881,
+    "Score": 0,
+    "TopN": 79,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 454228,
+    "Score": 0,
+    "TopN": 47,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 848429,
+    "Score": 457611,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 739763,
+    "Score": 0,
+    "TopN": 27,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 878174,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 933283,
+    "Score": 0,
+    "TopN": 32,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 947815,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 98351,
+    "Score": 0,
+    "TopN": 66,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 739987,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 96508,
+    "Score": 0,
+    "TopN": 35,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 505198,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 723213,
+    "Score": 0,
+    "TopN": 16,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 586904,
+    "Score": 0,
+    "TopN": 71,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 461763,
+    "Score": 0,
+    "TopN": 63,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 266850,
+    "Score": 0,
+    "TopN": 83,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 526892,
+    "Score": 0,
+    "TopN": 72,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 547812,
+    "Score": 0,
+    "TopN": 22,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 34477,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 816171,
+    "Score": 0,
+    "TopN": 52,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 316276,
+    "Score": 350731,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 254530,
+    "Score": 662543,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 122562,
+    "Score": 0,
+    "TopN": 26,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 615321,
+    "Score": 0,
+    "TopN": 9,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 970071,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 783596,
+    "Score": 308967,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 653020,
+    "Score": 0,
+    "TopN": 29,
+    "AroundN": 6
+  },
+  {
+    "Type": 2,
+    "UserId": 559863,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 227301,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 6
+  },
+  {
+    "Type": 2,
+    "UserId": 917896,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 282834,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 241518,
+    "Score": 0,
+    "TopN": 27,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 179515,
+    "Score": 0,
+    "TopN": 29,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 778095,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 132346,
+    "Score": 327082,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 393373,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 137282,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 828209,
+    "Score": 0,
+    "TopN": 11,
+    "AroundN": 1
+  },
+  {
+    "Type": 1,
+    "UserId": 663103,
+    "Score": 480529,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 978387,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 442308,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 604081,
+    "Score": 0,
+    "TopN": 37,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 505379,
+    "Score": 0,
+    "TopN": 70,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 457617,
+    "Score": 0,
+    "TopN": 10,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 558882,
+    "Score": 0,
+    "TopN": 47,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 454319,
+    "Score": 0,
+    "TopN": 26,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 552719,
+    "Score": 0,
+    "TopN": 8,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 932196,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 177773,
+    "Score": 163441,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 655833,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 994963,
+    "Score": 0,
+    "TopN": 88,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 478729,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 651161,
+    "Score": 0,
+    "TopN": 93,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 104221,
+    "Score": 0,
+    "TopN": 70,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 185320,
+    "Score": 55286,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 451940,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 107599,
+    "Score": 0,
+    "TopN": 40,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 917819,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 404919,
+    "Score": 0,
+    "TopN": 62,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 620706,
+    "Score": 0,
+    "TopN": 1,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 777838,
+    "Score": 0,
+    "TopN": 76,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 419652,
+    "Score": 0,
+    "TopN": 33,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 1000037,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 172104,
+    "Score": 0,
+    "TopN": 26,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 936850,
+    "Score": 1085,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 597284,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 1
+  },
+  {
+    "Type": 2,
+    "UserId": 250557,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 371317,
+    "Score": 0,
+    "TopN": 53,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 934128,
+    "Score": 0,
+    "TopN": 8,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 352788,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 1000038,
+    "Score": 1,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 428370,
+    "Score": 56409,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 587494,
+    "Score": 452043,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 884503,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 233320,
+    "Score": 0,
+    "TopN": 31,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 10650,
+    "Score": 0,
+    "TopN": 69,
+    "AroundN": 7
+  },
+  {
+    "Type": 2,
+    "UserId": 997007,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 795813,
+    "Score": 0,
+    "TopN": 83,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 3194,
+    "Score": 0,
+    "TopN": 62,
+    "AroundN": 7
+  },
+  {
+    "Type": 2,
+    "UserId": 97236,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 879976,
+    "Score": 138442,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 128618,
+    "Score": 0,
+    "TopN": 14,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 268856,
+    "Score": 0,
+    "TopN": 81,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 212784,
+    "Score": 0,
+    "TopN": 24,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 847039,
+    "Score": 96329,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000039,
+    "Score": 69,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 65320,
+    "Score": 0,
+    "TopN": 98,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 832210,
+    "Score": 45185,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 125390,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000040,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 107791,
+    "Score": 0,
+    "TopN": 42,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 623830,
+    "Score": 348042,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 703282,
+    "Score": 0,
+    "TopN": 17,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 375913,
+    "Score": 0,
+    "TopN": 23,
+    "AroundN": 8
+  },
+  {
+    "Type": 1,
+    "UserId": 378754,
+    "Score": 403752,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 820069,
+    "Score": 0,
+    "TopN": 14,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 331910,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 3
+  },
+  {
+    "Type": 2,
+    "UserId": 900970,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 826957,
+    "Score": 0,
+    "TopN": 11,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 664054,
+    "Score": 0,
+    "TopN": 38,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 738711,
+    "Score": 0,
+    "TopN": 56,
+    "AroundN": 2
+  },
+  {
+    "Type": 1,
+    "UserId": 820118,
+    "Score": 6065,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 927064,
+    "Score": 0,
+    "TopN": 60,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 566695,
+    "Score": 0,
+    "TopN": 42,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 973520,
+    "Score": 163726,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 546399,
+    "Score": 0,
+    "TopN": 57,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 483578,
+    "Score": 2354,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 186323,
+    "Score": 0,
+    "TopN": 3,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 502487,
+    "Score": 0,
+    "TopN": 10,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 973518,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 473883,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 822073,
+    "Score": 157062,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 594545,
+    "Score": 0,
+    "TopN": 34,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 371394,
+    "Score": 0,
+    "TopN": 30,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 257641,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 506005,
+    "Score": 160496,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 1000041,
+    "Score": 1,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 471831,
+    "Score": 0,
+    "TopN": 78,
+    "AroundN": 5
+  },
+  {
+    "Type": 1,
+    "UserId": 201247,
+    "Score": 108714,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 624331,
+    "Score": 0,
+    "TopN": 10,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 463405,
+    "Score": 0,
+    "TopN": 83,
+    "AroundN": 9
+  },
+  {
+    "Type": 2,
+    "UserId": 852753,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 876845,
+    "Score": 0,
+    "TopN": 7,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 474938,
+    "Score": 0,
+    "TopN": 77,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 893773,
+    "Score": 0,
+    "TopN": 12,
+    "AroundN": 9
+  },
+  {
+    "Type": 0,
+    "UserId": 580732,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 181221,
+    "Score": 0,
+    "TopN": 62,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 227240,
+    "Score": 0,
+    "TopN": 49,
+    "AroundN": 9
+  },
+  {
+    "Type": 1,
+    "UserId": 70855,
+    "Score": 52589,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 124748,
+    "Score": 0,
+    "TopN": 5,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 370808,
+    "Score": 0,
+    "TopN": 68,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 375348,
+    "Score": 0,
+    "TopN": 30,
+    "AroundN": 3
+  },
+  {
+    "Type": 1,
+    "UserId": 228502,
+    "Score": 220334,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 585231,
+    "Score": 0,
+    "TopN": 92,
+    "AroundN": 5
+  },
+  {
+    "Type": 2,
+    "UserId": 134814,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 649348,
+    "Score": 0,
+    "TopN": 32,
+    "AroundN": 8
+  },
+  {
+    "Type": 0,
+    "UserId": 987217,
+    "Score": 0,
+    "TopN": 39,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 884248,
+    "Score": 0,
+    "TopN": 41,
+    "AroundN": 1
+  },
+  {
+    "Type": 0,
+    "UserId": 233625,
+    "Score": 0,
+    "TopN": 84,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 327785,
+    "Score": 0,
+    "TopN": 89,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 870316,
+    "Score": 0,
+    "TopN": 88,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 62620,
+    "Score": 0,
+    "TopN": 99,
+    "AroundN": 2
+  },
+  {
+    "Type": 0,
+    "UserId": 163087,
+    "Score": 0,
+    "TopN": 37,
+    "AroundN": 6
+  },
+  {
+    "Type": 1,
+    "UserId": 907007,
+    "Score": 165956,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 784369,
+    "Score": 0,
+    "TopN": 95,
+    "AroundN": 7
+  },
+  {
+    "Type": 1,
+    "UserId": 922561,
+    "Score": 30966,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 606449,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 994919,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 736147,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 6
+  },
+  {
+    "Type": 0,
+    "UserId": 371660,
+    "Score": 0,
+    "TopN": 94,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 1000042,
+    "Score": 15,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 0,
+    "UserId": 988481,
+    "Score": 0,
+    "TopN": 21,
+    "AroundN": 5
+  },
+  {
+    "Type": 0,
+    "UserId": 516801,
+    "Score": 0,
+    "TopN": 84,
+    "AroundN": 3
+  },
+  {
+    "Type": 0,
+    "UserId": 326661,
+    "Score": 0,
+    "TopN": 45,
+    "AroundN": 4
+  },
+  {
+    "Type": 0,
+    "UserId": 373381,
+    "Score": 0,
+    "TopN": 20,
+    "AroundN": 7
+  },
+  {
+    "Type": 0,
+    "UserId": 947799,
+    "Score": 0,
+    "TopN": 48,
+    "AroundN": 4
+  },
+  {
+    "Type": 1,
+    "UserId": 1000043,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 1,
+    "UserId": 957183,
+    "Score": 401407,
+    "TopN": 0,
+    "AroundN": 0
+  },
+  {
+    "Type": 2,
+    "UserId": 400146,
+    "Score": 0,
+    "TopN": 0,
+    "AroundN": 0
+  }
+]

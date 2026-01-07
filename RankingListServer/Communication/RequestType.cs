@@ -6,6 +6,11 @@ namespace RankingListServer.Communication
     public enum RequestType
     {
         /// <summary>
+        /// 初始化请求
+        /// </summary>
+        Initialize,
+
+        /// <summary>
         /// 添加或更新用户
         /// </summary>
         AddOrUpdateUser,

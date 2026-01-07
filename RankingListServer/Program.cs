@@ -2,7 +2,6 @@ using RankingList;
 using RankingListServer.Communication;
 using System.Diagnostics;
 using System.IO.Pipes;
-using System.Text.Json;
 
 namespace RankingListServer
 {
@@ -12,7 +11,7 @@ namespace RankingListServer
         private static bool _isRunning = true;
         private static readonly string PipeName = "RankingListPipe";
         private static long _peakMemoryUsage = 0;
-        private static readonly object _lock = new object();
+        private static readonly object _lock = new();
 
         static void Main(string[] args)
         {
@@ -42,7 +41,7 @@ namespace RankingListServer
         private static void InitializeRankingList()
         {
             // Create empty ranking list
-            _rankingList = DllMain.CreateRankingList(new List<User>());
+            _rankingList = DllMain.CreateRankingList(Array.Empty<User>());
             Console.WriteLine("Ranking list initialized.");
         }
 
@@ -96,13 +95,13 @@ namespace RankingListServer
                         try
                         {
                             // Read request from client
-                            Console.WriteLine("Waiting for client request...");
-                            var request = ReadRequest(serverStream);
-                            if (request == null)
-                            {
-                                Console.WriteLine("Received null request, continuing...");
-                                continue;
-                            }
+                        Console.WriteLine("Waiting for client request...");
+                        var request = ReadRequest(serverStream);
+                        if (request == null)
+                        {
+                            Console.WriteLine("Received null request, closing connection...");
+                            break;
+                        }
 
                             Console.WriteLine($"Received request: {request.Type}, RequestId: {request.RequestId}");
 
@@ -135,58 +134,39 @@ namespace RankingListServer
             try
             {
                 // Read message length first
+                Console.WriteLine("Reading message length...");
                 byte[] lengthBuffer = new byte[4];
                 int bytesRead = serverStream.Read(lengthBuffer, 0, 4);
+                Console.WriteLine($"Read {bytesRead} bytes for message length");
                 if (bytesRead != 4)
                     return null;
 
                 int messageLength = BitConverter.ToInt32(lengthBuffer, 0);
+                Console.WriteLine($"Message length: {messageLength}");
                 if (messageLength <= 0)
                     return null;
 
                 // Read message content
+                Console.WriteLine($"Reading message content of {messageLength} bytes...");
                 byte[] messageBuffer = new byte[messageLength];
                 bytesRead = 0;
                 while (bytesRead < messageLength)
                 {
                     int read = serverStream.Read(messageBuffer, bytesRead, messageLength - bytesRead);
+                    Console.WriteLine($"Read {read} bytes, total so far: {bytesRead + read}");
                     if (read == 0)
                         return null;
                     bytesRead += read;
                 }
 
-                // Deserialize message - use a simpler approach for .NET 8 compatibility
-                string json = System.Text.Encoding.UTF8.GetString(messageBuffer);
-                
-                // First determine the request type
-                using JsonDocument doc = JsonDocument.Parse(json);
-                JsonElement root = doc.RootElement;
-                
-                if (root.TryGetProperty("Type", out JsonElement typeElement))
-                {
-                    RequestType requestType = (RequestType)Enum.Parse(typeof(RequestType), typeElement.GetString()!);
-                    
-                    // Deserialize to the appropriate concrete type
-                    switch (requestType)
-                    {
-                        case RequestType.AddOrUpdateUser:
-                            return JsonSerializer.Deserialize<AddOrUpdateUserRequest>(json);
-                        case RequestType.GetUserRank:
-                            return JsonSerializer.Deserialize<GetUserRankRequest>(json);
-                        case RequestType.GetRankingListMutiResponse:
-                            return JsonSerializer.Deserialize<GetRankingListMutiResponseRequest>(json);
-                        case RequestType.GetMemoryUsage:
-                            return JsonSerializer.Deserialize<GetMemoryUsageRequest>(json);
-                        default:
-                            return null;
-                    }
-                }
-                
-                return null;
+                // Deserialize binary request
+                Console.WriteLine("Deserializing request...");
+                return RequestBase.Deserialize(messageBuffer);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error reading request: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
                 return null;
             }
         }
@@ -195,31 +175,8 @@ namespace RankingListServer
         {
             try
             {
-                // Serialize response - use concrete type for compatibility with .NET 8
-                string json;
-                if (response is AddOrUpdateUserResponse addUpdateResponse)
-                {
-                    json = JsonSerializer.Serialize(addUpdateResponse);
-                }
-                else if (response is GetUserRankResponse userRankResponse)
-                {
-                    json = JsonSerializer.Serialize(userRankResponse);
-                }
-                else if (response is GetRankingListMutiResponseResponse rankingListResponse)
-                {
-                    json = JsonSerializer.Serialize(rankingListResponse);
-                }
-                else if (response is GetMemoryUsageResponse memoryResponse)
-                {
-                    json = JsonSerializer.Serialize(memoryResponse);
-                }
-                else
-                {
-                    throw new NotSupportedException($"Response type {response.GetType().Name} is not supported.");
-                }
-
-                // Convert to bytes
-                byte[] messageBuffer = System.Text.Encoding.UTF8.GetBytes(json);
+                // Serialize response to binary
+                byte[] messageBuffer = response.Serialize();
                 int messageLength = messageBuffer.Length;
 
                 // Write message length first
@@ -243,6 +200,12 @@ namespace RankingListServer
                 // Return an appropriate response type based on request type
                 switch (request.Type)
                 {
+                    case RequestType.Initialize:
+                        return new InitializeResponse(request.RequestId)
+                        {
+                            Success = false,
+                            ErrorMessage = "Ranking list not initialized."
+                        };
                     case RequestType.AddOrUpdateUser:
                         return new AddOrUpdateUserResponse(request.RequestId)
                         {
@@ -280,6 +243,8 @@ namespace RankingListServer
             {
                 switch (request.Type)
                 {
+                    case RequestType.Initialize:
+                        return ProcessInitializeRequest(request as InitializeRequest);
                     case RequestType.AddOrUpdateUser:
                         return ProcessAddOrUpdateUserRequest(request as AddOrUpdateUserRequest);
                     case RequestType.GetUserRank:
@@ -414,6 +379,21 @@ namespace RankingListServer
                 PeakMemoryUsage = _peakMemoryUsage
             };
             return response;
+        }
+
+        private static InitializeResponse ProcessInitializeRequest(InitializeRequest? request)
+        {
+            if (request == null)
+            {
+                return new InitializeResponse(request?.RequestId ?? Guid.Empty)
+                {
+                    Success = false,
+                    ErrorMessage = "Invalid request."
+                };
+            }
+
+            _rankingList = DllMain.CreateRankingList(request.Users ?? Array.Empty<User>());
+            return new InitializeResponse(request.RequestId);
         }
 
         private static void MonitorMemoryUsage()

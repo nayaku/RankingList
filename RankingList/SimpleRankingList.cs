@@ -1,27 +1,23 @@
-﻿namespace RankingList
+namespace RankingList
 {
     internal class SimpleRankingList : IRankingList
     {
         public List<User> Users { get; set; }
-        private readonly object _lock = new();
 
-        public SimpleRankingList(List<User> users)
+        public SimpleRankingList(User[] users)
         {
-            Users = users;
+            Users = [.. users];
             Users.Sort();
         }
         public void AddOrUpdateUser(User user)
         {
-            lock (_lock)
+            var existingUser = Users.FirstOrDefault(u => u.ID == user.ID);
+            if (existingUser != null)
             {
-                var existingUser = Users.FirstOrDefault(u => u.ID == user.ID);
-                if (existingUser != null)
-                {
-                    Users.Remove(existingUser);
-                }
-                Users.Add(user);
-                Users.Sort();
+                Users.Remove(existingUser);
             }
+            Users.Add(user);
+            Users.Sort();
         }
         public void AddOrUpdateUser(int userId, int score, DateTime lastActive)
         {
@@ -35,78 +31,58 @@
         }
         public RankingListSingleResponse GetUserRank(int userId)
         {
-            lock (_lock)
+            var index = Users.FindIndex(u => u.ID == userId);
+            if (index == -1) return null;
+            return new RankingListSingleResponse
             {
-                var index = Users.FindIndex(u => u.ID == userId);
-                if (index == -1) return null;
-                return new RankingListSingleResponse
-                {
-                    User = Users[index],
-                    Rank = index + 1
-                };
-            }
+                User = Users[index],
+                Rank = index + 1
+            };
         }
         public RankingListMutiResponse GetRankingListMutiResponse(int topN, int aroundUserId, int aroundN)
         {
-            lock (_lock)
+            var response = new RankingListMutiResponse
             {
-                var response = new RankingListMutiResponse
+                TotalUsers = Users.Count
+            };
+            // Top N users
+            var topNNum = Math.Min(topN, Users.Count);
+            response.TopNUsers = new RankingListSingleResponse[topNNum];
+            for (int i = 0; i < topNNum; i++)
+            {
+                response.TopNUsers[i] = new RankingListSingleResponse
                 {
-                    TopNUsers = [],
-                    RankingAroundUsers = [],
-                    TotalUsers = Users.Count
+                    User = Users[i],
+                    Rank = i + 1
                 };
-                // Top N users
-                for (int i = 0; i < Math.Min(topN, Users.Count); i++)
+            }
+            // Users around a specific user
+            var index = Users.FindIndex(u => u.ID == aroundUserId);
+            if (index != -1)
+            {
+                int start = Math.Max(0, index - aroundN);
+                int end = Math.Min(Users.Count - 1, index + aroundN);
+                int count = end - start + 1;
+                response.RankingAroundUsers = new RankingListSingleResponse[count];
+                for (int i = start; i <= end; i++)
                 {
-                    response.TopNUsers.Add(new RankingListSingleResponse
+                    response.RankingAroundUsers[i - start] = new RankingListSingleResponse
                     {
                         User = Users[i],
                         Rank = i + 1
-                    });
+                    };
                 }
-                // Users around a specific user
-                var index = Users.FindIndex(u => u.ID == aroundUserId);
-                if (index != -1)
-                {
-                    int start = Math.Max(0, index - aroundN);
-                    int end = Math.Min(Users.Count - 1, index + aroundN);
-                    for (int i = start; i <= end; i++)
-                    {
-                        response.RankingAroundUsers.Add(new RankingListSingleResponse
-                        {
-                            User = Users[i],
-                            Rank = i + 1
-                        });
-                    }
-                }
-                return response;
             }
+            return response;
         }
     }
 }
 /*
-2026年1月6日15:54:13
-=== Ranking List Concurrent Test ===
-
-Starting ranking list server from: RankingListServer.exe
-Server started with PID: 23132
-=== Ranking List Server ===
-Starting server...
-Ranking list initialized.
-Named pipe server started. Pipe name: RankingListPipe
-Press any key to stop the server...
-Starting concurrent test...
-Initial users: 1000000
-Total operations: 1000
-Concurrency level: 100
-
-Test Results:
-Total time elapsed: 24175 ms
-Completed operations: 1000
-Maximum concurrent operations: 27
-Average response time: 536.07 ms
-Throughput: 41.36 operations/second
-Peak memory usage: 89.75 MB
-Server process with PID 23132 stopped.
+=== 基准测试结果 ===
+排行榜名称: SimpleRankingList
+总耗时: 30776 ms
+平均耗时: 30.78 ms/操作
+内存占用: 426.91 MB
+内存峰值: 487.13 MB
+测试日期: 2026/1/7 15:58:42
 */
