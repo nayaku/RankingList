@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RankingListServer\RankingListServer.csproj" />
     <ProjectReference Include="..\RankingList\RankingList.csproj" />
   </ItemGroup>
 

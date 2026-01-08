@@ -1,5 +1,4 @@
 <Solution>
   <Project Path="RankingList/RankingList.csproj" />
-  <Project Path="RankingListServer/RankingListServer.csproj" />
   <Project Path="RankingListTest/RankingListTest.csproj" />
 </Solution>

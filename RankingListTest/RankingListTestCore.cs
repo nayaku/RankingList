@@ -1,17 +1,17 @@
-using System;
-using System.Collections.Generic;
+using RankingList;
 using System.Diagnostics;
 using System.Text.Json;
-using RankingList;
 
 namespace RankingListTest
 {
     // 操作类型枚举
     public enum OperationType
     {
-        GetRankingList,
-        AddOrUpdateUser,
-        GetUserRank
+        AddUser,
+        UpdateUser,
+        GetUserRank,
+        GetTopN,
+        GetAroundUser
     }
 
     // 测试操作类
@@ -39,9 +39,7 @@ namespace RankingListTest
     public class OperationResult
     {
         public OperationType Type { get; set; }
-        public int UserId { get; set; }
-        public RankingListSingleResponse? UserRankResult { get; set; }
-        public RankingListMutiResponse? RankingListResult { get; set; }
+        public RankingListResponse[]? UserRankResult { get; set; }
     }
 
     // 基准结果集合类
@@ -57,13 +55,13 @@ namespace RankingListTest
         private const string BaseResultFilePath = "base_result.json";
         private const string BaseOperationResultsFilePath = "base_operation_results.json";
         private const string InitialUsersFilePath = "initial_users.json";
-        private const int InitialUserCount = 1000000;
+        private const int InitialUserCount = 1000_0000;
         private int CurrentUserId = InitialUserCount + 1;
         private Dictionary<int, int> UserIdToScore;
-        private const int TotalOperations = 1000;
+        private const int TotalOperations = 10000;
 
         private Process _process = Process.GetCurrentProcess();
-        private long _peakMemoryUsage = 0;
+        private long _peakMemoryUsage;
 
         // 生成操作列表
         public void GenerateOperations()
@@ -76,39 +74,35 @@ namespace RankingListTest
                 double operationType = random.NextDouble();
                 var operation = new TestOperation();
 
-                if (operationType < 0.7) // 70% GetRankingList
+                if (operationType < 0.1) // 10% AddUser
                 {
-                    operation.Type = OperationType.GetRankingList;
+                    operation.Type = OperationType.AddUser;
+                    operation.UserId = CurrentUserId++;
+                    operation.Score = GeneratePowerLawScore(random, 100);
+                }
+                else if (operationType < 0.3) // 20% UpdateUser
+                {
+                    operation.Type = OperationType.UpdateUser;
                     operation.UserId = random.Next(1, CurrentUserId + 1);
-                    operation.TopN = random.Next(1, 100);
-                    operation.AroundN = random.Next(1, 10);
+                    int score = UserIdToScore[operation.UserId];
+                    operation.Score = score + GeneratePowerLawScore(random, 100);
                 }
-                else if (operationType < 0.9) // 20% AddOrUpdateUser
-                {
-                    operation.Type = OperationType.AddOrUpdateUser;
-                    double userType = random.NextDouble();
-                    if (userType < 0.2) // 20% 新用户
-                    {
-                        operation.UserId = CurrentUserId++;
-                    }
-                    else // 80% 更新现有用户
-                    {
-                        operation.UserId = random.Next(1, CurrentUserId + 1);
-                    }
-
-                    if (UserIdToScore.TryGetValue(operation.UserId, out int score))
-                    {
-                        operation.Score = score + GeneratePowerLawScore(random, 100);
-                    }
-                    else
-                    {
-                        operation.Score = GeneratePowerLawScore(random, 100);
-                    }
-                }
-                else // 10% GetUserRank
+                else if (operationType < 0.6) // 30% GetUserRank
                 {
                     operation.Type = OperationType.GetUserRank;
                     operation.UserId = random.Next(1, CurrentUserId + 1);
+                }
+                else if (operationType < 0.8) // 20% GetTopN
+                {
+                    operation.Type = OperationType.GetTopN;
+                    operation.TopN = random.Next(1, 100);
+                    operation.UserId = random.Next(1, CurrentUserId + 1);
+                }
+                else // 20% GetAroundUser
+                {
+                    operation.Type = OperationType.GetAroundUser;
+                    operation.UserId = random.Next(1, CurrentUserId + 1);
+                    operation.AroundN = random.Next(1, 10);
                 }
 
                 operations.Add(operation);
@@ -131,11 +125,11 @@ namespace RankingListTest
             {
                 users[i] = new User
                 {
-                    ID = i + 1,
+                    Id = i + 1,
                     Score = GeneratePowerLawScore(random),
                     LastActive = DateTime.Now
                 };
-                UserIdToScore[users[i].ID] = users[i].Score;
+                UserIdToScore[users[i].Id] = users[i].Score;
             }
 
             // 保存初始用户到JSON文件
@@ -187,38 +181,63 @@ namespace RankingListTest
 
             // 开始内存监控
             _peakMemoryUsage = 0;
-            var memoryMonitorThread = new Thread(MonitorMemoryUsage);
-            memoryMonitorThread.IsBackground = true;
+            var memoryMonitorThread = new Thread(MonitorMemoryUsage)
+            {
+                IsBackground = true
+            };
             memoryMonitorThread.Start();
 
             // 开始测试计时
             var stopwatch = Stopwatch.StartNew();
 
             // 收集操作结果
-            var operationResults = new List<OperationResult>();
+            var operationResults = new List<OperationResult>(operations.Count);
 
             // 顺序执行所有操作
             foreach (var operation in operations)
             {
                 var opResult = new OperationResult
                 {
-                    Type = operation.Type,
-                    UserId = operation.UserId
+                    Type = operation.Type
                 };
 
                 switch (operation.Type)
                 {
-                    case OperationType.GetRankingList:
-                        var listResult =
-                            rankingList.GetRankingListMutiResponse(operation.TopN, operation.UserId, operation.AroundN);
-                        opResult.RankingListResult = listResult;
+                    case OperationType.AddUser:
+                        {
+                            var user = new User
+                            {
+                                Id = operation.UserId,
+                                Score = operation.Score,
+                                LastActive = DateTime.Now
+                            };
+                            var addResult = rankingList.AddUser(user);
+                            opResult.UserRankResult = [addResult];
+                        }
                         break;
-                    case OperationType.AddOrUpdateUser:
-                        rankingList.AddOrUpdateUser(operation.UserId, operation.Score, DateTime.Now);
+                    case OperationType.UpdateUser:
+                        {
+                            var user = new User
+                            {
+                                Id = operation.UserId,
+                                Score = operation.Score,
+                                LastActive = DateTime.Now
+                            };
+                            var updateResult = rankingList.UpdateUser(user);
+                            opResult.UserRankResult = [updateResult];
+                        }
                         break;
                     case OperationType.GetUserRank:
                         var rankResult = rankingList.GetUserRank(operation.UserId);
-                        opResult.UserRankResult = rankResult;
+                        opResult.UserRankResult = [rankResult];
+                        break;
+                    case OperationType.GetTopN:
+                        var topNResult = rankingList.GetTopN(operation.TopN);
+                        opResult.UserRankResult = topNResult;
+                        break;
+                    case OperationType.GetAroundUser:
+                        var aroundUserResult = rankingList.GetAroundUser(operation.UserId, operation.AroundN);
+                        opResult.UserRankResult = aroundUserResult;
                         break;
                 }
 
@@ -270,11 +289,6 @@ namespace RankingListTest
         // 加载基准结果
         public TestResult LoadBaseResult()
         {
-            if (!File.Exists(BaseResultFilePath))
-            {
-                throw new Exception("基准结果文件不存在，请先运行 --init 命令");
-            }
-
             var json = File.ReadAllText(BaseResultFilePath);
             return JsonSerializer.Deserialize<TestResult>(json) ??
                    throw new Exception("无法加载基准结果");
@@ -299,55 +313,46 @@ namespace RankingListTest
         // 验证测试结果与基准
         public void ValidateResults(List<OperationResult> testResults)
         {
-            var baseResults = LoadBaseOperationResults().Results;
-            if (testResults.Count != baseResults.Count)
-            {
-                throw new Exception($"操作结果数量不匹配: 测试结果 {testResults.Count} 个，基准结果 {baseResults.Count} 个");
-            }
+            Console.WriteLine("\n=== 验证操作结果与基准对比 ===");
 
-            Console.WriteLine($"\n=== 验证操作结果与基准对比 ===");
-            int matchedCount = 0;
-            int mismatchedCount = 0;
+            // 加载基准操作结果
+            var baseResults = LoadBaseOperationResults();
 
-            for (int i = 0; i < testResults.Count; i++)
+            int totalOperations = testResults.Count;
+            int passedOperations = 0;
+            int failedOperations = 0;
+
+            Console.WriteLine($"总操作数: {totalOperations}");
+            Console.WriteLine($"基准操作数: {baseResults.Results.Count}");
+
+            // 逐一比较测试结果与基准结果
+            for (int i = 0; i < totalOperations; i++)
             {
+                if (i >= baseResults.Results.Count)
+                {
+                    Console.WriteLine($"操作 {i + 1}: 测试结果中缺少该操作");
+                    failedOperations++;
+                    continue;
+                }
+
                 var testResult = testResults[i];
-                var baseResult = baseResults[i];
+                var baseResult = baseResults.Results[i];
 
                 if (CompareOperationResults(testResult, baseResult))
                 {
-                    matchedCount++;
+                    passedOperations++;
                 }
                 else
                 {
-                    mismatchedCount++;
-                    Console.WriteLine($"操作 {i + 1} 结果不匹配:");
-                    Console.WriteLine($"  操作类型: {testResult.Type}");
-                    Console.WriteLine($"  用户ID: {testResult.UserId}");
-
-                    if (testResult.Type == OperationType.GetUserRank)
-                    {
-                        Console.WriteLine(
-                            $"  测试结果: Rank={testResult.UserRankResult?.Rank}, Score={testResult.UserRankResult?.User?.Score}");
-                        Console.WriteLine(
-                            $"  基准结果: Rank={baseResult.UserRankResult?.Rank}, Score={baseResult.UserRankResult?.User?.Score}");
-                    }
-                    else if (testResult.Type == OperationType.GetRankingList)
-                    {
-                        Console.WriteLine($"  测试结果: TotalUsers={testResult.RankingListResult?.TotalUsers}");
-                        Console.WriteLine($"  基准结果: TotalUsers={baseResult.RankingListResult?.TotalUsers}");
-                    }
+                    failedOperations++;
+                    Console.WriteLine($"操作 {i + 1}: {testResult.Type} 结果不匹配");
                 }
             }
 
-            Console.WriteLine($"\n=== 验证结果总结 ===");
-            Console.WriteLine($"总操作数: {testResults.Count}");
-            Console.WriteLine($"匹配数: {matchedCount}");
-            Console.WriteLine($"不匹配数: {mismatchedCount}");
 
-            if (mismatchedCount > 0)
+            if (failedOperations > 0)
             {
-                Console.WriteLine($"测试失败，发现 {mismatchedCount} 个不匹配的操作结果");
+                Console.WriteLine($"验证失败，{failedOperations} 个操作结果不匹配");
             }
             else
             {
@@ -361,25 +366,30 @@ namespace RankingListTest
             if (testResult.Type != baseResult.Type)
                 return false;
 
-            if (testResult.UserId != baseResult.UserId)
-                return false;
-
-            switch (testResult.Type)
-            {
-                case OperationType.GetUserRank:
-                    return CompareUserRankResults(testResult.UserRankResult, baseResult.UserRankResult);
-                case OperationType.GetRankingList:
-                    return CompareRankingListResults(testResult.RankingListResult, baseResult.RankingListResult);
-                case OperationType.AddOrUpdateUser:
-                    return true; // AddOrUpdateUser 没有返回结果需要验证
-                default:
-                    return true;
-            }
+            return CompareRankResults(testResult.UserRankResult, baseResult.UserRankResult);
         }
 
         // 对比用户排名结果
-        private bool CompareUserRankResults(RankingListSingleResponse? testResult,
-            RankingListSingleResponse? baseResult)
+        private bool CompareRankResults(RankingListResponse[]? testResults,
+            RankingListResponse[]? baseResults)
+        {
+            if (testResults == null && baseResults == null)
+                return true;
+            if (testResults == null || baseResults == null)
+                return false;
+            if (testResults.Length != baseResults.Length)
+                return false;
+            for (int i = 0; i < testResults.Length; i++)
+            {
+                if (!CompareRankResult(testResults[i], baseResults[i]))
+                    return false;
+            }
+            return true;
+        }
+
+        // 对比排名结果
+        private bool CompareRankResult(RankingListResponse? testResult,
+            RankingListResponse? baseResult)
         {
             if (testResult == null && baseResult == null)
                 return true;
@@ -391,51 +401,16 @@ namespace RankingListTest
                 return true;
             if (testResult.User == null || baseResult.User == null)
                 return false;
-            if (testResult.User.ID != baseResult.User.ID)
-                return false;
-            if (testResult.User.Score != baseResult.User.Score)
-                return false;
-            return true;
-        }
 
-        // 对比排行榜结果
-        private bool CompareRankingListResults(RankingListMutiResponse? testResult, RankingListMutiResponse? baseResult)
-        {
-            if (testResult == null && baseResult == null)
-                return true;
-            if (testResult == null || baseResult == null)
-                return false;
-            if (testResult.TotalUsers != baseResult.TotalUsers)
-                return false;
+            var testUser = testResult.User as User;
+            var baseUser = baseResult.User as User;
 
-            // 对比 TopNUsers
-            if (!CompareUserArrayResults(testResult.TopNUsers, baseResult.TopNUsers))
+            if (testUser == null || baseUser == null)
                 return false;
-
-            // 对比 RankingAroundUsers
-            if (!CompareUserArrayResults(testResult.RankingAroundUsers, baseResult.RankingAroundUsers))
+            if (testUser.Id != baseUser.Id)
                 return false;
-
-            return true;
-        }
-
-        // 对比用户数组结果
-        private bool CompareUserArrayResults(RankingListSingleResponse[]? testResults,
-            RankingListSingleResponse[]? baseResults)
-        {
-            if (testResults == null && baseResults == null)
-                return true;
-            if (testResults == null || baseResults == null)
+            if (testUser.Score != baseUser.Score)
                 return false;
-            if (testResults.Length != baseResults.Length)
-                return false;
-
-            for (int i = 0; i < testResults.Length; i++)
-            {
-                if (!CompareUserRankResults(testResults[i], baseResults[i]))
-                    return false;
-            }
-
             return true;
         }
 

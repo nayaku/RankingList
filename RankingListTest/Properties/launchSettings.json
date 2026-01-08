@@ -2,7 +2,7 @@
   "profiles": {
     "RankingListTest": {
       "commandName": "Project",
-      "commandLineArgs": "--test SimpleRankingList2"
+      "commandLineArgs": "--test EmptyRankingList"
     }
   }
 }

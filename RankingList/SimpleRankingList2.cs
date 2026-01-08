@@ -1,4 +1,4 @@
-﻿namespace RankingList
+namespace RankingList
 {
     /// <summary>
     /// 简单排名列表实现 2
@@ -8,121 +8,130 @@
     /// </summary>
     internal class SimpleRankingList2 : IRankingList
     {
-        private List<User> _users;
-        private Dictionary<int, User> _userDictionary;
-        private readonly object _lock = new();
+        private readonly List<IUser> _users;
+        private readonly Dictionary<int, int> _userId2Index;
 
-        public SimpleRankingList2(User[] users)
+        public SimpleRankingList2(IUser[] users)
         {
             _users = [.. users];
-            _userDictionary = users.ToDictionary(u => u.ID);
             _users.Sort();
+            _userId2Index = _users.Select((user, i) => new { user.Id, i })
+                .ToDictionary(x => x.Id, x => x.i);
         }
-        public void AddOrUpdateUser(User user)
+
+        public RankingListResponse AddUser(IUser user)
         {
-            lock (_lock)
+            var insertIndex = _users.BinarySearch(user);
+            if (insertIndex < 0)
             {
-                if (_userDictionary.TryGetValue(user.ID, out var existingUser))
-                {
-                    _users.Remove(existingUser);
-                    _userDictionary.Remove(user.ID);
-                }
-                var index = _users.BinarySearch(user);
-                if (index < 0)
-                {
-                    index = ~index;
-                }
-                _users.Insert(index, user);
-                _userDictionary[user.ID] = user;
+                insertIndex = ~insertIndex;
             }
-        }
-        public void AddOrUpdateUser(int userId, int score, DateTime lastActive)
-        {
-            var user = new User
+
+            _users.Insert(insertIndex, user);
+
+            return new RankingListResponse
             {
-                ID = userId,
-                Score = score,
-                LastActive = lastActive
+                User = user,
+                Rank = insertIndex + 1
             };
-            AddOrUpdateUser(user);
         }
-        public RankingListSingleResponse GetUserRank(int userId)
+
+        public RankingListResponse UpdateUser(IUser user)
         {
-            lock (_lock)
+            // 移除旧用户
+            if (_userId2Index.TryGetValue(user.Id, out var existingUserIndex))
             {
-                if (!_userDictionary.ContainsKey(userId))
+                _users.RemoveAt(existingUserIndex);
+            }
+
+            // 插入新用户
+            var insertIndex = _users.BinarySearch(user);
+            if (insertIndex < 0)
+            {
+                insertIndex = ~insertIndex;
+            }
+
+            _users.Insert(insertIndex, user);
+            _userId2Index[user.Id] = insertIndex;
+
+            return new RankingListResponse
+            {
+                User = user,
+                Rank = insertIndex + 1
+            };
+        }
+
+        public RankingListResponse GetUserRank(int userId)
+        {
+            if (!_userId2Index.TryGetValue(userId, out int index))
+            {
+                return new RankingListResponse
                 {
-                    return null;
-                }
-                var user = _userDictionary[userId];
-                var index = _users.IndexOf(user);
-                if (index == -1) return null;
-                return new RankingListSingleResponse
-                {
-                    User = _users[index],
-                    Rank = index + 1
+                    User = null,
+                    Rank = -1
                 };
             }
-        }
-        public RankingListMutiResponse GetRankingListMutiResponse(int topN, int aroundUserId, int aroundN)
-        {
-            lock (_lock)
+
+            return new RankingListResponse
             {
-                var response = new RankingListMutiResponse
+                User = _users[index],
+                Rank = index + 1
+            };
+        }
+
+        public RankingListResponse[] GetTopN(int topN)
+        {
+            var count = Math.Min(topN, _users.Count);
+            var result = new RankingListResponse[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                result[i] = new RankingListResponse
                 {
-                    TopNUsers = [],
-                    RankingAroundUsers = [],
-                    TotalUsers = _users.Count
+                    User = _users[i],
+                    Rank = i + 1
                 };
-                // Top N users
-                var topNNum = Math.Min(topN, _users.Count);
-                response.TopNUsers = new RankingListSingleResponse[topNNum];
-                for (int i = 0; i < topNNum; i++)
-                {
-                    response.TopNUsers[i] = new RankingListSingleResponse
-                    {
-                        User = _users[i],
-                        Rank = i + 1
-                    };
-                }
-                // Users around a specific user
-                if (!_userDictionary.TryGetValue(aroundUserId, out User? user))
-                {
-                    return response;
-                }
-                var index = _users.IndexOf(user);
-                if (index != -1)
-                {
-                    int start = Math.Max(0, index - aroundN);
-                    int end = Math.Min(_users.Count - 1, index + aroundN);
-                    int count = end - start + 1;
-                    response.RankingAroundUsers = new RankingListSingleResponse[count];
-                    for (int i = start; i <= end; i++)
-                    {
-                        response.RankingAroundUsers[i - start] = new RankingListSingleResponse
-                        {
-                            User = _users[i],
-                            Rank = i + 1
-                        };
-                    }
-                }
-                return response;
             }
+
+            return result;
+        }
+
+        public RankingListResponse[] GetAroundUser(int userId, int aroundN)
+        {
+            if (!_userId2Index.TryGetValue(userId, out int index))
+            {
+                return [];
+            }
+
+            int start = Math.Max(0, index - aroundN);
+            int end = Math.Min(_users.Count - 1, index + aroundN);
+            int count = end - start + 1;
+
+            var result = new RankingListResponse[count];
+            for (int i = start; i <= end; i++)
+            {
+                result[i - start] = new RankingListResponse
+                {
+                    User = _users[i],
+                    Rank = i + 1
+                };
+            }
+
+            return result;
+        }
+
+        public int GetRankingCount()
+        {
+            return _users.Count;
         }
     }
 }
 /*
-=== 测试结果 ===
+=== 基准测试结果 ===
 排行榜名称: SimpleRankingList2
-总耗时: 3873 ms
-平均耗时: 3.87 ms/操作
-内存占用: 453.57 MB
-内存峰值: 497.61 MB
-测试日期: 2026/1/7 16:10:57
-
-=== 与基准 SimpleRankingList 的对比 ===
-总耗时: 3873 ms vs 27917 ms (-86.13%)
-平均耗时: 3.87 ms vs 27.92 ms (-86.13%)
-内存占用: 453.57 MB vs 425.84 MB (+6.51%)
-内存峰值: 497.61 MB vs 487.53 MB (+2.07%)
+总耗时: 8884 ms
+平均耗时: 0.89 ms/操作
+内存占用: 4737.48 MB
+内存峰值: 4737.48 MB
+测试日期: 2026/1/8 17:24:32
 */

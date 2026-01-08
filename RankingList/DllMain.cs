@@ -2,12 +2,10 @@ namespace RankingList
 {
     public static class DllMain
     {
-        public static IRankingList CreateRankingList(User[] users, string rankingListName = "SimpleRankingList")
+        public static IRankingList CreateRankingList(IUser[] users, string rankingListName = "SimpleRankingList2")
         {
             switch (rankingListName)
             {
-                case "SimpleRankingList":
-                    return new SimpleRankingList(users);
                 case "SimpleRankingList2":
                     return new SimpleRankingList2(users);
                 case "EmptyRankingList":

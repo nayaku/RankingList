@@ -1,8 +1,8 @@
 {
-  "RankingListName": "SimpleRankingList",
-  "TotalTimeMs": 101682,
-  "AverageTimeMs": 101.682,
-  "MemoryUsageBytes": 447414272,
-  "PeakMemoryUsageBytes": 510353408,
-  "TestDate": "2026-01-07T15:34:44.0258226+08:00"
+  "RankingListName": "SimpleRankingList2",
+  "TotalTimeMs": 3806,
+  "AverageTimeMs": 3.806,
+  "MemoryUsageBytes": 500154368,
+  "PeakMemoryUsageBytes": 562716672,
+  "TestDate": "2026-01-08T10:31:28.0084575+08:00"
 }
