@@ -177,11 +177,13 @@ namespace RankingListTest
             var operationsJson = File.ReadAllText(OperationsFilePath);
             var operations = JsonSerializer.Deserialize<List<TestOperation>>(operationsJson) ??
                              throw new Exception("无法加载操作列表");
-
+            int totalOperationCount = operations.Count;
+            Console.WriteLine($"总操作数: {totalOperationCount}");
             var initialUsersJson = File.ReadAllText(InitialUsersFilePath);
             var initialUsers = JsonSerializer.Deserialize<User[]>(initialUsersJson) ??
                                throw new Exception("无法加载初始用户数据");
-    
+            int initialUserCount = initialUsers.Length;
+            Console.WriteLine($"初始用户数: {initialUserCount}");
             // 创建排行榜实例
             var rankingList = DllMain.CreateRankingList(initialUsers, rankingListName);
 
@@ -335,9 +337,6 @@ namespace RankingListTest
             int totalOperations = testResults.Count;
             int passedOperations = 0;
             int failedOperations = 0;
-
-            Console.WriteLine($"总操作数: {totalOperations}");
-            Console.WriteLine($"基准操作数: {baseResults.Results.Count}");
 
             // 逐一比较测试结果与基准结果
             for (int i = 0; i < totalOperations; i++)
