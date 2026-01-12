@@ -333,10 +333,10 @@ namespace RankingList
 }
 /*
 === 测试 BucketRankingList 排行榜 ===
+总操作数: 10000
+初始用户数: 1000000
 
 === 验证操作结果与基准对比 ===
-总操作数: 10000
-基准操作数: 10000
 √ 所有操作结果验证通过！
 测试操作结果已保存到 BucketRankingList_test_results.json
 
