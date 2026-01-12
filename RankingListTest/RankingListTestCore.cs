@@ -17,6 +17,7 @@ namespace RankingListTest
     // 测试操作类
     public class TestOperation
     {
+        public int Id { get; set; }
         public OperationType Type { get; set; }
         public int UserId { get; set; }
         public int Score { get; set; }
@@ -38,6 +39,7 @@ namespace RankingListTest
     // 操作结果类
     public class OperationResult
     {
+        public int Id { get; set; }
         public OperationType Type { get; set; }
         public RankingListResponse[]? UserRankResult { get; set; }
     }
@@ -55,7 +57,7 @@ namespace RankingListTest
         private const string BaseResultFilePath = "base_result.json";
         private const string BaseOperationResultsFilePath = "base_operation_results.json";
         private const string InitialUsersFilePath = "initial_users.json";
-        private const int InitialUserCount = 1000_0000;
+        private const int InitialUserCount = 100_0000;
         private int CurrentUserId = InitialUserCount + 1;
         private Dictionary<int, int> UserIdToScore;
         private const int TotalOperations = 10000;
@@ -72,13 +74,17 @@ namespace RankingListTest
             for (int i = 0; i < TotalOperations; i++)
             {
                 double operationType = random.NextDouble();
-                var operation = new TestOperation();
+                var operation = new TestOperation
+                {
+                    Id = i + 1,
+                };
 
                 if (operationType < 0.1) // 10% AddUser
                 {
                     operation.Type = OperationType.AddUser;
                     operation.UserId = CurrentUserId++;
                     operation.Score = GeneratePowerLawScore(random, 100);
+                    UserIdToScore[operation.UserId] = operation.Score;
                 }
                 else if (operationType < 0.3) // 20% UpdateUser
                 {
@@ -175,7 +181,7 @@ namespace RankingListTest
             var initialUsersJson = File.ReadAllText(InitialUsersFilePath);
             var initialUsers = JsonSerializer.Deserialize<User[]>(initialUsersJson) ??
                                throw new Exception("无法加载初始用户数据");
-
+    
             // 创建排行榜实例
             var rankingList = DllMain.CreateRankingList(initialUsers, rankingListName);
 
@@ -198,6 +204,7 @@ namespace RankingListTest
             {
                 var opResult = new OperationResult
                 {
+                    Id = operation.Id,
                     Type = operation.Type
                 };
 
@@ -259,20 +266,22 @@ namespace RankingListTest
                 TestDate = DateTime.Now
             };
 
+            var benchmarkResults = new BenchmarkResults
+            {
+                Results = operationResults,
+                PerformanceResult = result
+            };
             // 如果是基准测试，保存操作结果
             if (isBenchmark)
             {
-                var benchmarkResults = new BenchmarkResults
-                {
-                    Results = operationResults,
-                    PerformanceResult = result
-                };
                 SaveBaseOperationResults(benchmarkResults);
             }
             else
             {
                 // 验证测试结果与基准
                 ValidateResults(operationResults);
+                string testResultFilePath = $"{rankingListName}_test_results.json";
+                SaveTestOperationResults(benchmarkResults, testResultFilePath);
             }
 
             return result;
@@ -301,7 +310,12 @@ namespace RankingListTest
             File.WriteAllText(BaseOperationResultsFilePath, json);
             Console.WriteLine($"基准操作结果已保存到 {BaseOperationResultsFilePath}");
         }
-
+        public void SaveTestOperationResults(BenchmarkResults results, string filePath)
+        {
+            var json = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+            Console.WriteLine($"测试操作结果已保存到 {filePath}");
+        }
         // 加载基准操作结果
         public BenchmarkResults LoadBaseOperationResults()
         {
@@ -330,7 +344,7 @@ namespace RankingListTest
             {
                 if (i >= baseResults.Results.Count)
                 {
-                    Console.WriteLine($"操作 {i + 1}: 测试结果中缺少该操作");
+                    Console.WriteLine($"操作 {testResults[i].Id}: 测试结果中缺少该操作");
                     failedOperations++;
                     continue;
                 }
@@ -345,7 +359,7 @@ namespace RankingListTest
                 else
                 {
                     failedOperations++;
-                    Console.WriteLine($"操作 {i + 1}: {testResult.Type} 结果不匹配");
+                    Console.WriteLine($"操作 {testResult.Id}: {testResult.Type} 结果不匹配");
                 }
             }
 

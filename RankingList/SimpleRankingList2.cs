@@ -28,6 +28,10 @@ namespace RankingList
             }
 
             _users.Insert(insertIndex, user);
+            for (int i = insertIndex; i < _users.Count; i++)
+            {
+                _userId2Index[_users[i].Id] = i;
+            }
 
             return new RankingListResponse
             {
@@ -52,7 +56,11 @@ namespace RankingList
             }
 
             _users.Insert(insertIndex, user);
-            _userId2Index[user.Id] = insertIndex;
+            int minIndex = Math.Min(insertIndex, existingUserIndex);
+            for (int i = minIndex; i < _users.Count; i++)
+            {
+                _userId2Index[_users[i].Id] = i;
+            }
 
             return new RankingListResponse
             {
@@ -127,11 +135,25 @@ namespace RankingList
     }
 }
 /*
-=== 基准测试结果 ===
+=== 测试 SimpleRankingList2 排行榜 ===
+
+=== 验证操作结果与基准对比 ===
+总操作数: 10000
+基准操作数: 10000
+√ 所有操作结果验证通过！
+测试操作结果已保存到 SimpleRankingList2_test_results.json
+
+=== 测试结果 ===
 排行榜名称: SimpleRankingList2
-总耗时: 8884 ms
-平均耗时: 0.89 ms/操作
-内存占用: 4737.48 MB
-内存峰值: 4737.48 MB
-测试日期: 2026/1/8 17:24:32
+总耗时: 22657 ms
+平均耗时: 2.27 ms/操作
+内存占用: 470.05 MB
+内存峰值: 470.79 MB
+测试日期: 2026/1/12 15:03:50
+
+=== 与基准 SimpleRankingList 的对比 ===
+总耗时: 22657 ms vs 367868 ms (-93.84%)
+平均耗时: 2.27 ms vs 36.79 ms (-93.84%)
+内存占用: 470.05 MB vs 427.65 MB (+9.91%)
+内存峰值: 470.79 MB vs 454.34 MB (+3.62%)
 */
