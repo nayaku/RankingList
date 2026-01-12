@@ -4,7 +4,7 @@ namespace RankingList
 {
     internal class BucketRankingList : IRankingList
     {
-        private static readonly int BucketSize = 1000; // Define the score range for each bucket
+        private static readonly int BucketSize = 212; // Define the score range for each bucket
         private static readonly int InitialBucketSize = BucketSize / 2; // Initial size for each bucket
         private int _userCount;
         private List<UserBucket> _buckets;
@@ -84,7 +84,7 @@ namespace RankingList
                 bucket.Remove(user);
                 break;
             }
-
+            Debug.Assert(bucketIndex < _buckets.Count, "用户不存在");
             if (_buckets[bucketIndex].Empty)
             {
                 _buckets.RemoveAt(bucketIndex);
@@ -221,7 +221,6 @@ namespace RankingList
         internal class UserBucket
         {
             public IUser MinUser => Users[0];
-            public IUser MaxUser => Users[UserCount - 1];
             public IUser[] Users { get; set; }
             public int UserCount { get; set; }
             public HashSet<int> UserIds { get; set; }
@@ -281,6 +280,7 @@ namespace RankingList
             /// 分裂成两个桶
             /// </summary>
             /// <param name="user"></param>
+            /// <param name="userIndex"></param>
             /// <returns>右边的新桶</returns>
             public UserBucket Split(IUser user, out int userIndex)
             {
@@ -311,8 +311,13 @@ namespace RankingList
                     newUserIds.Add(newUsers[i].Id);
                 }
 
+                for(int i = mid; i < UserCount; i++)
+                {
+                    UserIds.Remove(Users[i].Id);
+                }
                 Array.Clear(Users, mid, UserCount - mid);
-                UserCount = mid + 1;
+                
+                UserCount = mid;
                 UserBucket newBucket = new(newUsers, newUserCount, newUserIds);
                 if (userIndex < mid)
                     Insert(user);
