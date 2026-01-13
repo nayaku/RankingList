@@ -89,17 +89,3 @@ namespace RankingList
         }
     }
 }
-/*
-=== 生成基准数据 ===
-运行基准测试（SimpleRankingList）...
-基准操作结果已保存到 base_operation_results.json
-基准结果已保存到 base_result.json
-
-=== 基准测试结果 ===
-排行榜名称: SimpleRankingList
-总耗时: 367868 ms
-平均耗时: 36.79 ms/操作
-内存占用: 427.65 MB
-内存峰值: 454.34 MB
-测试日期: 2026/1/12 15:02:12
-*/

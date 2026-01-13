@@ -28,8 +28,8 @@ namespace RankingListTest
                 {
                     // 基准模式：生成基准结果
                     Console.WriteLine("=== 生成基准数据 ===");
-                    Console.WriteLine("运行基准测试（SimpleRankingList）...");
-                    var baseResult = testCore.RunTest("SimpleRankingList", true);
+                    Console.WriteLine("运行基准测试（SimpleRankingList2）...");
+                    var baseResult = testCore.RunTest("SimpleRankingList2", true);
                     testCore.SaveBaseResult(baseResult);
                     Console.WriteLine("\n=== 基准测试结果 ===");
                     testCore.DisplayTestResult(baseResult);

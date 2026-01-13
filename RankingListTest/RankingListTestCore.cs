@@ -57,10 +57,10 @@ namespace RankingListTest
         private const string BaseResultFilePath = "base_result.json";
         private const string BaseOperationResultsFilePath = "base_operation_results.json";
         private const string InitialUsersFilePath = "initial_users.json";
-        private const int InitialUserCount = 100_0000;
+        private const int InitialUserCount = 1_0000;
         private int CurrentUserId = InitialUserCount + 1;
         private Dictionary<int, int> UserIdToScore;
-        private const int TotalOperations = 10000;
+        private const int TotalOperations = 30_0000;
 
         private Process _process = Process.GetCurrentProcess();
         private long _peakMemoryUsage;
@@ -89,25 +89,25 @@ namespace RankingListTest
                 else if (operationType < 0.3) // 20% UpdateUser
                 {
                     operation.Type = OperationType.UpdateUser;
-                    operation.UserId = random.Next(1, CurrentUserId + 1);
+                    operation.UserId = random.Next(1, CurrentUserId);
                     int score = UserIdToScore[operation.UserId];
                     operation.Score = score + GeneratePowerLawScore(random, 100);
                 }
                 else if (operationType < 0.6) // 30% GetUserRank
                 {
                     operation.Type = OperationType.GetUserRank;
-                    operation.UserId = random.Next(1, CurrentUserId + 1);
+                    operation.UserId = random.Next(1, CurrentUserId);
                 }
                 else if (operationType < 0.8) // 20% GetTopN
                 {
                     operation.Type = OperationType.GetTopN;
                     operation.TopN = random.Next(1, 100);
-                    operation.UserId = random.Next(1, CurrentUserId + 1);
+                    operation.UserId = random.Next(1, CurrentUserId);
                 }
                 else // 20% GetAroundUser
                 {
                     operation.Type = OperationType.GetAroundUser;
-                    operation.UserId = random.Next(1, CurrentUserId + 1);
+                    operation.UserId = random.Next(1, CurrentUserId);
                     operation.AroundN = random.Next(1, 10);
                 }
 

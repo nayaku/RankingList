@@ -4,7 +4,7 @@ namespace RankingList
 {
     internal class BucketRankingList : IRankingList
     {
-        private static readonly int BucketSize = 212; // Define the score range for each bucket
+        private static readonly int BucketSize = 512; // Define the score range for each bucket
         private static readonly int InitialBucketSize = BucketSize / 2; // Initial size for each bucket
         private int _userCount;
         private List<UserBucket> _buckets;
@@ -12,7 +12,7 @@ namespace RankingList
         public BucketRankingList(IUser[] users)
         {
             Array.Sort(users);
-            int bucketNum = users.Length / InitialBucketSize;
+            int bucketNum = (int)Math.Ceiling((double)users.Length / InitialBucketSize);
             // Initialize buckets and distribute users into buckets
             _buckets = new List<UserBucket>(bucketNum);
             for (int i = 0; i < bucketNum; i++)
@@ -337,9 +337,11 @@ namespace RankingList
     }
 }
 /*
+=== 排行榜测试框架 ===
+
 === 测试 BucketRankingList 排行榜 ===
-总操作数: 10000
-初始用户数: 1000000
+总操作数: 300000
+初始用户数: 10000
 
 === 验证操作结果与基准对比 ===
 √ 所有操作结果验证通过！
@@ -347,15 +349,15 @@ namespace RankingList
 
 === 测试结果 ===
 排行榜名称: BucketRankingList
-总耗时: 418 ms
-平均耗时: 0.04 ms/操作
-内存占用: 449.79 MB
-内存峰值: 449.79 MB
-测试日期: 2026/1/12 15:22:49
+总耗时: 831 ms
+平均耗时: 0.00 ms/操作
+内存占用: 259.04 MB
+内存峰值: 285.52 MB
+测试日期: 2026/1/12 18:25:32
 
-=== 与基准 SimpleRankingList 的对比 ===
-总耗时: 418 ms vs 367868 ms (-99.89%)
-平均耗时: 0.04 ms vs 36.79 ms (-99.89%)
-内存占用: 449.79 MB vs 427.65 MB (+5.18%)
-内存峰值: 449.79 MB vs 454.34 MB (-1.00%)
+=== 与基准 SimpleRankingList2 的对比 ===
+总耗时: 831 ms vs 8517 ms (-90.24%)
+平均耗时: 0.00 ms vs 0.03 ms (-90.24%)
+内存占用: 259.04 MB vs 259.20 MB (-0.06%)
+内存峰值: 285.52 MB vs 288.79 MB (-1.13%)
 */
