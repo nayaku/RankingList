@@ -285,7 +285,8 @@ namespace RankingListTest
                 string testResultFilePath = $"{rankingListName}_test_results.json";
                 SaveTestOperationResults(benchmarkResults, testResultFilePath);
             }
-
+            //if(rankingList is BucketRankingList bucketRankingList)
+            //    bucketRankingList.DebugPrint(); 
             return result;
         }
 
