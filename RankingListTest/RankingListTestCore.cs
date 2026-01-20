@@ -58,6 +58,7 @@ namespace RankingListTest
         private const string BaseOperationResultsFilePath = "base_operation_results.json";
         private const string InitialUsersFilePath = "initial_users.json";
         private const int InitialUserCount = 1_0000;
+        private static readonly DateTime InitialUserCreateTime = new DateTime(2026, 1, 1);
         private int CurrentUserId = InitialUserCount + 1;
         private Dictionary<int, int> UserIdToScore;
         private const int TotalOperations = 30_0000;
@@ -133,7 +134,7 @@ namespace RankingListTest
                 {
                     Id = i + 1,
                     Score = GeneratePowerLawScore(random),
-                    LastActive = DateTime.Now
+                    LastActive = InitialUserCreateTime.AddSeconds(i)
                 };
                 UserIdToScore[users[i].Id] = users[i].Score;
             }
@@ -213,28 +214,28 @@ namespace RankingListTest
                 switch (operation.Type)
                 {
                     case OperationType.AddUser:
+                    {
+                        var user = new User
                         {
-                            var user = new User
-                            {
-                                Id = operation.UserId,
-                                Score = operation.Score,
-                                LastActive = DateTime.Now
-                            };
-                            var addResult = rankingList.AddUser(user);
-                            opResult.UserRankResult = [addResult];
-                        }
+                            Id = operation.UserId,
+                            Score = operation.Score,
+                            LastActive = InitialUserCreateTime.AddSeconds(InitialUserCount + operation.Id)
+                        };
+                        var addResult = rankingList.AddUser(user);
+                        opResult.UserRankResult = [addResult];
+                    }
                         break;
                     case OperationType.UpdateUser:
+                    {
+                        var user = new User
                         {
-                            var user = new User
-                            {
-                                Id = operation.UserId,
-                                Score = operation.Score,
-                                LastActive = DateTime.Now
-                            };
-                            var updateResult = rankingList.UpdateUser(user);
-                            opResult.UserRankResult = [updateResult];
-                        }
+                            Id = operation.UserId,
+                            Score = operation.Score,
+                            LastActive = InitialUserCreateTime.AddSeconds(InitialUserCount + operation.Id)
+                        };
+                        var updateResult = rankingList.UpdateUser(user);
+                        opResult.UserRankResult = [updateResult];
+                    }
                         break;
                     case OperationType.GetUserRank:
                         var rankResult = rankingList.GetUserRank(operation.UserId);
@@ -287,6 +288,10 @@ namespace RankingListTest
             }
             //if(rankingList is BucketRankingList bucketRankingList)
             //    bucketRankingList.DebugPrint(); 
+#if DEBUG
+            if (rankingList is BucketRankingList2 bucketRankingList2)
+                bucketRankingList2.DebugPrint();
+#endif
             return result;
         }
 
@@ -313,12 +318,14 @@ namespace RankingListTest
             File.WriteAllText(BaseOperationResultsFilePath, json);
             Console.WriteLine($"基准操作结果已保存到 {BaseOperationResultsFilePath}");
         }
+
         public void SaveTestOperationResults(BenchmarkResults results, string filePath)
         {
             var json = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
             Console.WriteLine($"测试操作结果已保存到 {filePath}");
         }
+
         // 加载基准操作结果
         public BenchmarkResults LoadBaseOperationResults()
         {
@@ -398,6 +405,7 @@ namespace RankingListTest
                 if (!CompareRankResult(testResults[i], baseResults[i]))
                     return false;
             }
+
             return true;
         }
 
