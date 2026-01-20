@@ -196,6 +196,7 @@ namespace RankingListTest
             // 创建排行榜实例
             var rankingList = DllMain.CreateRankingList(initialUsers, rankingListName);
 
+            GC.Collect();
             // 开始内存监控
             _peakMemoryUsage = 0;
             var memoryMonitorThread = new Thread(MonitorMemoryUsage)
