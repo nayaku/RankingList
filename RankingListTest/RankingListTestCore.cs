@@ -61,7 +61,7 @@ namespace RankingListTest
         private static readonly DateTime InitialUserCreateTime = new DateTime(2026, 1, 1);
         private int CurrentUserId = InitialUserCount + 1;
         private Dictionary<int, int> UserIdToScore;
-        private const int TotalOperations = 30_0000;
+        private const int TotalOperations = 100_0000;
 
         private Process _process = Process.GetCurrentProcess();
         private long _peakMemoryUsage;
@@ -116,8 +116,8 @@ namespace RankingListTest
             }
 
             // 保存操作列表到JSON文件
-            var json = JsonSerializer.Serialize(operations, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(OperationsFilePath, json);
+            using FileStream fs = new(OperationsFilePath, FileMode.Create, FileAccess.Write);
+            JsonSerializer.Serialize(fs, operations, new JsonSerializerOptions { WriteIndented = true });
             Console.WriteLine($"操作列表已生成并保存到 {OperationsFilePath}");
         }
 
@@ -140,8 +140,8 @@ namespace RankingListTest
             }
 
             // 保存初始用户到JSON文件
-            var json = JsonSerializer.Serialize(users, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(InitialUsersFilePath, json);
+            using FileStream fs = new(InitialUsersFilePath, FileMode.Create, FileAccess.Write);
+            JsonSerializer.Serialize(fs, users, new JsonSerializerOptions { WriteIndented = true });
             Console.WriteLine($"初始用户数据已生成并保存到 {InitialUsersFilePath}");
 
             return users;
@@ -174,15 +174,23 @@ namespace RankingListTest
         // 运行测试
         public TestResult RunTest(string rankingListName, bool isBenchmark = false)
         {
+            List<TestOperation> operations;
             // 加载操作列表
-            var operationsJson = File.ReadAllText(OperationsFilePath);
-            var operations = JsonSerializer.Deserialize<List<TestOperation>>(operationsJson) ??
+            using (FileStream fs1 = new(OperationsFilePath, FileMode.Open, FileAccess.Read))
+            {
+                operations = JsonSerializer.Deserialize<List<TestOperation>>(fs1) ??
                              throw new Exception("无法加载操作列表");
+            }
             int totalOperationCount = operations.Count;
             Console.WriteLine($"总操作数: {totalOperationCount}");
-            var initialUsersJson = File.ReadAllText(InitialUsersFilePath);
-            var initialUsers = JsonSerializer.Deserialize<User[]>(initialUsersJson) ??
+            // 加载初始用户数据
+            User[] initialUsers;
+            using (FileStream fs2 = new(InitialUsersFilePath, FileMode.Open, FileAccess.Read))
+            {
+                initialUsers = JsonSerializer.Deserialize<User[]>(fs2) ??
                                throw new Exception("无法加载初始用户数据");
+            }
+
             int initialUserCount = initialUsers.Length;
             Console.WriteLine($"初始用户数: {initialUserCount}");
             // 创建排行榜实例
@@ -298,39 +306,40 @@ namespace RankingListTest
         // 保存基准结果
         public void SaveBaseResult(TestResult result)
         {
-            var json = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(BaseResultFilePath, json);
+            using FileStream fs = new(BaseResultFilePath, FileMode.Create, FileAccess.Write);
+            JsonSerializer.Serialize(fs, result, new JsonSerializerOptions { WriteIndented = true });
             Console.WriteLine($"基准结果已保存到 {BaseResultFilePath}");
         }
 
         // 加载基准结果
         public TestResult LoadBaseResult()
         {
-            var json = File.ReadAllText(BaseResultFilePath);
-            return JsonSerializer.Deserialize<TestResult>(json) ??
+            using FileStream fs = new(BaseResultFilePath, FileMode.Open, FileAccess.Read);
+            return JsonSerializer.Deserialize<TestResult>(fs) ??
                    throw new Exception("无法加载基准结果");
         }
 
         // 保存基准操作结果
         public void SaveBaseOperationResults(BenchmarkResults results)
         {
-            var json = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(BaseOperationResultsFilePath, json);
+            using FileStream fs = new(BaseOperationResultsFilePath, FileMode.Create, FileAccess.Write);
+            JsonSerializer.Serialize(fs, results, new JsonSerializerOptions { WriteIndented = true });
             Console.WriteLine($"基准操作结果已保存到 {BaseOperationResultsFilePath}");
         }
 
+        // 保存测试操作结果
         public void SaveTestOperationResults(BenchmarkResults results, string filePath)
         {
-            var json = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(filePath, json);
+            using FileStream fs = new(filePath, FileMode.Create, FileAccess.Write);
+            JsonSerializer.Serialize(fs, results, new JsonSerializerOptions { WriteIndented = true });
             Console.WriteLine($"测试操作结果已保存到 {filePath}");
         }
 
         // 加载基准操作结果
         public BenchmarkResults LoadBaseOperationResults()
         {
-            var json = File.ReadAllText(BaseOperationResultsFilePath);
-            return JsonSerializer.Deserialize<BenchmarkResults>(json) ??
+            using FileStream fs = new(BaseOperationResultsFilePath, FileMode.Open, FileAccess.Read);
+            return JsonSerializer.Deserialize<BenchmarkResults>(fs) ??
                    throw new Exception("无法加载基准操作结果");
         }
 
