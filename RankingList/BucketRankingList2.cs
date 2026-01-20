@@ -8,7 +8,10 @@ namespace RankingList
         private static readonly int InitialBucketSize = BucketSize / 2; // Initial size for each bucket
         private int _userCount;
         private List<UserBucket> _buckets;
-
+#if DEBUG
+        private int _splitCount;
+        private int _combineCount;
+#endif
         public BucketRankingList2(IUser[] users)
         {
             Array.Sort(users);
@@ -48,6 +51,9 @@ namespace RankingList
                 // 分裂bucket
                 var newBucket = _buckets[bucketIndex].Split(user, out userIndexInBucket);
                 _buckets.Insert(bucketIndex + 1, newBucket);
+#if DEBUG
+                _splitCount++;
+#endif
             }
             else
             {
@@ -92,6 +98,9 @@ namespace RankingList
                 // 向前合并
                 _buckets[bucketIndex - 1].Combine([_buckets[bucketIndex]]);
                 _buckets.RemoveAt(bucketIndex);
+#if DEBUG
+                _combineCount++;
+#endif
             }
 
             _userCount--;
@@ -168,9 +177,11 @@ namespace RankingList
 
                 rankCount += _buckets[i].UserCount;
             }
+
             Debug.Assert(user != null);
 
-            int inBucketIndex = Array.BinarySearch(_buckets[bucketIndex].Users, 0, _buckets[bucketIndex].UserCount, user);
+            int inBucketIndex =
+                Array.BinarySearch(_buckets[bucketIndex].Users, 0, _buckets[bucketIndex].UserCount, user);
             Debug.Assert(inBucketIndex != -1);
             int startRank = Math.Max(0, rankCount + inBucketIndex - aroundN);
             int endRank = Math.Min(rankCount + inBucketIndex + aroundN, _userCount - 1);
@@ -213,6 +224,7 @@ namespace RankingList
             return _userCount;
         }
 
+#if DEBUG
         public void DebugPrint()
         {
             Console.WriteLine($"UserCount: {_userCount}");
@@ -229,7 +241,11 @@ namespace RankingList
                 Console.WriteLine(
                     $"Bucket {i}: {((User)_buckets[i].MinUser).Score} - {((User)_buckets[i].MaxUser).Score}");
             }
+
+            Console.WriteLine($"SplitCount: {_splitCount}");
+            Console.WriteLine($"CombineCount: {_combineCount}");
         }
+#endif
 
         /// <summary>
         /// 每个桶
