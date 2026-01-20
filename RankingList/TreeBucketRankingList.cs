@@ -4,7 +4,7 @@ namespace RankingList
 {
     public class TreeBucketRankingList : IRankingList
     {
-        private static readonly int BucketSize = 16; // 每个bucket的用户数量
+        private static readonly int BucketSize = 512; // 每个bucket的用户数量
         private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
         private TreeNode _root;
         private Dictionary<int, IUser> _userMap;
@@ -551,3 +551,28 @@ namespace RankingList
         }
     }
 }
+/*
+=== 排行榜测试框架 ===
+
+=== 测试 TreeBucketRankingList 排行榜 ===
+总操作数: 1000000
+初始用户数: 10000
+
+=== 验证操作结果与基准对比 ===
+√ 所有操作结果验证通过！
+测试操作结果已保存到 TreeBucketRankingList_test_results.json
+
+=== 测试结果 ===
+排行榜名称: TreeBucketRankingList
+总耗时: 1763 ms
+平均耗时: 0.00 ms/操作
+内存占用: 657.65 MB
+内存峰值: 656.87 MB
+测试日期: 2026/1/20 16:16:03
+
+=== 与基准 BucketRankingList 的对比 ===
+总耗时: 1763 ms vs 3339 ms (-47.20%)
+平均耗时: 0.00 ms vs 0.00 ms (-47.20%)
+内存占用: 657.65 MB vs 647.78 MB (+1.52%)
+内存峰值: 656.87 MB vs 647.78 MB (+1.40%)
+*/
