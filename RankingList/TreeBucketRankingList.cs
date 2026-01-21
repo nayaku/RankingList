@@ -110,7 +110,7 @@ namespace RankingList
             }
 
             Debug.Assert(node.Count == node.Left.Count + node.Right.Count);
-            if (node.UserBucket == null )
+            if (node.UserBucket == null)
             {
                 if (node.Left.Empty)
                 {
@@ -312,6 +312,7 @@ namespace RankingList
                         };
                     }
                 }
+
                 return;
             }
 
@@ -326,6 +327,35 @@ namespace RankingList
                 }
             }
         }
+
+#if DEBUG
+        public void DebugPrint()
+        {
+            List<(int depth, int count)> results = [];
+            DebugPrint(_root, 0, ref results);
+            for (int i = 0; i < results.Count; i++)
+            {
+                Console.Write($"{results[i].depth}-{results[i].count}  ");
+                // 每10个换行
+                if ((i + 1) % 10 == 0)
+                {
+                    Console.WriteLine();
+                }
+            }
+        }
+
+        private void DebugPrint(TreeNode node, int depth, ref List<(int depth, int count)> results)
+        {
+            if (node.UserBucket != null)
+            {
+                results.Add((depth, node.UserBucket.UserCount));
+                return;
+            }
+
+            DebugPrint(node.Left, depth + 1, ref results);
+            DebugPrint(node.Right, depth + 1, ref results);
+        }
+#endif
 
         public RankingListResponse[] GetAroundUser(int userId, int aroundN)
         {
@@ -343,6 +373,7 @@ namespace RankingList
                 Array.Copy(result, aroundN - leftCount, newResult, 0, leftCount + rightCount + 1);
                 result = newResult;
             }
+
             return result;
         }
 
@@ -535,10 +566,12 @@ namespace RankingList
                 {
                     Left.CombineChild();
                 }
+
                 if (Right.UserBucket == null)
                 {
                     Right.CombineChild();
                 }
+
                 Debug.Assert(Left.UserBucket != null && Right.UserBucket != null);
                 UserBucket = Left.UserBucket;
                 UserBucket.Combine(Right.UserBucket);

@@ -300,6 +300,8 @@ namespace RankingListTest
 #if DEBUG
             if (rankingList is BucketRankingList2 bucketRankingList2)
                 bucketRankingList2.DebugPrint();
+            if (rankingList is TreeBucketRankingList treeBucketRankingList)
+                treeBucketRankingList.DebugPrint();
 #endif
             return result;
         }
