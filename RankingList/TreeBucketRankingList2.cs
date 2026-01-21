@@ -2,14 +2,14 @@
 
 namespace RankingList
 {
-    public class TreeBucketRankingList : IRankingList
+    public class TreeBucketRankingList2 : IRankingList
     {
         private static readonly int BucketSize = 512; // 每个bucket的用户数量
         private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
         private TreeNode _root;
         private Dictionary<int, IUser> _userMap;
 
-        public TreeBucketRankingList(IUser[] users)
+        public TreeBucketRankingList2(IUser[] users)
         {
             Array.Sort(users);
             UserBucket[] buckets = BuildBucket(users);
@@ -58,75 +58,85 @@ namespace RankingList
             return node;
         }
 
-        private static void OperateTree(TreeNode node, IUser user, ref int rankCount, bool isAdd)
+        private static void AddUser(TreeNode node, IUser user, ref int rankCount)
         {
             // 叶子节点
             if (node.UserBucket != null)
             {
-                if (isAdd)
+                int userIndexInBucket;
+                if (node.Full)
                 {
-                    int userIndexInBucket;
-                    if (node.Full)
-                    {
-                        // 分裂TreeNode
-                        node.Split(user, out userIndexInBucket);
-                        rankCount += userIndexInBucket;
-                        return;
-                    }
-
-                    // 加入bucket
-                    userIndexInBucket = node.Insert(user);
+                    // 分裂TreeNode
+                    node.Split(user, out userIndexInBucket);
                     rankCount += userIndexInBucket;
+                    return;
                 }
-                else
-                {
-                    node.Remove(user);
-                }
+
+                // 加入bucket
+                userIndexInBucket = node.Insert(user);
+                rankCount += userIndexInBucket;
 
                 return;
             }
 
             // 非叶子节点，必定度为2
             Debug.Assert(node.Left != null && node.Right != null);
-            if (user.CompareTo(node.Right.LeftUser) < 0)
+            if (user.CompareTo(node.Left.RightUser) < 0 ||
+                (user.CompareTo(node.Right.LeftUser) < 0 && node.Left.Count < node.Right.Count))
+                // 比左节点的最大还大，比右节点的最小还小，且左节点的用户数量小于右节点的用户数量，
+                // 则加入左节点。平衡一下
             {
-                OperateTree(node.Left, user, ref rankCount, isAdd);
+                AddUser(node.Left, user, ref rankCount);
                 node.LeftUser = node.Left.LeftUser;
             }
             else
             {
                 rankCount += node.Left.Count;
-                OperateTree(node.Right, user, ref rankCount, isAdd);
+                AddUser(node.Right, user, ref rankCount);
                 node.RightUser = node.Right.RightUser;
             }
 
-            if (isAdd)
+            node.Count++;
+        }
+
+        private static void RemoveUser(TreeNode node, IUser user, ref int rankCount)
+        {
+            // 叶子节点
+            if (node.UserBucket != null)
             {
-                node.Count++;
+                node.Remove(user);
+                return;
+            }
+
+            // 非叶子节点，必定度为2
+            Debug.Assert(node.Left != null && node.Right != null);
+            if (user.CompareTo(node.Left.RightUser) <= 0)
+            {
+                RemoveUser(node.Left, user, ref rankCount);
+                node.LeftUser = node.Left.LeftUser;
             }
             else
             {
-                node.Count--;
+                rankCount += node.Left.Count;
+                RemoveUser(node.Right, user, ref rankCount);
+                node.RightUser = node.Right.RightUser;
             }
-
+            node.Count--;
             Debug.Assert(node.Count == node.Left.Count + node.Right.Count);
-            if (node.UserBucket == null)
+            if (node.Left.Empty)
             {
-                if (node.Left.Empty)
-                {
-                    // 左子树为空，用右子树代替
-                    node.CopyFrom(node.Right);
-                }
-                else if (node.Right.Empty)
-                {
-                    // 右子树为空，用左子树代替
-                    node.CopyFrom(node.Left);
-                }
-                else if (node.Count < BucketSize / 4)
-                {
-                    // 合并TreeNode
-                    node.CombineChild();
-                }
+                // 左子树为空，用右子树代替
+                node.CopyFrom(node.Right);
+            }
+            else if (node.Right.Empty)
+            {
+                // 右子树为空，用左子树代替
+                node.CopyFrom(node.Left);
+            }
+            else if (node.Count < BucketSize / 4)
+            {
+                // 合并TreeNode
+                node.CombineChild();
             }
         }
 
@@ -135,7 +145,7 @@ namespace RankingList
             Debug.Assert(!_userMap.ContainsKey(user.Id));
             _userMap.Add(user.Id, user);
             int rankCount = 0;
-            OperateTree(_root, user, ref rankCount, true);
+            AddUser(_root, user, ref rankCount);
             return new RankingListResponse
             {
                 User = user,
@@ -147,9 +157,9 @@ namespace RankingList
         {
             int rankCount = 0;
             IUser oldUser = _userMap[user.Id];
-            OperateTree(_root, oldUser, ref rankCount, false);
+            RemoveUser(_root, oldUser, ref rankCount);
             rankCount = 0;
-            OperateTree(_root, user, ref rankCount, true);
+            AddUser(_root, user, ref rankCount);
             _userMap[user.Id] = user;
             return new RankingListResponse
             {
@@ -168,7 +178,7 @@ namespace RankingList
             while (node.UserBucket == null)
             {
                 Debug.Assert(node.Left != null && node.Right != null);
-                if (user.CompareTo(node.Right.LeftUser) < 0)
+                if (user.CompareTo(node.Left.RightUser) <= 0)
                 {
                     node = node.Left;
                 }
@@ -261,7 +271,7 @@ namespace RankingList
             }
 
             Debug.Assert(node.Left != null && node.Right != null);
-            if (user.CompareTo(node.Right.LeftUser) < 0)
+            if (user.CompareTo(node.Left.RightUser) <= 0)
             {
                 GetAroundUserStep1(node.Left, user, aroundN, ref rankCount, ref leftCount, ref rightCount, ref result);
                 // 找到用户后，进入第二阶段
@@ -587,25 +597,26 @@ namespace RankingList
 /*
 === 排行榜测试框架 ===
 
-=== 测试 TreeBucketRankingList 排行榜 ===
+=== 测试 TreeBucketRankingList2 排行榜 ===
 总操作数: 1000000
 初始用户数: 10000
 
 === 验证操作结果与基准对比 ===
 √ 所有操作结果验证通过！
-测试操作结果已保存到 TreeBucketRankingList_test_results.json
+测试操作结果已保存到 TreeBucketRankingList2_test_results.json
 
 === 测试结果 ===
-排行榜名称: TreeBucketRankingList
-总耗时: 1771 ms
-平均耗时: 1.77 ms/1000操作
-内存占用: 658.94 MB
-内存峰值: 658.94 MB
-测试日期: 2026/1/21 17:29:21
+排行榜名称: TreeBucketRankingList2
+总耗时: 1764 ms
+平均耗时: 1.76 ms/1000操作
+内存占用: 659.65 MB
+内存峰值: 659.65 MB
+测试日期: 2026/1/21 17:27:33
 
 === 与基准 BucketRankingList 的对比 ===
-总耗时: 1771 ms vs 3216 ms (-44.93%)
-平均耗时: 1.77 ms vs 3.22 ms (-44.93%)
-内存占用: 658.94 MB vs 644.68 MB (+2.21%)
-内存峰值: 658.94 MB vs 644.68 MB (+2.21%)
+总耗时: 1764 ms vs 3216 ms (-45.15%)
+平均耗时: 1.76 ms vs 3.22 ms (-45.15%)
+内存占用: 659.65 MB vs 644.68 MB (+2.32%)
+内存峰值: 659.65 MB vs 644.68 MB (+2.32%)
 */
+// 优化后没啥卵用

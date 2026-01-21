@@ -18,6 +18,8 @@ namespace RankingList
                     return new BucketRankingList2(users);
                 case "TreeBucketRankingList":
                     return new TreeBucketRankingList(users);
+                case "TreeBucketRankingList2":
+                    return new TreeBucketRankingList2(users);
                 // 可以添加更多排行榜实现
                 default:
                     throw new ArgumentException($"未知的排行榜类型: {rankingListName}");
