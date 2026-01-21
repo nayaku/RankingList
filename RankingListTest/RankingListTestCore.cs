@@ -54,11 +54,10 @@ namespace RankingListTest
     public class RankingListTestCore
     {
         private const string OperationsFilePath = "operations.json";
-        private const string BaseResultFilePath = "base_result.json";
         private const string BaseOperationResultsFilePath = "base_operation_results.json";
         private const string InitialUsersFilePath = "initial_users.json";
         private const int InitialUserCount = 1_0000;
-        private static readonly DateTime InitialUserCreateTime = new DateTime(2026, 1, 1);
+        private static readonly DateTime InitialUserCreateTime = new(2026, 1, 1);
         private int CurrentUserId = InitialUserCount + 1;
         private Dictionary<int, int> UserIdToScore;
         private const int TotalOperations = 100_0000;
@@ -148,7 +147,7 @@ namespace RankingListTest
         }
 
         // 生成幂律分布的分数
-        private int GeneratePowerLawScore(Random random, int maxScore = 1000000)
+        private static int GeneratePowerLawScore(Random random, int maxScore = 1000000)
         {
             // 简单的幂律分布生成
             double uniform = random.NextDouble();
@@ -181,6 +180,7 @@ namespace RankingListTest
                 operations = JsonSerializer.Deserialize<List<TestOperation>>(fs1) ??
                              throw new Exception("无法加载操作列表");
             }
+
             int totalOperationCount = operations.Count;
             Console.WriteLine($"总操作数: {totalOperationCount}");
             // 加载初始用户数据
@@ -283,21 +283,37 @@ namespace RankingListTest
                 Results = operationResults,
                 PerformanceResult = result
             };
+            BenchmarkResults baseBenchmarkResults;
             // 如果是基准测试，保存操作结果
             if (isBenchmark)
             {
-                SaveBaseOperationResults(benchmarkResults);
+                using FileStream fs = new(BaseOperationResultsFilePath, FileMode.Create, FileAccess.Write);
+                JsonSerializer.Serialize(fs, benchmarkResults, new JsonSerializerOptions { WriteIndented = true });
+                Console.WriteLine($"基准操作结果已保存到 {BaseOperationResultsFilePath}");
+                Console.WriteLine("\n=== 基准测试结果 ===");
+                DisplayTestResult(result);
             }
             else
             {
                 // 验证测试结果与基准
-                ValidateResults(operationResults);
+                using (FileStream fs = new(BaseOperationResultsFilePath, FileMode.Open, FileAccess.Read))
+                    baseBenchmarkResults = JsonSerializer.Deserialize<BenchmarkResults>(fs) ??
+                                           throw new Exception("无法加载基准操作结果");
+                ValidateResults(baseBenchmarkResults.Results, operationResults);
                 string testResultFilePath = $"{rankingListName}_test_results.json";
-                SaveTestOperationResults(benchmarkResults, testResultFilePath);
+                using (FileStream fs = new(testResultFilePath, FileMode.Create, FileAccess.Write))
+                    JsonSerializer.Serialize(fs, testResultFilePath,
+                        new JsonSerializerOptions { WriteIndented = true });
+                Console.WriteLine($"测试操作结果已保存到 {testResultFilePath}");
+                Console.WriteLine("\n=== 测试结果 ===");
+                DisplayTestResult(result);
+                CompareWithBase(baseBenchmarkResults.PerformanceResult, result);
             }
+
+#if DEBUG
             //if(rankingList is BucketRankingList bucketRankingList)
             //    bucketRankingList.DebugPrint(); 
-#if DEBUG
+
             if (rankingList is BucketRankingList2 bucketRankingList2)
                 bucketRankingList2.DebugPrint();
             if (rankingList is TreeBucketRankingList treeBucketRankingList)
@@ -306,53 +322,10 @@ namespace RankingListTest
             return result;
         }
 
-        // 保存基准结果
-        public void SaveBaseResult(TestResult result)
-        {
-            using FileStream fs = new(BaseResultFilePath, FileMode.Create, FileAccess.Write);
-            JsonSerializer.Serialize(fs, result, new JsonSerializerOptions { WriteIndented = true });
-            Console.WriteLine($"基准结果已保存到 {BaseResultFilePath}");
-        }
-
-        // 加载基准结果
-        public TestResult LoadBaseResult()
-        {
-            using FileStream fs = new(BaseResultFilePath, FileMode.Open, FileAccess.Read);
-            return JsonSerializer.Deserialize<TestResult>(fs) ??
-                   throw new Exception("无法加载基准结果");
-        }
-
-        // 保存基准操作结果
-        public void SaveBaseOperationResults(BenchmarkResults results)
-        {
-            using FileStream fs = new(BaseOperationResultsFilePath, FileMode.Create, FileAccess.Write);
-            JsonSerializer.Serialize(fs, results, new JsonSerializerOptions { WriteIndented = true });
-            Console.WriteLine($"基准操作结果已保存到 {BaseOperationResultsFilePath}");
-        }
-
-        // 保存测试操作结果
-        public void SaveTestOperationResults(BenchmarkResults results, string filePath)
-        {
-            using FileStream fs = new(filePath, FileMode.Create, FileAccess.Write);
-            JsonSerializer.Serialize(fs, results, new JsonSerializerOptions { WriteIndented = true });
-            Console.WriteLine($"测试操作结果已保存到 {filePath}");
-        }
-
-        // 加载基准操作结果
-        public BenchmarkResults LoadBaseOperationResults()
-        {
-            using FileStream fs = new(BaseOperationResultsFilePath, FileMode.Open, FileAccess.Read);
-            return JsonSerializer.Deserialize<BenchmarkResults>(fs) ??
-                   throw new Exception("无法加载基准操作结果");
-        }
-
         // 验证测试结果与基准
-        public void ValidateResults(List<OperationResult> testResults)
+        public void ValidateResults(List<OperationResult> baseResults, List<OperationResult> testResults)
         {
             Console.WriteLine("\n=== 验证操作结果与基准对比 ===");
-
-            // 加载基准操作结果
-            var baseResults = LoadBaseOperationResults();
 
             int totalOperations = testResults.Count;
             int passedOperations = 0;
@@ -361,7 +334,7 @@ namespace RankingListTest
             // 逐一比较测试结果与基准结果
             for (int i = 0; i < totalOperations; i++)
             {
-                if (i >= baseResults.Results.Count)
+                if (i >= baseResults.Count)
                 {
                     Console.WriteLine($"操作 {testResults[i].Id}: 测试结果中缺少该操作");
                     failedOperations++;
@@ -369,7 +342,7 @@ namespace RankingListTest
                 }
 
                 var testResult = testResults[i];
-                var baseResult = baseResults.Results[i];
+                var baseResult = baseResults[i];
 
                 if (CompareOperationResults(testResult, baseResult))
                 {
@@ -449,15 +422,13 @@ namespace RankingListTest
         }
 
         // 对比测试结果与基准
-        public void CompareWithBase(TestResult testResult)
+        public void CompareWithBase(TestResult baseResult, TestResult testResult)
         {
-            var baseResult = LoadBaseResult();
-
             Console.WriteLine($"\n=== 与基准 {baseResult.RankingListName} 的对比 ===");
             Console.WriteLine(
                 $"总耗时: {testResult.TotalTimeMs} ms vs {baseResult.TotalTimeMs} ms ({CalculateDifference(testResult.TotalTimeMs, baseResult.TotalTimeMs):+0.00;-0.00;0.00}%)");
             Console.WriteLine(
-                $"平均耗时: {testResult.AverageTimeMs:0.00} ms vs {baseResult.AverageTimeMs:0.00} ms ({CalculateDifference(testResult.AverageTimeMs, baseResult.AverageTimeMs):+0.00;-0.00;0.00}%)");
+                $"平均耗时: {1000 * testResult.AverageTimeMs:0.00} ms vs {1000 * baseResult.AverageTimeMs:0.00} ms ({CalculateDifference(1000 * testResult.AverageTimeMs, 1000 * baseResult.AverageTimeMs):+0.00;-0.00;0.00}%)");
             Console.WriteLine(
                 $"内存占用: {BytesToMB(testResult.MemoryUsageBytes):0.00} MB vs {BytesToMB(baseResult.MemoryUsageBytes):0.00} MB ({CalculateDifference(testResult.MemoryUsageBytes, baseResult.MemoryUsageBytes):+0.00;-0.00;0.00}%)");
             Console.WriteLine(
@@ -482,7 +453,7 @@ namespace RankingListTest
         {
             Console.WriteLine($"排行榜名称: {result.RankingListName}");
             Console.WriteLine($"总耗时: {result.TotalTimeMs} ms");
-            Console.WriteLine($"平均耗时: {result.AverageTimeMs:0.00} ms/操作");
+            Console.WriteLine($"平均耗时: {1000 * result.AverageTimeMs:0.00} ms/1000操作");
             Console.WriteLine($"内存占用: {BytesToMB(result.MemoryUsageBytes):0.00} MB");
             Console.WriteLine($"内存峰值: {BytesToMB(result.PeakMemoryUsageBytes):0.00} MB");
             Console.WriteLine($"测试日期: {result.TestDate}");

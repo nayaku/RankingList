@@ -29,24 +29,14 @@ namespace RankingListTest
                     // 基准模式：生成基准结果
                     Console.WriteLine("=== 生成基准数据 ===");
                     Console.WriteLine("运行基准测试（BucketRankingList）...");
-                    var baseResult = testCore.RunTest("BucketRankingList", true);
-                    testCore.SaveBaseResult(baseResult);
-                    Console.WriteLine("\n=== 基准测试结果 ===");
-                    testCore.DisplayTestResult(baseResult);
+                    testCore.RunTest("BucketRankingList", true);
                 }
                 else if (args[0] == "--test" && args.Length > 1)
                 {
                     // 测试模式：测试指定名称的排行榜
                     string rankingListName = args[1];
                     Console.WriteLine($"=== 测试 {rankingListName} 排行榜 ===");
-
-                    var testResult = testCore.RunTest(rankingListName);
-
-                    Console.WriteLine("\n=== 测试结果 ===");
-                    testCore.DisplayTestResult(testResult);
-
-                    // 与基准结果对比
-                    testCore.CompareWithBase(testResult);
+                    testCore.RunTest(rankingListName);
                 }
                 else
                 {
