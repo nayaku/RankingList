@@ -302,7 +302,7 @@ namespace RankingListTest
                 ValidateResults(baseBenchmarkResults.Results, operationResults);
                 string testResultFilePath = $"{rankingListName}_test_results.json";
                 using (FileStream fs = new(testResultFilePath, FileMode.Create, FileAccess.Write))
-                    JsonSerializer.Serialize(fs, testResultFilePath,
+                    JsonSerializer.Serialize(fs, benchmarkResults,
                         new JsonSerializerOptions { WriteIndented = true });
                 Console.WriteLine($"测试操作结果已保存到 {testResultFilePath}");
                 Console.WriteLine("\n=== 测试结果 ===");
