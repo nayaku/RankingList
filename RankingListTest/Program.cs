@@ -21,8 +21,7 @@ namespace RankingListTest
                 if (args[0] == "--init")
                 {
                     // 初始化模式：生成操作列表和用户数据
-                    testCore.GenerateInitialUsers();
-                    testCore.GenerateOperations();
+                    testCore.GenerateTestInitialData();
                 }
                 else if (args[0] == "--base")
                 {
