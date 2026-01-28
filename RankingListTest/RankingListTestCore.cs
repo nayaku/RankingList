@@ -74,13 +74,13 @@ namespace RankingListTest
         private const string BaseOperationResultsFilePath = "base_operation_results.json";
         private const string TestInitialFilePath = "test_initial.json";
 
-        private const int InitialUserCount = 1_0000;
+        private const int InitialUserCount = 100_0000;
         private static readonly DateTime InitialUserCreateTime = new(2026, 1, 1);
         private int currentUserId = InitialUserCount + 1;
         private int currentOperationId = 0;
         private Dictionary<int, int> userIdToScore;
         private const int allOperationNum = 100_0000;
-        private static readonly double[] singleOperationNumProportions = [0.1, 0.2, 0.3, 0.2, 0.2];
+        private static readonly double[] singleOperationNumProportions = [0.01, 0.02, 0.03, 0.02, 0.02];
 
         private Process _process = Process.GetCurrentProcess();
         private long _peakMemoryUsage;
@@ -357,7 +357,8 @@ namespace RankingListTest
 
             GC.Collect();
             // 开始内存监控
-            _peakMemoryUsage = 0;
+            long initialMemoryUsage = _process.WorkingSet64;
+            _peakMemoryUsage = initialMemoryUsage;
             var memoryMonitorThread = new Thread(MonitorMemoryUsage) { IsBackground = true };
             memoryMonitorThread.Start();
 
@@ -366,6 +367,7 @@ namespace RankingListTest
 
             // 停止计时和内存监控
             Thread.Sleep(100); // 等待内存监控线程更新峰值
+            GC.Collect();
 
             // 收集测试结果
             var result = new TestResult
@@ -373,8 +375,8 @@ namespace RankingListTest
                 RankingListName = rankingListName,
                 TotalTimeMs = stopwatch.ElapsedMilliseconds,
                 AverageTimeMs = stopwatch.ElapsedMilliseconds / (double)testInitial.AllOperations.Count,
-                MemoryUsageBytes = _process.WorkingSet64,
-                PeakMemoryUsageBytes = _peakMemoryUsage,
+                MemoryUsageBytes = _process.WorkingSet64 - initialMemoryUsage,
+                PeakMemoryUsageBytes = _peakMemoryUsage - initialMemoryUsage,
                 TestDate = DateTime.Now
             };
 
