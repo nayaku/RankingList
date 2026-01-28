@@ -470,7 +470,6 @@ namespace RankingList
                 }
 
                 IUser[] newUsers = new IUser[BucketSize];
-                HashSet<int> newUserIds = new(BucketSize);
                 int newUserCount = UserCount - mid;
                 if (userIndex >= mid)
                 {
@@ -482,11 +481,6 @@ namespace RankingList
                 else
                 {
                     Array.Copy(Users, mid, newUsers, 0, UserCount - mid);
-                }
-
-                for (int i = 0; i < newUserCount; i++)
-                {
-                    newUserIds.Add(newUsers[i].Id);
                 }
 
                 Array.Clear(Users, mid, UserCount - mid);
