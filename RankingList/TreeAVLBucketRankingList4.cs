@@ -55,6 +55,7 @@ namespace RankingList
             node.Right = BuildTree(mid, r, buckets);
             node.RightUser = node.Right.RightUser;
             node.Count = node.Left.Count + node.Right.Count;
+            node.Height = Math.Max(node.Left.Height, node.Right.Height) + 1;
             return node;
         }
 
@@ -112,7 +113,6 @@ namespace RankingList
             }
 
             Debug.Assert(node.Count == node.Left.Count + node.Right.Count);
-            node.Height = Math.Max(node.Left.Height, node.Right.Height) + 1;
             if (node.Left.Empty)
             {
                 // 左子树为空，用右子树代替
@@ -157,7 +157,7 @@ namespace RankingList
                         node = TreeNode.RotateLeft(node);
                         break;
                     default:
-
+                        node.Height = Math.Max(node.Left.Height, node.Right.Height) + 1;
                         break;
                 }
             }
