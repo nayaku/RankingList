@@ -2,7 +2,7 @@
   "profiles": {
     "RankingListTest": {
       "commandName": "Project",
-      "commandLineArgs": "--test TreeAVLBucketRankingList4"
+      "commandLineArgs": "--test TreeBRTreeBucketRankingListS"
     }
   }
 }

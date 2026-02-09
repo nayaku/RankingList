@@ -2,26 +2,27 @@
 
 namespace RankingList
 {
-    public class TreeBRTreeBucketRankingList : IRankingList
+    public class TreeBRTreeBucketRankingListS : IRankingList
     {
-        private static readonly int BucketSize = 64; // 每个bucket的用户数量
+        private static readonly int BucketSize = 128; // 每个bucket的用户数量
         private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
         private TreeNode _root;
-        private Dictionary<int, IUser> _userMap;
+        private Dictionary<int, UserValue> _userMap;
 
-        public TreeBRTreeBucketRankingList(IUser[] users)
+        public TreeBRTreeBucketRankingListS(IUser[] users)
         {
-            Array.Sort(users);
-            UserBucket[] buckets = BuildBucket(users);
+            UserValue[] userValues = users.Select(u => new UserValue((User)u)).ToArray();
+            Array.Sort(userValues);
+            UserBucket[] buckets = BuildBucket(userValues);
             _root = BuildTree(0, buckets.Length, 1, buckets);
             _root.Color = ColorEnum.Black;
-            _userMap = users.ToDictionary(u => u.Id, u => u);
+            _userMap = userValues.ToDictionary(u => u.Id, u => u);
 #if DEBUG
             CheckTree();
 #endif
         }
 
-        private static UserBucket[] BuildBucket(IUser[] users)
+        private static UserBucket[] BuildBucket(UserValue[] users)
         {
             // 初始化bucket
             int bucketNum = (int)Math.Ceiling((double)users.Length / InitialBucketSize);
@@ -31,7 +32,7 @@ namespace RankingList
                 int l = i * InitialBucketSize;
                 int r = Math.Min((i + 1) * InitialBucketSize, users.Length);
                 int userCount = r - l;
-                IUser[] bucketUsers = new IUser[BucketSize];
+                UserValue[] bucketUsers = new UserValue[BucketSize];
                 Array.Copy(users, l, bucketUsers, 0, userCount);
 
                 buckets[i] = new UserBucket(bucketUsers, userCount);
@@ -88,8 +89,8 @@ namespace RankingList
             Debug.Assert(node.Right == null || node.Right.Parent == node);
             Debug.Assert(node.Left == null || node.Right == null || node.Left.Count + node.Right.Count == node.Count);
             Debug.Assert(node.UserBucket == null || node.UserBucket.UserCount == node.Count);
-            Debug.Assert(node.Left == null || node.LeftUser == node.Left.LeftUser);
-            Debug.Assert(node.Right == null || node.RightUser == node.Right.RightUser);
+            Debug.Assert(node.Left == null || node.LeftUser.CompareTo(node.Left.LeftUser) == 0);
+            Debug.Assert(node.Right == null || node.RightUser.CompareTo(node.Right.RightUser) == 0);
             if (node.Color == ColorEnum.Red)
             {
                 Debug.Assert(node.Left == null || node.Left.Color == ColorEnum.Black);
@@ -103,7 +104,7 @@ namespace RankingList
 #endif
         // 参考：https://www.cnblogs.com/crazymakercircle/p/16320430.html
         // 参考：https://blog.csdn.net/u014454538/article/details/120120216
-        private void AddUser(IUser user, ref int rankCount)
+        private void AddUser(UserValue user, ref int rankCount)
         {
             TreeNode node = _root;
             while (node.UserBucket == null)
@@ -204,6 +205,7 @@ namespace RankingList
                         // 左旋转
                         RotateLeft(grandParentNode);
                     }
+
                     break;
                 }
             }
@@ -212,13 +214,13 @@ namespace RankingList
         }
 
         // 参考： https://zhuanlan.zhihu.com/p/91960960
-        private void RemoveUser(IUser user)
+        private void RemoveUser(UserValue user)
         {
             TreeNode node = _root;
             while (node.UserBucket == null)
             {
                 node.Count--;
-                node = user.CompareTo(node.Right.LeftUser) < 0 ? node.Left : node.Right!;
+                node = user.CompareTo(node.Right!.LeftUser) < 0 ? node.Left! : node.Right!;
             }
 
             // 叶子节点
@@ -381,7 +383,7 @@ namespace RankingList
             y.LeftUser = x.LeftUser;
             x.Count = x.Left.Count + x.Right.Count;
             y.Count = y.Left.Count + y.Right.Count;
-            if(y.Parent == null)
+            if (y.Parent == null)
                 _root = y;
             return y;
         }
@@ -412,7 +414,7 @@ namespace RankingList
             y.RightUser = x.RightUser;
             x.Count = x.Left.Count + x.Right.Count;
             y.Count = y.Left.Count + y.Right.Count;
-            if(y.Parent == null)
+            if (y.Parent == null)
                 _root = y;
             return y;
         }
@@ -420,9 +422,10 @@ namespace RankingList
         public RankingListResponse AddUser(IUser user)
         {
             Debug.Assert(!_userMap.ContainsKey(user.Id));
-            _userMap.Add(user.Id, user);
+            UserValue userValue = new UserValue((User)user);
+            _userMap.Add(user.Id, userValue);
             int rankCount = 0;
-            AddUser(user, ref rankCount);
+            AddUser(userValue, ref rankCount);
             return new RankingListResponse
             {
                 User = user,
@@ -432,11 +435,12 @@ namespace RankingList
 
         public RankingListResponse UpdateUser(IUser newUser)
         {
-            IUser oldUser = _userMap[newUser.Id];
-            RemoveUser(oldUser);
+            UserValue oldUserValue = _userMap[newUser.Id];
+            RemoveUser(oldUserValue);
             int rankCount = 0;
-            AddUser(newUser, ref rankCount);
-            _userMap[newUser.Id] = newUser;
+            UserValue newUserValue = new UserValue((User)newUser);
+            AddUser(newUserValue, ref rankCount);
+            _userMap[newUser.Id] = newUserValue;
             return new RankingListResponse
             {
                 User = newUser,
@@ -447,31 +451,31 @@ namespace RankingList
         public RankingListResponse GetUserRank(int userId)
         {
             Debug.Assert(_userMap.ContainsKey(userId));
-            IUser user = _userMap[userId];
+            UserValue userValue = _userMap[userId];
             int rankCount = 0;
             TreeNode node = _root;
 
             while (node.UserBucket == null)
             {
                 Debug.Assert(node.Left != null && node.Right != null);
-                if (user.CompareTo(node.Right.LeftUser) < 0)
+                if (userValue.CompareTo(node.Right.LeftUser) < 0)
                 {
-                    node = node.Left;
+                    node = node.Left!;
                 }
                 else
                 {
-                    rankCount += node.Left.Count;
-                    node = node.Right;
+                    rankCount += node.Left!.Count;
+                    node = node.Right!;
                 }
             }
 
-            UserBucket bucket = node.UserBucket;
-            int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
+            UserBucket bucket = node.UserBucket!;
+            int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, userValue);
             Debug.Assert(userIndexInBucket >= 0);
             rankCount += userIndexInBucket;
             return new RankingListResponse
             {
-                User = user,
+                User = userValue.ToUser(),
                 Rank = rankCount + 1
             };
         }
@@ -492,7 +496,7 @@ namespace RankingList
                 {
                     result[rankCount] = new RankingListResponse
                     {
-                        User = node.UserBucket.Users[i],
+                        User = node.UserBucket.Users[i].ToUser(),
                         Rank = rankCount + 1
                     };
                 }
@@ -509,7 +513,7 @@ namespace RankingList
         }
 
         // 先获取用户在树中的排名，再获取左右aroundN个用户
-        private static void GetAroundUserStep1(TreeNode node, IUser user, int aroundN, ref int rankCount,
+        private static void GetAroundUserStep1(TreeNode node, UserValue user, int aroundN, ref int rankCount,
             ref int leftCount, ref int rightCount, ref RankingListResponse[] result)
         {
             if (node.UserBucket != null)
@@ -520,7 +524,7 @@ namespace RankingList
                 rankCount += userIndexInBucket;
                 result[aroundN] = new RankingListResponse
                 {
-                    User = bucket.Users[userIndexInBucket],
+                    User = bucket.Users[userIndexInBucket].ToUser(),
                     Rank = rankCount + 1
                 };
                 // 左边
@@ -528,7 +532,7 @@ namespace RankingList
                 {
                     result[aroundN - leftCount - 1] = new RankingListResponse
                     {
-                        User = bucket.Users[i],
+                        User = bucket.Users[i].ToUser(),
                         Rank = rankCount - (leftCount + 1) + 1
                     };
                 }
@@ -538,7 +542,7 @@ namespace RankingList
                 {
                     result[aroundN + rightCount + 1] = new RankingListResponse
                     {
-                        User = bucket.Users[i],
+                        User = bucket.Users[i].ToUser(),
                         Rank = rankCount + (rightCount + 1) + 1
                     };
                 }
@@ -581,7 +585,7 @@ namespace RankingList
                     {
                         result[aroundN - requiredCount - 1] = new RankingListResponse
                         {
-                            User = bucket.Users[i],
+                            User = bucket.Users[i].ToUser(),
                             Rank = rankCount - (requiredCount + 1) + 1
                         };
                     }
@@ -593,7 +597,7 @@ namespace RankingList
                     {
                         result[aroundN + requiredCount + 1] = new RankingListResponse
                         {
-                            User = bucket.Users[i],
+                            User = bucket.Users[i].ToUser(),
                             Rank = rankCount + (requiredCount + 1) + 1
                         };
                     }
@@ -646,7 +650,7 @@ namespace RankingList
         public RankingListResponse[] GetAroundUser(int userId, int aroundN)
         {
             Debug.Assert(_userMap.ContainsKey(userId));
-            IUser user = _userMap[userId];
+            UserValue user = _userMap[userId];
             int rankCount = 0;
             int leftCount = 0;
             int rightCount = 0;
@@ -673,21 +677,21 @@ namespace RankingList
         /// </summary>
         class UserBucket
         {
-            public IUser MinUser => Users[0];
-            public IUser MaxUser => Users[UserCount - 1];
+            public UserValue MinUser => Users[0];
+            public UserValue MaxUser => Users[UserCount - 1];
 
-            public IUser[] Users { get; }
+            public UserValue[] Users { get; }
             public int UserCount { get; private set; }
             public bool Full => UserCount >= Users.Length;
             public bool Empty => UserCount == 0;
 
-            public UserBucket(IUser[] users, int userCount)
+            public UserBucket(UserValue[] users, int userCount)
             {
                 Users = users;
                 UserCount = userCount;
             }
 
-            public int Insert(IUser user)
+            public int Insert(UserValue user)
             {
                 int index = Array.BinarySearch(Users, 0, UserCount, user);
                 if (index < 0)
@@ -701,13 +705,12 @@ namespace RankingList
                 return index;
             }
 
-            public int Remove(IUser user)
+            public int Remove(UserValue user)
             {
                 int index = Array.BinarySearch(Users, 0, UserCount, user);
                 Debug.Assert(index >= 0);
 
                 Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
-                Users[UserCount - 1] = null;
                 UserCount--;
                 return index;
             }
@@ -718,7 +721,7 @@ namespace RankingList
             /// <param name="user"></param>
             /// <param name="userIndex"></param>
             /// <returns>右边的新桶</returns>
-            public UserBucket Split(IUser user, out int userIndex)
+            public UserBucket Split(UserValue user, out int userIndex)
             {
                 int mid = UserCount / 2;
                 userIndex = Array.BinarySearch(Users, 0, UserCount, user);
@@ -727,7 +730,7 @@ namespace RankingList
                     userIndex = ~userIndex;
                 }
 
-                IUser[] newUsers = new IUser[BucketSize];
+                UserValue[] newUsers = new UserValue[BucketSize];
                 int newUserCount = UserCount - mid;
                 if (userIndex >= mid)
                 {
@@ -767,8 +770,8 @@ namespace RankingList
         class TreeNode
         {
             public int Count;
-            public IUser LeftUser;
-            public IUser RightUser;
+            public UserValue LeftUser;
+            public UserValue RightUser;
             public TreeNode? Left;
             public TreeNode? Right;
             public TreeNode? Parent;
@@ -815,7 +818,7 @@ namespace RankingList
                 }
             }
 
-            public int Insert(IUser user)
+            public int Insert(UserValue user)
             {
                 Debug.Assert(UserBucket != null);
                 int userIndexInBucket = UserBucket.Insert(user);
@@ -834,7 +837,7 @@ namespace RankingList
                 return userIndexInBucket;
             }
 
-            public void Remove(IUser user)
+            public void Remove(UserValue user)
             {
                 Debug.Assert(UserBucket != null);
                 int userIndexInBucket = UserBucket.Remove(user);
@@ -842,7 +845,7 @@ namespace RankingList
                 {
                     // LeftUser = null;
                     // RightUser = null;
-                    if(Parent != null)
+                    if (Parent != null)
                     {
                         if (this == Parent.Left)
                         {
@@ -870,7 +873,7 @@ namespace RankingList
                 Count--;
             }
 
-            public void Split(IUser user, out int userIndexInBucket)
+            public void Split(UserValue user, out int userIndexInBucket)
             {
                 Debug.Assert(UserBucket != null);
                 UserBucket newBucket = UserBucket.Split(user, out userIndexInBucket);
@@ -900,30 +903,61 @@ namespace RankingList
                 {
                     UpdateRightUser(Right);
                 }
+
                 Debug.Assert(Count == Left.Count + Right.Count);
             }
 
             public void CombineChild()
             {
                 Debug.Assert(Left != null && Right != null);
-                // if (Left.UserBucket == null)
-                // {
-                //     Left.CombineChild();
-                // }
-
-                // if (Right.UserBucket == null)
-                // {
-                //     Right.CombineChild();
-                // }
-
                 Debug.Assert(Left.UserBucket != null && Right.UserBucket != null);
                 UserBucket = Left.UserBucket;
                 UserBucket.Combine(Right.UserBucket);
                 Debug.Assert(UserBucket.UserCount == Count);
-                Debug.Assert(UserBucket.MinUser == LeftUser);
-                Debug.Assert(UserBucket.MaxUser == RightUser);
+                Debug.Assert(UserBucket.MinUser.Id == LeftUser.Id);
+                Debug.Assert(UserBucket.MaxUser.Id == RightUser.Id);
                 Left = null;
                 Right = null;
+            }
+        }
+
+        struct UserValue : IComparable<UserValue>
+        {
+            public int Id;
+            public int Score;
+            public DateTime LastActive;
+
+            public int CompareTo(UserValue other)
+            {
+                if (Score == other.Score)
+                    return -LastActive.CompareTo(other.LastActive);
+                return -Score.CompareTo(other.Score);
+            }
+            public User ToUser()
+            {
+                return new User()
+                {
+                    Id = Id,
+                    Score = Score,
+                    LastActive = LastActive
+                };
+            }
+
+            public UserValue()
+            {
+                Id = -1;
+            }
+            public UserValue(int id, int score, DateTime lastActive)
+            {
+                Id = id;
+                Score = score;
+                LastActive = lastActive;
+            }
+            public UserValue(User user)
+            {
+                Id = user.Id;
+                Score = user.Score;
+                LastActive = user.LastActive;
             }
         }
     }
@@ -931,49 +965,49 @@ namespace RankingList
 /*
 === 排行榜测试框架 ===
 
-=== 测试 TreeBRTreeBucketRankingList 排行榜 ===
+=== 测试 TreeBRTreeBucketRankingListS 排行榜 ===
 初始用户数: 1000000
 操作数: 1000000
 
 === 验证操作结果与基准对比 ===
 √ 所有操作结果验证通过！
-测试操作结果已保存到 TreeBRTreeBucketRankingList_test_results.json
+测试操作结果已保存到 TreeBRTreeBucketRankingListS_test_results.json
 
 === 测试结果 ===
-排行榜名称: TreeBRTreeBucketRankingList
-总耗时: 2436 ms
-平均耗时: 2.44 ms/1000操作
-内存占用: 573.88 MB
-内存峰值: 574.21 MB
-测试日期: 2026/2/9 17:23:44
+排行榜名称: TreeBRTreeBucketRankingListS
+总耗时: 2200 ms
+平均耗时: 2.20 ms/1000操作
+内存占用: 952.71 MB
+内存峰值: 952.71 MB
+测试日期: 2026/2/9 18:11:14
 
 === 与基准 TreeBucketRankingList 的对比 ===
-总耗时: 2436 ms vs 2525 ms (-3.52%)
-平均耗时: 2.44 ms/1000操作 vs 2.53 ms/1000操作 (-3.52%)
-内存占用: 573.88 MB vs 565.24 MB (+1.53%)
-内存峰值: 574.21 MB vs 566.36 MB (+1.39%)
+总耗时: 2200 ms vs 2525 ms (-12.87%)
+平均耗时: 2.20 ms/1000操作 vs 2.53 ms/1000操作 (-12.87%)
+内存占用: 952.71 MB vs 565.24 MB (+68.55%)
+内存峰值: 952.71 MB vs 566.36 MB (+68.22%)
 
 === 单项操作耗时测试 ===
 
 【AddUser】
   操作数: 10000 vs 10000
-  总耗时: 4 ms vs 4 ms (0.00%) (10000次操作)
-  平均耗时: 0.40 ms/1000操作 vs 0.40 ms/1000操作 (0.00%)
+  总耗时: 2 ms vs 4 ms (-50.00%) (10000次操作)
+  平均耗时: 0.20 ms/1000操作 vs 0.40 ms/1000操作 (-50.00%)
 【UpdateUser】
   操作数: 20000 vs 20000
-  总耗时: 39 ms vs 38 ms (+2.63%) (20000次操作)
-  平均耗时: 1.95 ms/1000操作 vs 1.90 ms/1000操作 (+2.63%)
+  总耗时: 21 ms vs 38 ms (-44.74%) (20000次操作)
+  平均耗时: 1.05 ms/1000操作 vs 1.90 ms/1000操作 (-44.74%)
 【GetUserRank】
   操作数: 30000 vs 30000
-  总耗时: 34 ms vs 37 ms (-8.11%) (30000次操作)
-  平均耗时: 1.13 ms/1000操作 vs 1.23 ms/1000操作 (-8.11%)
+  总耗时: 20 ms vs 37 ms (-45.95%) (30000次操作)
+  平均耗时: 0.67 ms/1000操作 vs 1.23 ms/1000操作 (-45.95%)
 【GetTopN】
   操作数: 20000 vs 20000
-  总耗时: 67 ms vs 63 ms (+6.35%) (20000次操作)
-  平均耗时: 3.35 ms/1000操作 vs 3.15 ms/1000操作 (+6.35%)
+  总耗时: 75 ms vs 63 ms (+19.05%) (20000次操作)
+  平均耗时: 3.75 ms/1000操作 vs 3.15 ms/1000操作 (+19.05%)
 【GetAroundUser】
   操作数: 20000 vs 20000
-  总耗时: 28 ms vs 29 ms (-3.45%) (20000次操作)
-  平均耗时: 1.40 ms/1000操作 vs 1.45 ms/1000操作 (-3.45%)
+  总耗时: 30 ms vs 29 ms (+3.45%) (20000次操作)
+  平均耗时: 1.50 ms/1000操作 vs 1.45 ms/1000操作 (+3.45%)
 */
-// 咋感觉没有突飞猛进的提升呢
+// 结构体更快
