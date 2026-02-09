@@ -4,7 +4,7 @@ namespace RankingList
 {
     public class TreeBRTreeBucketRankingList : IRankingList
     {
-        private static readonly int BucketSize = 128; // 每个bucket的用户数量
+        private static readonly int BucketSize = 16; // 每个bucket的用户数量
         private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
         private TreeNode _root;
         private Dictionary<int, IUser> _userMap;
@@ -75,7 +75,7 @@ namespace RankingList
             CheckTree(_root);
         }
 
-        private int CheckTree(TreeNode? node)
+        private static int CheckTree(TreeNode? node)
         {
             if (node == null)
             {
@@ -188,7 +188,7 @@ namespace RankingList
                         parentNode.Color = ColorEnum.Black;
                         grandParentNode.Color = ColorEnum.Red;
                         // 右旋转
-                        node = RotateRight(grandParentNode);
+                        RotateRight(grandParentNode);
                     }
                     else
                     {
@@ -202,8 +202,9 @@ namespace RankingList
                         parentNode.Color = ColorEnum.Black;
                         grandParentNode.Color = ColorEnum.Red;
                         // 左旋转
-                        node = RotateLeft(grandParentNode);
+                        RotateLeft(grandParentNode);
                     }
+                    break;
                 }
             }
 
@@ -272,7 +273,7 @@ namespace RankingList
                         siblingNode.Color = ColorEnum.Black;
                         parentNode.Color = ColorEnum.Red;
                         // 左旋转
-                        parentNode = RotateLeft(parentNode);
+                        RotateLeft(parentNode);
                         siblingNode = parentNode.Right!;
                     }
 
@@ -299,7 +300,8 @@ namespace RankingList
                         parentNode.Color = ColorEnum.Black;
                         siblingNode.Right!.Color = ColorEnum.Black;
                         // 左旋转
-                        node = RotateLeft(parentNode);
+                        RotateLeft(parentNode);
+                        node = _root;
                     }
                 }
                 else
@@ -312,7 +314,7 @@ namespace RankingList
                         siblingNode.Color = ColorEnum.Black;
                         parentNode.Color = ColorEnum.Red;
                         // 右旋转
-                        parentNode = RotateRight(parentNode);
+                        RotateRight(parentNode);
                         siblingNode = parentNode.Left!;
                     }
 
@@ -339,7 +341,8 @@ namespace RankingList
                         parentNode.Color = ColorEnum.Black;
                         siblingNode.Left!.Color = ColorEnum.Black;
                         // 右旋转
-                        node = RotateRight(parentNode);
+                        RotateRight(parentNode);
+                        node = _root;
                     }
                 }
             }
@@ -889,6 +892,14 @@ namespace RankingList
                 };
                 UserBucket = null;
                 Count++;
+                if (userIndexInBucket == 0)
+                {
+                    UpdateLeftUser(Left);
+                }
+                else if (userIndexInBucket == Count - 1)
+                {
+                    UpdateRightUser(Right);
+                }
                 Debug.Assert(Count == Left.Count + Right.Count);
             }
 
@@ -930,39 +941,39 @@ namespace RankingList
 
 === 测试结果 ===
 排行榜名称: TreeBRTreeBucketRankingList
-总耗时: 2433 ms
-平均耗时: 2.43 ms/1000操作
-内存占用: 567.80 MB
-内存峰值: 567.80 MB
-测试日期: 2026/2/4 15:47:33
+总耗时: 2436 ms
+平均耗时: 2.44 ms/1000操作
+内存占用: 573.88 MB
+内存峰值: 574.21 MB
+测试日期: 2026/2/9 17:23:44
 
 === 与基准 TreeBucketRankingList 的对比 ===
-总耗时: 2433 ms vs 2525 ms (-3.64%)
-平均耗时: 2.43 ms/1000操作 vs 2.53 ms/1000操作 (-3.64%)
-内存占用: 567.80 MB vs 565.24 MB (+0.45%)
-内存峰值: 567.80 MB vs 566.36 MB (+0.25%)
+总耗时: 2436 ms vs 2525 ms (-3.52%)
+平均耗时: 2.44 ms/1000操作 vs 2.53 ms/1000操作 (-3.52%)
+内存占用: 573.88 MB vs 565.24 MB (+1.53%)
+内存峰值: 574.21 MB vs 566.36 MB (+1.39%)
 
 === 单项操作耗时测试 ===
 
 【AddUser】
   操作数: 10000 vs 10000
-  总耗时: 3 ms vs 4 ms (-25.00%) (10000次操作)
-  平均耗时: 0.30 ms/1000操作 vs 0.40 ms/1000操作 (-25.00%)
+  总耗时: 4 ms vs 4 ms (0.00%) (10000次操作)
+  平均耗时: 0.40 ms/1000操作 vs 0.40 ms/1000操作 (0.00%)
 【UpdateUser】
   操作数: 20000 vs 20000
-  总耗时: 41 ms vs 38 ms (+7.89%) (20000次操作)
-  平均耗时: 2.05 ms/1000操作 vs 1.90 ms/1000操作 (+7.89%)
+  总耗时: 39 ms vs 38 ms (+2.63%) (20000次操作)
+  平均耗时: 1.95 ms/1000操作 vs 1.90 ms/1000操作 (+2.63%)
 【GetUserRank】
   操作数: 30000 vs 30000
   总耗时: 34 ms vs 37 ms (-8.11%) (30000次操作)
   平均耗时: 1.13 ms/1000操作 vs 1.23 ms/1000操作 (-8.11%)
 【GetTopN】
   操作数: 20000 vs 20000
-  总耗时: 64 ms vs 63 ms (+1.59%) (20000次操作)
-  平均耗时: 3.20 ms/1000操作 vs 3.15 ms/1000操作 (+1.59%)
+  总耗时: 67 ms vs 63 ms (+6.35%) (20000次操作)
+  平均耗时: 3.35 ms/1000操作 vs 3.15 ms/1000操作 (+6.35%)
 【GetAroundUser】
   操作数: 20000 vs 20000
-  总耗时: 27 ms vs 29 ms (-6.90%) (20000次操作)
-  平均耗时: 1.35 ms/1000操作 vs 1.45 ms/1000操作 (-6.90%)
+  总耗时: 28 ms vs 29 ms (-3.45%) (20000次操作)
+  平均耗时: 1.40 ms/1000操作 vs 1.45 ms/1000操作 (-3.45%)
 */
 // 咋感觉没有突飞猛进的提升呢

@@ -424,6 +424,8 @@ namespace RankingListTest
                 treeAVLBucketRankingList3.DebugPrint();
             if (rankingList is TreeAVLBucketRankingList4 treeAVLBucketRankingList4)
                 treeAVLBucketRankingList4.DebugPrint();
+            if (rankingList is TreeBRTreeBucketRankingList treeBRTreeBucketRankingList)
+                treeBRTreeBucketRankingList.DebugPrint();
 #endif
             return result;
         }
