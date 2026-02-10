@@ -921,11 +921,11 @@ namespace RankingList
             }
         }
 
-        struct UserValue : IComparable<UserValue>
+        readonly struct UserValue : IComparable<UserValue>
         {
-            public int Id;
-            public int Score;
-            public DateTime LastActive;
+            public readonly int Id;
+            public readonly int Score;
+            public readonly DateTime LastActive;
 
             public int CompareTo(UserValue other)
             {
