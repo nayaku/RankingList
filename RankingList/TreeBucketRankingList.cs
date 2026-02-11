@@ -2,6 +2,7 @@
 
 namespace RankingList
 {
+    // 参考 https://www.cnblogs.com/qianqians/p/7288474.html
     public class TreeBucketRankingList : IRankingList
     {
         private static readonly int BucketSize = 512; // 每个bucket的用户数量
