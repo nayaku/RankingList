@@ -32,6 +32,8 @@ namespace RankingList
                     return new TreeBRTreeBucketRankingList(users);
                 case "TreeBRTreeBucketRankingListS":
                     return new TreeBRTreeBucketRankingListS(users);
+                case "TreeBRTreeBucketRankingListST":
+                    return new TreeBRTreeBucketRankingListST(users);
                 
                 // 可以添加更多排行榜实现
                 default:

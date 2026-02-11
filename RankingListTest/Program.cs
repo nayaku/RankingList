@@ -27,8 +27,8 @@ namespace RankingListTest
                 {
                     // 基准模式：生成基准结果
                     Console.WriteLine("=== 生成基准数据 ===");
-                    Console.WriteLine("运行基准测试（TreeBucketRankingList）...");
-                    testCore.RunTest("TreeBucketRankingList", true);
+                    Console.WriteLine("运行基准测试（TreeBRTreeBucketRankingListS）...");
+                    testCore.RunTest("TreeBRTreeBucketRankingListS", true);
                 }
                 else if (args[0] == "--test" && args.Length > 1)
                 {
