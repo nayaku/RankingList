@@ -1,43 +1,50 @@
-﻿using System.CommandLine;
+﻿using RankingListNew;
+using System.CommandLine;
+using System.Text.Json;
 
 namespace RankingListTestNew
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
-            var rootCommand = new RootCommand
+            var generatorCommand = new Command("generate", "初始化测试环境，生成用户数据和操作列表")
             {
-                new Command("generate", "初始化测试环境，生成用户数据和操作列表")
+                new Argument<string>("name")
                 {
-                    new Argument<string>("name")
-                    {
-                            Description = "排行榜名称"
-                    }
+                    Description = "测试名"
                 },
-                new Command("base", "生成基准结果数据"),
-                new Command("test", "测试指定名称的排行榜，并与基准对比")
+                new Argument<int>("userNum")
                 {
-                    new Argument<string>("name")
-                    {
-                        Description = "排行榜名称"
-                    }
+                    Description = "用户数量"
+                },
+                new Argument<int>("operationNum")
+                {
+                    Description = "操作数量"
+                },
+                new Option<OperationType?>(
+                    "--limitOperationType","-l"
+                )
+                {
+                    Description = "限制操作类型，默认为不限"
                 }
             };
+            generatorCommand.SetAction(parseResult =>
+            {
+                var name = parseResult.GetValue<string>("name")!;
+                var userNum = parseResult.GetValue<int>("userNum");
+                var operationNum = parseResult.GetValue<int>("operationNum");
+                var limitOperationType = parseResult.GetValue<OperationType?>("--limitOperationType");
+                var generator = new Generator(name, userNum, operationNum, limitOperationType);
+                generator.Generate();
+            });
 
-        }
-
-        static void ShowHelp()
-        {
-            Console.WriteLine("使用方法:");
-            Console.WriteLine("  RankingListTest --generate <name>                  初始化测试环境，生成用户数据和操作列表");
-            Console.WriteLine("  RankingListTest --base                生成基准结果数据");
-            Console.WriteLine("  RankingListTest --test <name>         测试指定名称的排行榜，并与基准对比");
-            Console.WriteLine();
-            Console.WriteLine("示例:");
-            Console.WriteLine("  RankingListTest --init                初始化测试环境");
-            Console.WriteLine("  RankingListTest --base                生成基准数据");
-            Console.WriteLine("  RankingListTest --test SimpleRankingList 测试SimpleRankingList");
+            var rootCommand = new RootCommand
+            {
+                generatorCommand
+            };
+            ParseResult parseResult = rootCommand.Parse(args);
+            return parseResult.Invoke();
         }
     }
 }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RankingListTestNew": {
+      "commandName": "Project",
+      "commandLineArgs": "generate t0 100 100"
+    }
+  }
+}

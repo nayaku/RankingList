@@ -1,5 +1,6 @@
 ﻿namespace RankingListNew
 {
+    [Serializable]
     public readonly struct User : IComparable<User>, IEquatable<User>
     {
         public readonly int Id;

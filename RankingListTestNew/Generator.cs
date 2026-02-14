@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace RankingListTestNew
 {
     // 测试初始类
-    public class TestInitial
+    public class TestData
     {
         public List<User> Users { get; set; }
         public List<TestOperation> Operations { get; set; }
@@ -124,7 +124,7 @@ namespace RankingListTestNew
         }
 
         // 生成初始化测试数据
-        public void GenerateTestInitialData()
+        public void Generate()
         {
             Random random = new(42);
             // 生成初始用户数据
@@ -132,14 +132,18 @@ namespace RankingListTestNew
             // 生成操作列表
             List<TestOperation> operations = GenerateOperations(random);
 
-            TestInitial testInitial = new()
+            TestData testData = new()
             {
                 Users = initialUsers,
                 Operations = operations,
             };
             // 储存测试数据
             using FileStream fs = new(_testName + ".json", FileMode.Create, FileAccess.Write);
-            JsonSerializer.Serialize(fs, testInitial, new JsonSerializerOptions { WriteIndented = true });
+            JsonSerializer.Serialize(fs, testData, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                IncludeFields = true
+            });
             Console.WriteLine($"测试数据已生成并保存到 {_testName}.json");
         }
 
