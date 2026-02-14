@@ -90,6 +90,9 @@ namespace RankingListTestNew
                     operation.Type = _limitOperationType.Value;
                 }
 
+                if (_currentUserId == 0 && operation.Type != OperationType.AddUser)
+                    continue;
+
                 switch (operation.Type)
                 {
                     case OperationType.AddUser:
@@ -98,12 +101,10 @@ namespace RankingListTestNew
                         _userIdToScore[operation.UserId] = operation.ScoreOrN;
                         break;
                     case OperationType.UpdateUser:
-                        {
-                            operation.UserId = random.Next(1, _currentUserId);
-                            int score = _userIdToScore[operation.UserId];
-                            operation.ScoreOrN = score + GeneratePowerLawScore(random, 100);
-                            break;
-                        }
+                        operation.UserId = random.Next(1, _currentUserId);
+                        int score = _userIdToScore[operation.UserId];
+                        operation.ScoreOrN = score + GeneratePowerLawScore(random, 100);
+                        break;
                     case OperationType.GetUserRank:
                         operation.UserId = random.Next(1, _currentUserId + 1);
                         break;
@@ -138,13 +139,18 @@ namespace RankingListTestNew
                 Operations = operations,
             };
             // 储存测试数据
-            using FileStream fs = new(_testName + ".json", FileMode.Create, FileAccess.Write);
+            string testTargetDir = "Test";
+            if (!Directory.Exists(testTargetDir))
+            {
+                Directory.CreateDirectory(testTargetDir);
+            }
+            using FileStream fs = new(Path.Combine(testTargetDir, _testName + ".json"), FileMode.Create, FileAccess.Write);
             JsonSerializer.Serialize(fs, testData, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 IncludeFields = true
             });
-            Console.WriteLine($"测试数据已生成并保存到 {_testName}.json");
+            Console.WriteLine($"测试数据已生成并保存到 {Path.Combine(testTargetDir, _testName + ".json")}");
         }
 
         // 生成幂律分布的分数
