@@ -8,7 +8,7 @@ namespace RankingListTestNew
     {
         public static int Main(string[] args)
         {
-            var generatorCommand = new Command("generate", "初始化测试环境，生成用户数据和操作列表")
+            var generatorCommand = new Command("generate", "生成测试数据：生成用户数据和操作列表")
             {
                 new Argument<string>("name")
                 {
@@ -39,9 +39,39 @@ namespace RankingListTestNew
                 generator.Generate();
             });
 
+            var fastGeneratorCommand = new Command("fastGenerate", "快速生成测试数据：生成用户数据和操作列表")
+            {
+            };
+            fastGeneratorCommand.SetAction(p =>
+            {
+                var fastGenerator = new FastGenerator();
+                fastGenerator.Generate();
+            });
+            var testCommand = new Command("test", "执行测试")
+            {
+                new Argument<string>("rankingListClassName")
+                {
+                    Description = "排行榜类名"
+                },
+                new Option<string?>(
+                    "--baseTestName","-b"
+                )
+                {
+                    Description = "基准测试名，默认为null"
+                }
+            };
+            testCommand.SetAction(parseResult =>
+            {
+                var rankingListClassName = parseResult.GetValue<string>("rankingListClassName")!;
+                var baseTestName = parseResult.GetValue<string?>("--baseTestName");
+                TestOperator.TestAll(rankingListClassName, baseTestName);
+            });
+
             var rootCommand = new RootCommand
             {
-                generatorCommand
+                generatorCommand,
+                fastGeneratorCommand,
+                testCommand
             };
             ParseResult parseResult = rootCommand.Parse(args);
             return parseResult.Invoke();

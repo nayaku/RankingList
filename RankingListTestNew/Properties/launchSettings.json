@@ -2,7 +2,7 @@
   "profiles": {
     "RankingListTestNew": {
       "commandName": "Project",
-      "commandLineArgs": "generate t1w_100w 10000 1000000"
+      "commandLineArgs": "test SimpleRankingList"
     }
   }
 }

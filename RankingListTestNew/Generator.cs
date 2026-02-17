@@ -23,7 +23,7 @@ namespace RankingListTestNew
         private OperationType? _limitOperationType;
 
 
-        public Generator(string testName, int userNum, int operationNum, OperationType? limitOperationType)
+        public Generator(string testName, int userNum, int operationNum, OperationType? limitOperationType = null)
         {
             _testName = testName;
             _userNum = userNum;
