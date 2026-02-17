@@ -8,6 +8,7 @@ namespace RankingListTestNew
     {
         public List<User> Users { get; set; }
         public List<TestOperation> Operations { get; set; }
+        public OperationType? LimitOperationType { get; set; }
     }
 
     public class Generator
@@ -137,6 +138,7 @@ namespace RankingListTestNew
             {
                 Users = initialUsers,
                 Operations = operations,
+                LimitOperationType = _limitOperationType,
             };
             // 储存测试数据
             string testTargetDir = "Test";

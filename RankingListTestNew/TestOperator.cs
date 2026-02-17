@@ -42,6 +42,12 @@ namespace RankingListTestNew
         {
             Console.WriteLine($"== Test {_testName} ===");
             TestData testData = LoadTestData();
+            Console.WriteLine($"用户数: {testData.Users.Count}");
+            Console.WriteLine($"操作数: {testData.Operations.Count}");
+            if (testData.LimitOperationType != null)
+            {
+                Console.WriteLine($"限制操作类型: {testData.LimitOperationType.Value}");
+            }
             IRankingList rankingList = RankingListHelper.NewRankingList(_rankingListClassName);
             GC.Collect();
             // 开始内存监控
@@ -293,3 +299,44 @@ namespace RankingListTestNew
         }
     }
 }
+/*
+== Test t0_100 ===
+用户数: 0
+操作数: 83
+总耗时: 2 ms
+平均耗时: 24.10 ms/1000操作
+内存占用: 0.01 MB
+内存峰值: 0.02 MB
+测试日期: 2026/2/17 14:23:37
+== Test t0_100 End ===
+
+== Test t0_1W ===
+用户数: 0
+操作数: 9983
+总耗时: 482 ms
+平均耗时: 48.28 ms/1000操作
+内存占用: 1.16 MB
+内存峰值: 1.43 MB
+测试日期: 2026/2/17 14:23:37
+== Test t0_1W End ===
+
+== Test t1000_10w ===
+用户数: 1000
+操作数: 100000
+总耗时: 50228 ms
+平均耗时: 502.28 ms/1000操作
+内存占用: 11.14 MB
+内存峰值: 13.20 MB
+测试日期: 2026/2/17 14:24:28
+== Test t1000_10w End ===
+
+== Test t100_100 ===
+用户数: 100
+操作数: 100
+总耗时: 0 ms
+平均耗时: 0.00 ms/1000操作
+内存占用: 0.01 MB
+内存峰值: 0.02 MB
+测试日期: 2026/2/17 14:24:28
+== Test t100_100 End ===
+*/

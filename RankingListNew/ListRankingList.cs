@@ -1,17 +1,15 @@
-﻿using System.Diagnostics;
-
-namespace RankingListNew
+﻿namespace RankingListNew
 {
-    public class SimpleRankingList : IRankingList
+    public class ListRankingList : IRankingList
     {
         private List<User> _users;
 
-        public SimpleRankingList()
+        public ListRankingList()
         {
             _users = [];
         }
 
-        public SimpleRankingList(List<User> users)
+        public ListRankingList(List<User> users)
         {
             _users = [.. users];
             _users.Sort();
@@ -30,8 +28,7 @@ namespace RankingListNew
 
         public RankingListResponse UpdateUser(User user)
         {
-            bool exist = _users.Remove(user);
-            Debug.Assert(exist, "User not found in ranking list");
+            _users.Remove(user);
             _users.Add(user);
             _users.Sort();
             return new RankingListResponse
@@ -44,7 +41,6 @@ namespace RankingListNew
         RankingListResponse IRankingList.GetUserRank(int userId)
         {
             var index = _users.FindIndex(u => u.Id == userId);
-            Debug.Assert(index != -1, "User not found in ranking list");
             return new RankingListResponse
             {
                 User = _users[index],
@@ -70,7 +66,6 @@ namespace RankingListNew
         public List<RankingListResponse> GetAroundUser(int userId, int aroundN)
         {
             var index = _users.FindIndex(u => u.Id == userId);
-            Debug.Assert(index != -1, "User not found in ranking list");
             int start = Math.Max(0, index - aroundN);
             int end = Math.Min(_users.Count - 1, index + aroundN);
             int count = end - start + 1;
