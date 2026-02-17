@@ -40,7 +40,7 @@ namespace RankingList
             int userIndexInBucket;
             for (bucketIndex = _buckets.Count - 1; bucketIndex > 0; bucketIndex--) // 找不到就选第一个，所以第一个不用比
             {
-                var bucket = _buckets[bucketIndex];
+                UserBucket bucket = _buckets[bucketIndex];
                 if (user.CompareTo(bucket.MinUser) >= 0)
                 {
                     break;
@@ -50,7 +50,7 @@ namespace RankingList
             if (_buckets[bucketIndex].Full)
             {
                 // 分裂bucket
-                var newBucket = _buckets[bucketIndex].Split(user, out userIndexInBucket);
+                UserBucket newBucket = _buckets[bucketIndex].Split(user, out userIndexInBucket);
                 _buckets.Insert(bucketIndex + 1, newBucket);
             }
             else
@@ -79,7 +79,7 @@ namespace RankingList
             int bucketIndex;
             for (bucketIndex = 0; bucketIndex < _buckets.Count; bucketIndex++)
             {
-                var bucket = _buckets[bucketIndex];
+                UserBucket bucket = _buckets[bucketIndex];
                 if (!bucket.UserIds.Contains(user.Id)) continue;
                 bucket.Remove(user);
                 break;
@@ -111,7 +111,7 @@ namespace RankingList
             int rankCount = 0;
             for (int bucketIndex = 0; bucketIndex < _buckets.Count; bucketIndex++)
             {
-                var bucket = _buckets[bucketIndex];
+                UserBucket bucket = _buckets[bucketIndex];
                 if (bucket.UserIds.Contains(userId))
                 {
                     int index = bucket.IndexOf(userId);
@@ -134,11 +134,11 @@ namespace RankingList
 
         public RankingListResponse[] GetTopN(int topN)
         {
-            var result = new RankingListResponse[topN];
+            RankingListResponse[] result = new RankingListResponse[topN];
             int rankCount = 0;
             for (int bucketIndex = 0; bucketIndex < _buckets.Count; bucketIndex++)
             {
-                var bucket = _buckets[bucketIndex];
+                UserBucket bucket = _buckets[bucketIndex];
                 int count = Math.Min(topN - rankCount, bucket.UserCount);
                 for (int i = 0; i < count; i++)
                 {
@@ -180,14 +180,14 @@ namespace RankingList
 
             for (; rankCount > startRank && bucketIndex > 0; bucketIndex--)
             {
-                rankCount -= _buckets[bucketIndex -1].UserCount;
+                rankCount -= _buckets[bucketIndex - 1].UserCount;
             }
             inBucketIndex = startRank - rankCount;
             RankingListResponse[] result = new RankingListResponse[count];
             int resultIndex = 0;
             for (; bucketIndex < _buckets.Count; bucketIndex++)
             {
-                var bucket = _buckets[bucketIndex];
+                UserBucket bucket = _buckets[bucketIndex];
                 for (; inBucketIndex < bucket.UserCount && rankCount + inBucketIndex <= endRank; inBucketIndex++)
                 {
                     result[resultIndex++] = new RankingListResponse
@@ -322,12 +322,12 @@ namespace RankingList
                     newUserIds.Add(newUsers[i].Id);
                 }
 
-                for(int i = mid; i < UserCount; i++)
+                for (int i = mid; i < UserCount; i++)
                 {
                     UserIds.Remove(Users[i].Id);
                 }
                 Array.Clear(Users, mid, UserCount - mid);
-                
+
                 UserCount = mid;
                 UserBucket newBucket = new(newUsers, newUserCount, newUserIds);
                 if (userIndex < mid)
@@ -337,7 +337,7 @@ namespace RankingList
 
             public void Combine(UserBucket[] other)
             {
-                foreach (var bucket in other)
+                foreach (UserBucket bucket in other)
                 {
                     Array.Copy(bucket.Users, 0, Users, UserCount, bucket.UserCount);
                     UserCount += bucket.UserCount;

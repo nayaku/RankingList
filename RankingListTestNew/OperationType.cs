@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RankingListTestNew
+﻿namespace RankingListTestNew
 {
     /// <summary>
     /// 操作类型枚举

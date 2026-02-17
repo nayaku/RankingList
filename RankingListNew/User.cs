@@ -1,12 +1,14 @@
-﻿namespace RankingListNew
+﻿using System.Text.Json.Serialization;
+
+namespace RankingListNew
 {
-    [Serializable]
     public readonly struct User : IComparable<User>, IEquatable<User>
     {
         public readonly int Id;
         public readonly int Score;
         public readonly DateTime LastActive;
 
+        [JsonConstructor]
         public User(int id, int score, DateTime lastActive)
         {
             Id = id;

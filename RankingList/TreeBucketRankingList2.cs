@@ -83,8 +83,8 @@ namespace RankingList
             Debug.Assert(node.Left != null && node.Right != null);
             if (user.CompareTo(node.Left.RightUser) < 0 ||
                 (user.CompareTo(node.Right.LeftUser) < 0 && node.Left.Count < node.Right.Count))
-                // 比左节点的最大还大，比右节点的最小还小，且左节点的用户数量小于右节点的用户数量，
-                // 则加入左节点。平衡一下
+            // 比左节点的最大还大，比右节点的最小还小，且左节点的用户数量小于右节点的用户数量，
+            // 则加入左节点。平衡一下
             {
                 AddUser(node.Left, user, ref rankCount);
                 node.LeftUser = node.Left.LeftUser;

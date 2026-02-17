@@ -1,13 +1,10 @@
-﻿namespace RankingListNew
+﻿using System.Diagnostics;
+
+namespace RankingListNew
 {
     public class ListRankingList : IRankingList
     {
         private List<User> _users;
-
-        public ListRankingList()
-        {
-            _users = [];
-        }
 
         public ListRankingList(List<User> users)
         {
@@ -38,9 +35,9 @@
             };
         }
 
-        RankingListResponse IRankingList.GetUserRank(int userId)
+        public RankingListResponse GetUserRank(int userId)
         {
-            var index = _users.FindIndex(u => u.Id == userId);
+            int index = _users.FindIndex(u => u.Id == userId);
             return new RankingListResponse
             {
                 User = _users[index],
@@ -50,8 +47,8 @@
 
         public List<RankingListResponse> GetTopN(int topN)
         {
-            var count = Math.Min(topN, _users.Count);
-            var result = new List<RankingListResponse>(count);
+            int count = Math.Min(topN, _users.Count);
+            List<RankingListResponse> result = new(count);
             for (int i = 0; i < count; i++)
             {
                 result.Add(new RankingListResponse
@@ -65,11 +62,11 @@
 
         public List<RankingListResponse> GetAroundUser(int userId, int aroundN)
         {
-            var index = _users.FindIndex(u => u.Id == userId);
+            int index = _users.FindIndex(u => u.Id == userId);
             int start = Math.Max(0, index - aroundN);
             int end = Math.Min(_users.Count - 1, index + aroundN);
             int count = end - start + 1;
-            var result = new List<RankingListResponse>(count);
+            List<RankingListResponse> result = new(count);
             for (int i = start; i <= end; i++)
             {
                 result.Add(new RankingListResponse
@@ -91,3 +88,44 @@
         }
     }
 }
+/*
+== Test t0_100 ===
+用户数: 0
+操作数: 83
+总耗时: 2 ms
+平均耗时: 24.10 ms/1000操作
+内存占用: 0.01 MB
+内存峰值: 0.03 MB
+测试日期: 2026/2/17 20:02:21
+== Test t0_100 End ===
+
+== Test t0_1w ===
+用户数: 0
+操作数: 9983
+总耗时: 159 ms
+平均耗时: 15.93 ms/1000操作
+内存占用: 4.03 MB
+内存峰值: 4.51 MB
+测试日期: 2026/2/17 20:02:21
+== Test t0_1w End ===
+
+== Test t100_1w ===
+用户数: 100
+操作数: 10000
+总耗时: 173 ms
+平均耗时: 17.30 ms/1000操作
+内存占用: 4.09 MB
+内存峰值: 4.57 MB
+测试日期: 2026/2/17 20:02:22
+== Test t100_1w End ===
+
+== Test t1k_10w ===
+用户数: 1000
+操作数: 100000
+总耗时: 2898 ms
+平均耗时: 28.98 ms/1000操作
+内存占用: 40.76 MB
+内存峰值: 41.61 MB
+测试日期: 2026/2/17 20:02:25
+== Test t1k_10w End ===
+*/

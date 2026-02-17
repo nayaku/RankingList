@@ -34,7 +34,7 @@ namespace RankingList
                     return new TreeBRTreeBucketRankingListS(users);
                 case "TreeBRTreeBucketRankingListST":
                     return new TreeBRTreeBucketRankingListST(users);
-                
+
                 // 可以添加更多排行榜实现
                 default:
                     throw new ArgumentException($"未知的排行榜类型: {rankingListName}");

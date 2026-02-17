@@ -128,33 +128,33 @@ namespace RankingList
                 node.CombineChild();
             }
             else switch (node.Left.Height - node.Right.Height)
-            {
-                // 平衡二叉树
-                case > 1:
                 {
-                    // 左子树高度大于右子树高度，需要右旋
-                    if (node.Left.Right.Height > node.Left.Left.Height)
-                    {
-                        // 左子树的右子树高度大于左子树高度，需要先左旋
-                        node.Left = TreeNode.RotateLeft(node.Left);
-                    }
+                    // 平衡二叉树
+                    case > 1:
+                        {
+                            // 左子树高度大于右子树高度，需要右旋
+                            if (node.Left.Right.Height > node.Left.Left.Height)
+                            {
+                                // 左子树的右子树高度大于左子树高度，需要先左旋
+                                node.Left = TreeNode.RotateLeft(node.Left);
+                            }
 
-                    node = TreeNode.RotateRight(node);
-                    break;
-                }
-                case < -1:
-                {
-                    // 右子树高度大于左子树高度，需要左旋
-                    if (node.Right.Left.Height > node.Right.Right.Height)
-                    {
-                        // 右子树的左子树高度大于右子树高度，需要先右旋
-                        node.Right = TreeNode.RotateRight(node.Right);
-                    }
+                            node = TreeNode.RotateRight(node);
+                            break;
+                        }
+                    case < -1:
+                        {
+                            // 右子树高度大于左子树高度，需要左旋
+                            if (node.Right.Left.Height > node.Right.Right.Height)
+                            {
+                                // 右子树的左子树高度大于右子树高度，需要先右旋
+                                node.Right = TreeNode.RotateRight(node.Right);
+                            }
 
-                    node = TreeNode.RotateLeft(node);
-                    break;
+                            node = TreeNode.RotateLeft(node);
+                            break;
+                        }
                 }
-            }
             return node;
         }
 

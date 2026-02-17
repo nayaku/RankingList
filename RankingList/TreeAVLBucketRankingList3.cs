@@ -526,7 +526,7 @@ namespace RankingList
             public TreeNode()
             {
             }
-            
+
             public void Init(int count = 0, IUser leftUser = null, IUser rightUser = null, TreeNode? left = null,
                 TreeNode? right = null, UserBucket? userBucket = null, int height = 0)
             {
@@ -684,7 +684,7 @@ namespace RankingList
 
     class ObjectPool<T> where T : class, new()
     {
-        private readonly Stack<T> _objects = new Stack<T>();
+        private readonly Stack<T> _objects = new();
 
         public T Get()
         {

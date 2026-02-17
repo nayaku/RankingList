@@ -422,7 +422,7 @@ namespace RankingList
         public RankingListResponse AddUser(IUser user)
         {
             Debug.Assert(!_userMap.ContainsKey(user.Id));
-            UserValue userValue = new UserValue((User)user);
+            UserValue userValue = new((User)user);
             _userMap.Add(user.Id, userValue);
             int rankCount = 0;
             AddUser(userValue, ref rankCount);
@@ -438,7 +438,7 @@ namespace RankingList
             UserValue oldUserValue = _userMap[newUser.Id];
             RemoveUser(oldUserValue);
             int rankCount = 0;
-            UserValue newUserValue = new UserValue((User)newUser);
+            UserValue newUserValue = new((User)newUser);
             AddUser(newUserValue, ref rankCount);
             _userMap[newUser.Id] = newUserValue;
             return new RankingListResponse

@@ -15,7 +15,7 @@ namespace RankingListTest
                     return;
                 }
 
-                var testCore = new RankingListTestCore();
+                RankingListTestCore testCore = new();
 
                 // 解析命令行参数
                 if (args[0] == "--init")

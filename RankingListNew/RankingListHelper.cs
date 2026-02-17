@@ -2,11 +2,11 @@
 {
     public static class RankingListHelper
     {
-        public static IRankingList NewRankingList(string rankingListClassName)
+        public static IRankingList NewRankingList(string rankingListClassName, object? parameter = null)
         {
-            var rankingListType = Type.GetType($"RankingListNew.{rankingListClassName}")??
+            Type rankingListType = Type.GetType($"RankingListNew.{rankingListClassName}") ??
                                   throw new ArgumentException($"RankingList class {rankingListClassName} not found");
-            if (Activator.CreateInstance(rankingListType) is not IRankingList rankingList)
+            if (Activator.CreateInstance(rankingListType, parameter) is not IRankingList rankingList)
             {
                 throw new ArgumentException($"RankingList class {rankingListClassName} not found");
             }

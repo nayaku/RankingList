@@ -13,7 +13,7 @@ namespace RankingListTestNew
 
     public class Generator
     {
-        private static readonly DateTime InitialUserCreateTime = new(2026, 1, 1);
+        private static readonly DateTime InitialUserCreateTime = new(2000, 1, 1);
         private static readonly double[] OperationRatio = [0.1, 0.2, 0.3, 0.2, 0.2]; // AddUser, UpdateUser, GetUserRank, GetTopN, GetAroundUser
         private string _testName;
         private int _userNum;
@@ -43,7 +43,7 @@ namespace RankingListTestNew
             List<User> users = [];
             for (int i = 0; i < _userNum; i++)
             {
-                var user = new User(
+                User user = new(
                      i + 1,
                      GeneratePowerLawScore(random),
                      InitialUserCreateTime.AddSeconds(i)
@@ -64,10 +64,10 @@ namespace RankingListTestNew
         /// <returns></returns>
         private List<TestOperation> GenerateOperations(Random random)
         {
-            var operations = new List<TestOperation>(_operationNum);
+            List<TestOperation> operations = new(_operationNum);
             for (int i = 0; i < _operationNum; i++)
             {
-                var operation = new TestOperation
+                TestOperation operation = new()
                 {
                     Id = ++_currentOperationId,
                 };
@@ -128,6 +128,10 @@ namespace RankingListTestNew
         // 生成初始化测试数据
         public void Generate()
         {
+            Console.WriteLine($"正在生成测试数据 {_testName}");
+            Console.WriteLine($"用户数量: {_userNum}");
+            Console.WriteLine($"操作数量: {_operationNum}");
+            Console.WriteLine($"限制操作类型: {_limitOperationType}");
             Random random = new(42);
             // 生成初始用户数据
             List<User> initialUsers = GenerateInitialUsers(random);

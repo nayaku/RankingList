@@ -381,7 +381,7 @@ namespace RankingList
             y.LeftUser = x.LeftUser;
             x.Count = x.Left.Count + x.Right.Count;
             y.Count = y.Left.Count + y.Right.Count;
-            if(y.Parent == null)
+            if (y.Parent == null)
                 _root = y;
             return y;
         }
@@ -412,7 +412,7 @@ namespace RankingList
             y.RightUser = x.RightUser;
             x.Count = x.Left.Count + x.Right.Count;
             y.Count = y.Left.Count + y.Right.Count;
-            if(y.Parent == null)
+            if (y.Parent == null)
                 _root = y;
             return y;
         }
@@ -842,7 +842,7 @@ namespace RankingList
                 {
                     // LeftUser = null;
                     // RightUser = null;
-                    if(Parent != null)
+                    if (Parent != null)
                     {
                         if (this == Parent.Left)
                         {

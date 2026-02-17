@@ -24,7 +24,7 @@ namespace RankingList
         public RankingListResponse AddUser(IUser user)
         {
             Debug.Assert(!_userId2Index.ContainsKey(user.Id), "用户已存在");
-            var insertIndex = _users.BinarySearch(user);
+            int insertIndex = _users.BinarySearch(user);
             if (insertIndex < 0)
             {
                 insertIndex = ~insertIndex;
@@ -46,7 +46,7 @@ namespace RankingList
         public RankingListResponse UpdateUser(IUser user)
         {
             // 移除旧用户
-            if (_userId2Index.TryGetValue(user.Id, out var existingUserIndex))
+            if (_userId2Index.TryGetValue(user.Id, out int existingUserIndex))
             {
                 _users.RemoveAt(existingUserIndex);
             }
@@ -56,7 +56,7 @@ namespace RankingList
             }
 
             // 插入新用户
-            var insertIndex = _users.BinarySearch(user);
+            int insertIndex = _users.BinarySearch(user);
             if (insertIndex < 0)
             {
                 insertIndex = ~insertIndex;
@@ -96,8 +96,8 @@ namespace RankingList
 
         public RankingListResponse[] GetTopN(int topN)
         {
-            var count = Math.Min(topN, _users.Count);
-            var result = new RankingListResponse[count];
+            int count = Math.Min(topN, _users.Count);
+            RankingListResponse[] result = new RankingListResponse[count];
 
             for (int i = 0; i < count; i++)
             {
@@ -122,7 +122,7 @@ namespace RankingList
             int end = Math.Min(_users.Count - 1, index + aroundN);
             int count = end - start + 1;
 
-            var result = new RankingListResponse[count];
+            RankingListResponse[] result = new RankingListResponse[count];
             for (int i = start; i <= end; i++)
             {
                 result[i - start] = new RankingListResponse

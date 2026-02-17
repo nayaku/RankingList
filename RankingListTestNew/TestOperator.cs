@@ -29,13 +29,13 @@ namespace RankingListTestNew
         private CancellationTokenSource _cancellationTokenSource;
         private readonly string _testName;
         private readonly string _rankingListClassName;
-        private readonly string? _baseTestName;
+        private readonly string? _baseRankingListClassName;
 
         public TestOperator(string rankingListClassName, string testName, string? baseTestName)
         {
             _rankingListClassName = rankingListClassName;
             _testName = testName;
-            _baseTestName = baseTestName;
+            _baseRankingListClassName = baseTestName;
         }
 
         public void Test()
@@ -48,16 +48,16 @@ namespace RankingListTestNew
             {
                 Console.WriteLine($"限制操作类型: {testData.LimitOperationType.Value}");
             }
-            IRankingList rankingList = RankingListHelper.NewRankingList(_rankingListClassName);
+            IRankingList rankingList = RankingListHelper.NewRankingList(_rankingListClassName, testData.Users);
             GC.Collect();
             // 开始内存监控
             long initialMemoryUsage = GC.GetTotalMemory(true);
             _peakMemoryUsage = initialMemoryUsage;
             _cancellationTokenSource = new CancellationTokenSource();
-            var memoryMonitorThread = new Thread(MonitorMemoryUsage) { IsBackground = true };
+            Thread memoryMonitorThread = new(MonitorMemoryUsage) { IsBackground = true };
             memoryMonitorThread.Start();
             // 运行测试
-            var (operationResults, stopwatch) = RunTest(rankingList, testData);
+            (List<OperationResult>? operationResults, Stopwatch? stopwatch) = RunTest(rankingList, testData);
             // 停止内存监控
             Thread.Sleep(100); // 等待内存监控线程更新峰值
             _cancellationTokenSource.Cancel();
@@ -74,14 +74,15 @@ namespace RankingListTestNew
                 TestDate = DateTime.Now,
             };
             Save(testResultObj, operationResults);
-            if (_baseTestName != null)
+            DisplayTestResult(testResultObj);
+            if (_baseRankingListClassName != null)
             {
+                ValidateResults(operationResults);
                 CompareWithBase(testResultObj);
             }
-            else
-            {
-                DisplayTestResult(testResultObj);
-            }
+#if DEBUG
+            rankingList.DebugPrint();
+#endif
             Console.WriteLine($"== Test {_testName} End ===\n");
         }
 
@@ -90,7 +91,7 @@ namespace RankingListTestNew
             string testTargetDir = "Test";
             string testDataPath = $"{testTargetDir}/{_testName}.json";
             using FileStream fs = new(testDataPath, FileMode.Open, FileAccess.Read);
-            TestData testData = JsonSerializer.Deserialize<TestData>(fs) ??
+            TestData testData = JsonSerializer.Deserialize<TestData>(fs, new JsonSerializerOptions { IncludeFields = true }) ??
                                 throw new Exception($"无法加载测试数据 {testDataPath}");
             return testData;
         }
@@ -110,29 +111,29 @@ namespace RankingListTestNew
                 switch (testOperation.Type)
                 {
                     case OperationType.AddUser:
-                    {
-                        var user = new User(testOperation.UserId, testOperation.ScoreOrN,
+                        {
+                            User user = new(testOperation.UserId, testOperation.ScoreOrN,
                             InitialUserCreateTime.AddSeconds(testOperation.Id));
-                        operationResult.RankingListResponses = [rankingList.AddUser(user)];
-                        break;
-                    }
+                            operationResult.RankingListResponses = [rankingList.AddUser(user)];
+                            break;
+                        }
                     case OperationType.UpdateUser:
-                    {
-                        var user = new User(testOperation.UserId, testOperation.ScoreOrN,
+                        {
+                            User user = new(testOperation.UserId, testOperation.ScoreOrN,
                             InitialUserCreateTime.AddSeconds(testOperation.Id));
-                        operationResult.RankingListResponses = [rankingList.UpdateUser(user)];
-                        break;
-                    }
+                            operationResult.RankingListResponses = [rankingList.UpdateUser(user)];
+                            break;
+                        }
 
                     case OperationType.GetUserRank:
-                        operationResult.RankingListResponses = [rankingList.GetUserRank(testOperation.Id)];
+                        operationResult.RankingListResponses = [rankingList.GetUserRank(testOperation.UserId)];
                         break;
                     case OperationType.GetTopN:
                         operationResult.RankingListResponses = rankingList.GetTopN(testOperation.ScoreOrN);
                         break;
                     case OperationType.GetAroundUser:
                         operationResult.RankingListResponses =
-                            rankingList.GetAroundUser(testOperation.Id, testOperation.ScoreOrN);
+                            rankingList.GetAroundUser(testOperation.UserId, testOperation.ScoreOrN);
                         break;
                 }
 
@@ -171,13 +172,13 @@ namespace RankingListTestNew
             string testResultPath = $"{testResultDir}/{_testName}.json";
             using (FileStream fs = new(testResultPath, FileMode.Create, FileAccess.Write))
             {
-                JsonSerializer.Serialize(fs, testResultObj);
+                JsonSerializer.Serialize(fs, testResultObj, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true });
             }
 
             string operationResultPath = $"{testResultDir}/{_testName}_Operations.json";
             using (FileStream fs = new(operationResultPath, FileMode.Create, FileAccess.Write))
             {
-                JsonSerializer.Serialize(fs, operationResults);
+                JsonSerializer.Serialize(fs, operationResults, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true });
             }
         }
 
@@ -187,12 +188,12 @@ namespace RankingListTestNew
         /// <param name="testResults"></param>
         private void ValidateResults(List<OperationResult> testResults)
         {
-            var baseTestResultDirPath = $"TestResults/{_rankingListClassName}";
-            var baseTestResultPath = $"{baseTestResultDirPath}/{_baseTestName}_Operations.json";
+            string baseTestResultDirPath = $"TestResults/{_baseRankingListClassName}";
+            string baseTestResultPath = $"{baseTestResultDirPath}/{_testName}_Operations.json";
             List<OperationResult> baseResults;
             using (FileStream fs = new(baseTestResultPath, FileMode.Open, FileAccess.Read))
             {
-                baseResults = JsonSerializer.Deserialize<List<OperationResult>>(fs) ??
+                baseResults = JsonSerializer.Deserialize<List<OperationResult>>(fs, new JsonSerializerOptions { IncludeFields = true }) ??
                               throw new Exception($"无法加载基准测试数据 {baseTestResultPath}");
             }
 
@@ -204,8 +205,8 @@ namespace RankingListTestNew
             int errorCount = 0;
             for (int i = 0; i < baseResults.Count; i++)
             {
-                var baseResult = baseResults[i];
-                var testResult = testResults[i];
+                OperationResult baseResult = baseResults[i];
+                OperationResult testResult = testResults[i];
                 if (baseResult.OperationType != testResult.OperationType)
                 {
                     Console.WriteLine($"基准测试数据与测试数据操作类型不一致，第{i}个操作");
@@ -240,12 +241,12 @@ namespace RankingListTestNew
         /// <param name="testResult"></param>
         private void CompareWithBase(TestResult testResult)
         {
-            var baseTestResultDirPath = $"TestResults/{_rankingListClassName}";
-            var baseTestResultPath = $"{baseTestResultDirPath}/{_baseTestName}.json";
+            string baseTestResultDirPath = $"TestResults/{_baseRankingListClassName}";
+            string baseTestResultPath = $"{baseTestResultDirPath}/{_testName}.json";
             TestResult baseTestResult;
             using (FileStream fs = new(baseTestResultPath, FileMode.Open, FileAccess.Read))
             {
-                baseTestResult = JsonSerializer.Deserialize<TestResult>(fs) ??
+                baseTestResult = JsonSerializer.Deserialize<TestResult>(fs, new JsonSerializerOptions { IncludeFields = true }) ??
                                  throw new Exception($"无法加载基准测试数据 {baseTestResultPath}");
             }
 
@@ -253,7 +254,7 @@ namespace RankingListTestNew
                 $"总耗时: {testResult.TotalTimeMs} ms vs {baseTestResult.TotalTimeMs} ms " +
                 $"({CalculateDifference(testResult.TotalTimeMs, baseTestResult.TotalTimeMs):+0.00;-0.00;0.00}%)");
             Console.WriteLine(
-                $"平均耗时: {1000 * testResult.AverageTimeMs:0.00} ms/1000操作 vs {1000 * baseTestResult.AverageTimeMs:0.00} ms/1000操作 " +
+                $"平均耗时: {1000 * testResult.AverageTimeMs:0.00} ms/k操作 vs {1000 * baseTestResult.AverageTimeMs:0.00} ms/1k操作 " +
                 $"({CalculateDifference(1000 * testResult.AverageTimeMs, 1000 * baseTestResult.AverageTimeMs):+0.00;-0.00;0.00}%)");
             Console.WriteLine(
                 $"内存占用: {BytesToMB(testResult.MemoryUsageBytes):0.00} MB vs {BytesToMB(baseTestResult.MemoryUsageBytes):0.00} MB " +
@@ -288,55 +289,14 @@ namespace RankingListTestNew
 
         public static void TestAll(string rankingListClassName, string? baseTestName = null)
         {
-            var testList = Directory.GetFiles("Test", "*.json");
-            foreach (var test in testList)
+            string[] testList = Directory.GetFiles("Test", "*.json");
+            foreach (string test in testList)
             {
-                var testName = Path.GetFileNameWithoutExtension(test);
-                var testOperator = new TestOperator(rankingListClassName, testName, baseTestName);
+                string testName = Path.GetFileNameWithoutExtension(test);
+                TestOperator testOperator = new(rankingListClassName, testName, baseTestName);
                 testOperator.Test();
                 GC.Collect();
             }
         }
     }
 }
-/*
-== Test t0_100 ===
-用户数: 0
-操作数: 83
-总耗时: 2 ms
-平均耗时: 24.10 ms/1000操作
-内存占用: 0.01 MB
-内存峰值: 0.02 MB
-测试日期: 2026/2/17 14:23:37
-== Test t0_100 End ===
-
-== Test t0_1W ===
-用户数: 0
-操作数: 9983
-总耗时: 482 ms
-平均耗时: 48.28 ms/1000操作
-内存占用: 1.16 MB
-内存峰值: 1.43 MB
-测试日期: 2026/2/17 14:23:37
-== Test t0_1W End ===
-
-== Test t1000_10w ===
-用户数: 1000
-操作数: 100000
-总耗时: 50228 ms
-平均耗时: 502.28 ms/1000操作
-内存占用: 11.14 MB
-内存峰值: 13.20 MB
-测试日期: 2026/2/17 14:24:28
-== Test t1000_10w End ===
-
-== Test t100_100 ===
-用户数: 100
-操作数: 100
-总耗时: 0 ms
-平均耗时: 0.00 ms/1000操作
-内存占用: 0.01 MB
-内存峰值: 0.02 MB
-测试日期: 2026/2/17 14:24:28
-== Test t100_100 End ===
-*/

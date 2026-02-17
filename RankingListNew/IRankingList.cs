@@ -10,7 +10,7 @@
         int GetRankingCount();
         void DebugPrint(); /* 仅用于调试，输出排行榜当前状态 */
     }
-    public struct RankingListResponse
+    public record struct RankingListResponse
     {
         public User User;
         public int Rank;

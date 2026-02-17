@@ -89,10 +89,10 @@ namespace RankingListTest
         public List<IUser> GenerateInitialUsers(Random random)
         {
             userIdToScore = [];
-            var users = new List<IUser>(InitialUserCount);
+            List<IUser> users = new(InitialUserCount);
             for (int i = 0; i < InitialUserCount; i++)
             {
-                var user = new User
+                User user = new()
                 {
                     Id = i + 1,
                     Score = GeneratePowerLawScore(random),
@@ -109,10 +109,10 @@ namespace RankingListTest
         public List<TestOperation> GenerateOperations(Random random, int operationNum,
             OperationType? specifiedType = null)
         {
-            var operations = new List<TestOperation>(operationNum);
+            List<TestOperation> operations = new(operationNum);
             for (int i = 0; i < operationNum; i++)
             {
-                var operation = new TestOperation
+                TestOperation operation = new()
                 {
                     Id = ++currentOperationId,
                 };
@@ -146,12 +146,12 @@ namespace RankingListTest
                         userIdToScore[operation.UserId] = operation.Score;
                         break;
                     case OperationType.UpdateUser:
-                    {
-                        operation.UserId = random.Next(1, currentUserId);
-                        int score = userIdToScore[operation.UserId];
-                        operation.Score = score + GeneratePowerLawScore(random, 100);
-                        break;
-                    }
+                        {
+                            operation.UserId = random.Next(1, currentUserId);
+                            int score = userIdToScore[operation.UserId];
+                            operation.Score = score + GeneratePowerLawScore(random, 100);
+                            break;
+                        }
                     case OperationType.GetUserRank:
                         operation.UserId = random.Next(1, currentUserId);
                         break;
@@ -188,7 +188,7 @@ namespace RankingListTest
             // 生成操作列表
             List<TestOperation> operations = GenerateOperations(random, allOperationNum);
             // 生成单项测试的操作列表
-            var singleOperations = Enum.GetValues<OperationType>()
+            List<List<TestOperation>> singleOperations = Enum.GetValues<OperationType>()
                 .Select((operationType, index) =>
                     GenerateOperations(random, (int)(allOperationNum * singleOperationNumProportions[index]), operationType))
                 .ToList();
@@ -226,12 +226,12 @@ namespace RankingListTest
             List<TestOperation> operations)
         {
             GC.Collect();
-            var operationResults = new List<OperationResult>(operations.Count);
-            var stopwatch = Stopwatch.StartNew();
+            List<OperationResult> operationResults = new(operations.Count);
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
-            foreach (var operation in operations)
+            foreach (TestOperation operation in operations)
             {
-                var opResult = new OperationResult
+                OperationResult opResult = new()
                 {
                     Id = operation.Id,
                     Type = operation.Type
@@ -240,39 +240,39 @@ namespace RankingListTest
                 switch (operation.Type)
                 {
                     case OperationType.AddUser:
-                    {
-                        var user = new User
                         {
-                            Id = operation.UserId,
-                            Score = operation.Score,
-                            LastActive = InitialUserCreateTime.AddSeconds(InitialUserCount + operation.Id)
-                        };
-                        var addResult = rankingList.AddUser(user);
-                        opResult.UserRankResult = [addResult];
-                    }
+                            User user = new()
+                            {
+                                Id = operation.UserId,
+                                Score = operation.Score,
+                                LastActive = InitialUserCreateTime.AddSeconds(InitialUserCount + operation.Id)
+                            };
+                            RankingListResponse addResult = rankingList.AddUser(user);
+                            opResult.UserRankResult = [addResult];
+                        }
                         break;
                     case OperationType.UpdateUser:
-                    {
-                        var user = new User
                         {
-                            Id = operation.UserId,
-                            Score = operation.Score,
-                            LastActive = InitialUserCreateTime.AddSeconds(InitialUserCount + operation.Id)
-                        };
-                        var updateResult = rankingList.UpdateUser(user);
-                        opResult.UserRankResult = [updateResult];
-                    }
+                            User user = new()
+                            {
+                                Id = operation.UserId,
+                                Score = operation.Score,
+                                LastActive = InitialUserCreateTime.AddSeconds(InitialUserCount + operation.Id)
+                            };
+                            RankingListResponse updateResult = rankingList.UpdateUser(user);
+                            opResult.UserRankResult = [updateResult];
+                        }
                         break;
                     case OperationType.GetUserRank:
-                        var rankResult = rankingList.GetUserRank(operation.UserId);
+                        RankingListResponse rankResult = rankingList.GetUserRank(operation.UserId);
                         opResult.UserRankResult = [rankResult];
                         break;
                     case OperationType.GetTopN:
-                        var topNResult = rankingList.GetTopN(operation.TopN);
+                        RankingListResponse[] topNResult = rankingList.GetTopN(operation.TopN);
                         opResult.UserRankResult = topNResult;
                         break;
                     case OperationType.GetAroundUser:
-                        var aroundUserResult = rankingList.GetAroundUser(operation.UserId, operation.AroundN);
+                        RankingListResponse[] aroundUserResult = rankingList.GetAroundUser(operation.UserId, operation.AroundN);
                         opResult.UserRankResult = aroundUserResult;
                         break;
                 }
@@ -289,16 +289,16 @@ namespace RankingListTest
         private List<SingleOperationResult> CalculateSingleOperationResults(List<List<TestOperation>> operationss,
             IRankingList rankingList)
         {
-            var singleOperationResults = new List<SingleOperationResult>();
+            List<SingleOperationResult> singleOperationResults = new();
 
-            foreach (var operations in operationss)
+            foreach (List<TestOperation> operations in operationss)
             {
                 int operationCount = operations.Count;
-                #if DEBUG
+#if DEBUG
                 Debug.Assert(operations.All(op=>op.Type == operations[0].Type), "所有操作类型必须相同");
-                #endif
+#endif
 
-                var (_, singleOpStopwatch) =
+                (List<OperationResult> _, Stopwatch? singleOpStopwatch) =
                     ExecuteOperations(rankingList, operations);
                 double averageTimeMs = singleOpStopwatch.ElapsedMilliseconds / (double)operationCount;
 
@@ -353,24 +353,24 @@ namespace RankingListTest
             Console.WriteLine($"操作数: {testInitial.AllOperations.Count}");
 
             // 创建排行榜实例
-            var rankingList = DllMain.CreateRankingList([.. testInitial.Users], rankingListName);
+            IRankingList rankingList = DllMain.CreateRankingList([.. testInitial.Users], rankingListName);
 
             GC.Collect();
             // 开始内存监控
             long initialMemoryUsage = _process.WorkingSet64;
             _peakMemoryUsage = initialMemoryUsage;
-            var memoryMonitorThread = new Thread(MonitorMemoryUsage) { IsBackground = true };
+            Thread memoryMonitorThread = new(MonitorMemoryUsage) { IsBackground = true };
             memoryMonitorThread.Start();
 
             // 执行所有操作
-            var (operationResults, stopwatch) = ExecuteOperations(rankingList, testInitial.AllOperations);
+            (List<OperationResult>? operationResults, Stopwatch? stopwatch) = ExecuteOperations(rankingList, testInitial.AllOperations);
 
             // 停止计时和内存监控
             Thread.Sleep(100); // 等待内存监控线程更新峰值
             GC.Collect();
 
             // 收集测试结果
-            var result = new TestResult
+            TestResult result = new()
             {
                 RankingListName = rankingListName,
                 TotalTimeMs = stopwatch.ElapsedMilliseconds,
@@ -381,10 +381,10 @@ namespace RankingListTest
             };
 
             // 计算单项操作结果
-            var singleOperationResults =
+            List<SingleOperationResult> singleOperationResults =
                 CalculateSingleOperationResults(testInitial.SingleOperations, rankingList);
 
-            var benchmarkResults = new BenchmarkResults
+            BenchmarkResults benchmarkResults = new()
             {
                 Results = operationResults,
                 PerformanceResult = result,
@@ -450,8 +450,8 @@ namespace RankingListTest
                     continue;
                 }
 
-                var testResult = testResults[i];
-                var baseResult = baseResults[i];
+                OperationResult testResult = testResults[i];
+                OperationResult baseResult = baseResults[i];
 
                 if (!CompareOperationResults(testResult, baseResult))
                 {
@@ -542,14 +542,14 @@ namespace RankingListTest
             Console.WriteLine("\n=== 单项操作耗时测试 ===\n");
 
             // 输出每种操作类型的测试结果
-            foreach (var result in singleResults)
+            foreach (SingleOperationResult result in singleResults)
             {
                 Console.WriteLine($"【{result.Type}】");
 
                 // 与基准对比
                 if (baseSingleResults != null)
                 {
-                    var baseResult = baseSingleResults.FirstOrDefault(r => r.Type == result.Type);
+                    SingleOperationResult? baseResult = baseSingleResults.FirstOrDefault(r => r.Type == result.Type);
                     if (baseResult != null)
                     {
                         double totalTimeDifference = CalculateDifference(result.TotalTimeMs, baseResult.TotalTimeMs);
