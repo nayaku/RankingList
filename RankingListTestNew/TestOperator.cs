@@ -1,30 +1,14 @@
 ﻿using RankingListNew;
 using System.Diagnostics;
+using System.Drawing;
 using System.Text.Json;
+using Console = Colorful.Console;
 
 namespace RankingListTestNew
 {
-    // 测试结果类
-    public class TestResult
-    {
-        public string RankingListName { get; set; }
-        public long TotalTimeMs { get; set; }
-        public double AverageTimeMs { get; set; }
-        public long MemoryUsageBytes { get; set; }
-        public long PeakMemoryUsageBytes { get; set; }
-        public DateTime TestDate { get; set; }
-    }
-
-    public struct OperationResult
-    {
-        public int Id;
-        public OperationType OperationType;
-        public List<RankingListResponse> RankingListResponses;
-    }
-
     public class TestOperator
     {
-        private static readonly DateTime InitialUserCreateTime = new(2056, 1, 1);
+        private static readonly DateTime InitialUserCreateTime = new(2300, 1, 1);
         private long _peakMemoryUsage;
         private CancellationTokenSource _cancellationTokenSource;
         private readonly string _testName;
@@ -57,7 +41,7 @@ namespace RankingListTestNew
             Thread memoryMonitorThread = new(MonitorMemoryUsage) { IsBackground = true };
             memoryMonitorThread.Start();
             // 运行测试
-            (List<OperationResult>? operationResults, Stopwatch? stopwatch) = RunTest(rankingList, testData);
+            (List<OperationResult> operationResults, Stopwatch stopwatch) = RunTest(rankingList, testData);
             // 停止内存监控
             Thread.Sleep(100); // 等待内存监控线程更新峰值
             _cancellationTokenSource.Cancel();
@@ -74,6 +58,7 @@ namespace RankingListTestNew
                 TestDate = DateTime.Now,
             };
             Save(testResultObj, operationResults);
+            Console.WriteLine($"排行榜用户数: {rankingList.GetRankingCount()}");
             DisplayTestResult(testResultObj);
             if (_baseRankingListClassName != null)
             {
@@ -98,7 +83,7 @@ namespace RankingListTestNew
 
         private (List<OperationResult>, Stopwatch) RunTest(IRankingList rankingList, TestData testData)
         {
-            List<OperationResult> operationResults = new(testData.Operations.Count);
+            List<OperationResult> operationResults = new(testData.Operations.Count + 1);
             Stopwatch stopwatch = new();
             stopwatch.Start();
             foreach (TestOperation testOperation in testData.Operations)
@@ -110,29 +95,29 @@ namespace RankingListTestNew
                 };
                 switch (testOperation.Type)
                 {
-                    case OperationType.AddUser:
+                    case TestOperationType.AddUser:
                         {
                             User user = new(testOperation.UserId, testOperation.ScoreOrN,
                             InitialUserCreateTime.AddSeconds(testOperation.Id));
-                            operationResult.RankingListResponses = [rankingList.AddUser(user)];
+                            operationResult.Rank = rankingList.AddUser(user);
                             break;
                         }
-                    case OperationType.UpdateUser:
+                    case TestOperationType.UpdateUser:
                         {
                             User user = new(testOperation.UserId, testOperation.ScoreOrN,
                             InitialUserCreateTime.AddSeconds(testOperation.Id));
-                            operationResult.RankingListResponses = [rankingList.UpdateUser(user)];
+                            operationResult.Rank = rankingList.UpdateUser(user);
                             break;
                         }
 
-                    case OperationType.GetUserRank:
-                        operationResult.RankingListResponses = [rankingList.GetUserRank(testOperation.UserId)];
+                    case TestOperationType.GetUserRank:
+                        operationResult.Rank = rankingList.GetUserRank(testOperation.UserId);
                         break;
-                    case OperationType.GetTopN:
-                        operationResult.RankingListResponses = rankingList.GetTopN(testOperation.ScoreOrN);
+                    case TestOperationType.GetTopN:
+                        operationResult.Users = rankingList.GetTopN(testOperation.ScoreOrN);
                         break;
-                    case OperationType.GetAroundUser:
-                        operationResult.RankingListResponses =
+                    case TestOperationType.GetAroundUser:
+                        (operationResult.Users, operationResult.Rank) =
                             rankingList.GetAroundUser(testOperation.UserId, testOperation.ScoreOrN);
                         break;
                 }
@@ -213,26 +198,47 @@ namespace RankingListTestNew
                     errorCount++;
                 }
 
-                if (baseResult.RankingListResponses.Count != testResult.RankingListResponses.Count)
+                if (baseResult.Rank != testResult.Rank)
+                {
+                    Console.WriteLine($"基准测试数据与测试数据排名不一致，第{i}个操作");
+                    errorCount++;
+                }
+
+                if (baseResult.Users is null && testResult.Users is null)
+                {
+                    continue;
+                }
+
+                if (baseResult.Users is null || testResult.Users is null)
+                {
+                    Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作");
+                    errorCount++;
+                    continue;
+                }
+
+                if (baseResult.Users.Count != testResult.Users.Count)
                 {
                     Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作");
                     errorCount++;
                 }
 
-                for (int j = 0; j < baseResult.RankingListResponses.Count; j++)
+                for (int j = 0; j < baseResult.Users.Count; j++)
                 {
-                    if (baseResult.RankingListResponses[j].Rank != testResult.RankingListResponses[j].Rank ||
-                        baseResult.RankingListResponses[j].User != testResult.RankingListResponses[j].User)
+                    if (baseResult.Users[j] != testResult.Users[j])
                     {
                         Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作，第{j}个响应");
                         errorCount++;
                     }
                 }
             }
-
-            Console.WriteLine(errorCount > 0
-                ? $"测试数据与基准数据不一致，共{errorCount}个错误"
-                : "√ 所有操作结果验证通过！");
+            if (errorCount > 0)
+            {
+                Console.WriteLine($"测试数据与基准数据不一致，共{errorCount}个错误", Color.Red);
+            }
+            else
+            {
+                Console.WriteLine("√ 所有操作结果验证通过！", Color.Green);
+            }
         }
 
         /// <summary>
@@ -254,7 +260,7 @@ namespace RankingListTestNew
                 $"总耗时: {testResult.TotalTimeMs} ms vs {baseTestResult.TotalTimeMs} ms " +
                 $"({CalculateDifference(testResult.TotalTimeMs, baseTestResult.TotalTimeMs):+0.00;-0.00;0.00}%)");
             Console.WriteLine(
-                $"平均耗时: {1000 * testResult.AverageTimeMs:0.00} ms/k操作 vs {1000 * baseTestResult.AverageTimeMs:0.00} ms/1k操作 " +
+                $"平均耗时: {1000 * testResult.AverageTimeMs:0.00} ms/1k操作 vs {1000 * baseTestResult.AverageTimeMs:0.00} ms/1k操作 " +
                 $"({CalculateDifference(1000 * testResult.AverageTimeMs, 1000 * baseTestResult.AverageTimeMs):+0.00;-0.00;0.00}%)");
             Console.WriteLine(
                 $"内存占用: {BytesToMB(testResult.MemoryUsageBytes):0.00} MB vs {BytesToMB(baseTestResult.MemoryUsageBytes):0.00} MB " +

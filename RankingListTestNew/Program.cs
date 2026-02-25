@@ -20,7 +20,7 @@ namespace RankingListTestNew
                 {
                     Description = "操作数量"
                 },
-                new Option<OperationType?>(
+                new Option<TestOperationType?>(
                     "--limitOperationType","-l"
                 )
                 {
@@ -32,7 +32,7 @@ namespace RankingListTestNew
                 string name = parseResult.GetValue<string>("name")!;
                 int userNum = parseResult.GetValue<int>("userNum");
                 int operationNum = parseResult.GetValue<int>("operationNum");
-                OperationType? limitOperationType = parseResult.GetValue<OperationType?>("--limitOperationType");
+                TestOperationType? limitOperationType = parseResult.GetValue<TestOperationType?>("--limitOperationType");
                 Generator generator = new(name, userNum, operationNum, limitOperationType);
                 generator.Generate();
             });

@@ -14,45 +14,30 @@ namespace RankingListNew
             _usersDict = _users.ToDictionary(u => u.Id);
         }
 
-        private int AddUserInternal(User user)
+        public int AddUser(User user)
         {
             int insertIndex = _users.BinarySearch(user);
             if (insertIndex < 0)
             {
                 insertIndex = ~insertIndex;
             }
+
             _users.Insert(insertIndex, user);
             _usersDict[user.Id] = user;
             return insertIndex;
         }
 
-        public RankingListResponse AddUser(User user)
-        {
-            int insertIndex = AddUserInternal(user);
-
-            return new RankingListResponse
-            {
-                User = user,
-                Rank = insertIndex + 1
-            };
-        }
-
-        public RankingListResponse UpdateUser(User user)
+        public int UpdateUser(User user)
         {
             // 移除旧用户
-            int oldIndex = GetUserIndexInternal(user.Id);
+            int oldIndex = GetUserRank(user.Id);
             _users.RemoveAt(oldIndex);
             // 插入新用户
-            int insertIndex = AddUserInternal(user);
-
-            return new RankingListResponse
-            {
-                User = user,
-                Rank = insertIndex + 1
-            };
+            int insertIndex = AddUser(user);
+            return insertIndex;
         }
 
-        private int GetUserIndexInternal(int userId)
+        public int GetUserRank(int userId)
         {
             User user = _usersDict[userId];
             int index = _users.BinarySearch(user);
@@ -61,50 +46,22 @@ namespace RankingListNew
             return index;
         }
 
-        public RankingListResponse GetUserRank(int userId)
-        {
-            int index = GetUserIndexInternal(userId);
-
-            return new RankingListResponse
-            {
-                User = _users[index],
-                Rank = index + 1
-            };
-        }
-
-        public List<RankingListResponse> GetTopN(int topN)
+        public List<User> GetTopN(int topN)
         {
             int count = Math.Min(topN, _users.Count);
-            List<RankingListResponse> result = new(count);
-
-            for (int i = 0; i < count; i++)
-            {
-                result.Add(new RankingListResponse
-                {
-                    User = _users[i],
-                    Rank = i + 1
-                });
-            }
+            List<User> result = _users.GetRange(0, count);
 
             return result;
         }
 
-        public List<RankingListResponse> GetAroundUser(int userId, int aroundN)
+        public (List<User>, int) GetAroundUser(int userId, int aroundN)
         {
-            int index = GetUserIndexInternal(userId);
+            int index = GetUserRank(userId);
             int start = Math.Max(0, index - aroundN);
             int end = Math.Min(_users.Count - 1, index + aroundN);
             int count = end - start + 1;
-            List<RankingListResponse> result = new(count);
-            for (int i = start; i <= end; i++)
-            {
-                result.Add(new RankingListResponse
-                {
-                    User = _users[i],
-                    Rank = i + 1
-                });
-            }
-            return result;
+            List<User> result = _users.GetRange(start, count);
+            return (result, index);
         }
 
         public int GetRankingCount()

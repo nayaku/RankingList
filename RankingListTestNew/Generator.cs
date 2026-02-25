@@ -8,7 +8,7 @@ namespace RankingListTestNew
     {
         public List<User> Users { get; set; }
         public List<TestOperation> Operations { get; set; }
-        public OperationType? LimitOperationType { get; set; }
+        public TestOperationType? LimitOperationType { get; set; }
     }
 
     public class Generator
@@ -21,10 +21,10 @@ namespace RankingListTestNew
         private int _currentUserId;
         private int _currentOperationId;
         private Dictionary<int, int> _userIdToScore;
-        private OperationType? _limitOperationType;
+        private TestOperationType? _limitOperationType;
 
 
-        public Generator(string testName, int userNum, int operationNum, OperationType? limitOperationType = null)
+        public Generator(string testName, int userNum, int operationNum, TestOperationType? limitOperationType = null)
         {
             _testName = testName;
             _userNum = userNum;
@@ -81,7 +81,7 @@ namespace RankingListTestNew
                         cumulative += OperationRatio[j];
                         if (operationType < cumulative)
                         {
-                            operation.Type = (OperationType)j;
+                            operation.Type = (TestOperationType)j;
                             break;
                         }
                     }
@@ -91,29 +91,29 @@ namespace RankingListTestNew
                     operation.Type = _limitOperationType.Value;
                 }
 
-                if (_currentUserId == 0 && operation.Type != OperationType.AddUser)
+                if (_currentUserId == 0 && operation.Type != TestOperationType.AddUser)
                     continue;
 
                 switch (operation.Type)
                 {
-                    case OperationType.AddUser:
+                    case TestOperationType.AddUser:
                         operation.UserId = ++_currentUserId;
                         operation.ScoreOrN = GeneratePowerLawScore(random, 100);
                         _userIdToScore[operation.UserId] = operation.ScoreOrN;
                         break;
-                    case OperationType.UpdateUser:
+                    case TestOperationType.UpdateUser:
                         operation.UserId = random.Next(1, _currentUserId);
                         int score = _userIdToScore[operation.UserId];
                         operation.ScoreOrN = score + GeneratePowerLawScore(random, 100);
                         break;
-                    case OperationType.GetUserRank:
+                    case TestOperationType.GetUserRank:
                         operation.UserId = random.Next(1, _currentUserId + 1);
                         break;
-                    case OperationType.GetTopN:
+                    case TestOperationType.GetTopN:
                         operation.UserId = random.Next(1, _currentUserId + 1);
                         operation.ScoreOrN = random.Next(1, 100);
                         break;
-                    case OperationType.GetAroundUser:
+                    case TestOperationType.GetAroundUser:
                         operation.UserId = random.Next(1, _currentUserId + 1);
                         operation.ScoreOrN = random.Next(1, 20);
                         break;
@@ -132,7 +132,7 @@ namespace RankingListTestNew
             Console.WriteLine($"用户数量: {_userNum}");
             Console.WriteLine($"操作数量: {_operationNum}");
             Console.WriteLine($"限制操作类型: {_limitOperationType}");
-            Random random = new(42);
+            Random random = new();
             // 生成初始用户数据
             List<User> initialUsers = GenerateInitialUsers(random);
             // 生成操作列表

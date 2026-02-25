@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace RankingListNew
+﻿namespace RankingListNew
 {
     public class ListRankingList : IRankingList
     {
@@ -12,60 +10,63 @@ namespace RankingListNew
             _users.Sort();
         }
 
-        public RankingListResponse AddUser(User user)
+        public int AddUser(User user)
         {
             _users.Add(user);
             _users.Sort();
-            return new RankingListResponse
-            {
-                User = user,
-                Rank = _users.IndexOf(user) + 1
-            };
+            return _users.IndexOf(user);
         }
 
-        public RankingListResponse UpdateUser(User user)
+        public int UpdateUser(User user)
         {
             _users.Remove(user);
             _users.Add(user);
             _users.Sort();
-            return new RankingListResponse
-            {
-                User = user,
-                Rank = _users.IndexOf(user) + 1
-            };
+            return _users.IndexOf(user);
         }
 
-        public RankingListResponse GetUserRank(int userId)
+        public int GetUserRank(int userId)
         {
             int index = _users.FindIndex(u => u.Id == userId);
-            return new RankingListResponse
-            {
-                User = _users[index],
-                Rank = index + 1
-            };
+            return index;
         }
 
-        public List<RankingListResponse> GetTopN(int topN)
+        public List<User> GetTopN(int topN)
         {
             int count = Math.Min(topN, _users.Count);
-            List<RankingListResponse> result = new(count);
-            for (int i = 0; i < count; i++)
-            {
-                result.Add(new RankingListResponse
-                {
-                    User = _users[i],
-                    Rank = i + 1
-                });
-            }
+            List<User> result = _users.GetRange(0, count);
             return result;
         }
 
-        public List<RankingListResponse> GetAroundUser(int userId, int aroundN)
+        public (List<User>, int) GetAroundUser(int userId, int aroundN)
         {
             int index = _users.FindIndex(u => u.Id == userId);
             int start = Math.Max(0, index - aroundN);
             int end = Math.Min(_users.Count - 1, index + aroundN);
             int count = end - start + 1;
+            List<User> result = _users.GetRange(start, count);
+            return (result, index);
+        }
+
+        public int GetRankingCount()
+        {
+            return _users.Count;
+        }
+
+        public void DebugPrint()
+        {
+        }
+    }
+}
+/*
+== Test t0_100 ===
+用户数: 0
+操作数: 83
+总耗时: 2 ms
+平均耗时: 24.10 ms/1000操作
+内存占用: 0.01 MB
+内存峰值: 0.03 MB
+测试日期: 2026/2/17 20:02:21
             List<RankingListResponse> result = new(count);
             for (int i = start; i <= end; i++)
             {

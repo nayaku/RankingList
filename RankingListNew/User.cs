@@ -9,7 +9,7 @@ namespace RankingListNew
         public readonly DateTime LastActive;
 
         [JsonConstructor]
-        public User(int id, int score, DateTime lastActive)
+        public User(int id = -1, int score = 0, DateTime lastActive = default)
         {
             Id = id;
             Score = score;
