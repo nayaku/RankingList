@@ -215,14 +215,9 @@ namespace RankingListNew
         {
             if (node.UserBucket != null)
             {
-                for (int i = 0; i < node.UserBucket.UserCount; i++)
+                for (int i = 0; i < node.UserBucket.UserCount && rankCount < topN; i++, rankCount++)
                 {
-                    if (rankCount >= topN)
-                    {
-                        break;
-                    }
                     result.Add(node.UserBucket.Users[i]);
-                    rankCount++;
                 }
                 return;
             }
@@ -362,12 +357,12 @@ namespace RankingListNew
 
         class TreeNode
         {
-            public int Count { get; set; }
-            public User LeftUser { get; set; }
-            public User RightUser { get; set; }
-            public TreeNode? Left { get; set; }
-            public TreeNode? Right { get; set; }
-            public UserBucket? UserBucket { get; set; }
+            public int Count;
+            public User LeftUser;
+            public User RightUser;
+            public TreeNode? Left;
+            public TreeNode? Right;
+            public UserBucket? UserBucket;
             public bool Full => Count >= BucketSize;
             public bool Empty => Count == 0;
 
