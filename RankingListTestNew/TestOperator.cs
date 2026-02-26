@@ -220,6 +220,7 @@ namespace RankingListTestNew
                 {
                     Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作");
                     errorCount++;
+                    continue;
                 }
 
                 for (int j = 0; j < baseResult.Users.Count; j++)
