@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
@@ -9,11 +10,11 @@ namespace RankingListNew
         private TreeNode _root;
         private Dictionary<int, User> _userMap;
 
-        public BucketBRTreeRankingList(List<User> users)
+        public BucketBRTreeRankingList(Span<User> users)
         {
             users.Sort();
             UserBucket[] buckets = BuildBucket(users);
-            if (users.Count == 0)
+            if (users.Length == 0)
             {
                 // 没有用户
                 _root = new TreeNode();
@@ -23,25 +24,36 @@ namespace RankingListNew
                 _root = BuildTree(0, buckets.Length, 1, buckets);
             }
             _root.Color = ColorEnum.Black;
-            _userMap = users.ToDictionary(u => u.Id, u => u);
+            // _userMap = users.ToDictionary(u => u.Id, u => u);
+            _userMap = new Dictionary<int, User>(users.Length);
+            foreach (ref readonly var u in users)
+            {
+                _userMap[u.Id] = u;
+            }
 #if DEBUG
-            if (users.Count > 0)
+            if (users.Length > 0)
                 CheckTree();
 #endif
         }
 
-        private static UserBucket[] BuildBucket(List<User> users)
+        public BucketBRTreeRankingList(List<User> users) :
+            this(CollectionsMarshal.AsSpan(users))
+        {
+
+        }
+
+        private static UserBucket[] BuildBucket(Span<User> users)
         {
             // 初始化bucket
-            int bucketNum = (int)Math.Ceiling((double)users.Count / InitialBucketSize);
+            int bucketNum = (int)Math.Ceiling((double)users.Length / InitialBucketSize);
             UserBucket[] buckets = new UserBucket[bucketNum];
             for (int i = 0; i < bucketNum; i++)
             {
                 int l = i * InitialBucketSize;
-                int r = Math.Min((i + 1) * InitialBucketSize, users.Count);
+                int r = Math.Min((i + 1) * InitialBucketSize, users.Length);
                 int userCount = r - l;
                 User[] bucketUsers = new User[BucketSize];
-                users.CopyTo(l, bucketUsers, 0, userCount);
+                users.Slice(l, userCount).CopyTo(bucketUsers);
                 buckets[i] = new UserBucket(bucketUsers, userCount);
             }
 
