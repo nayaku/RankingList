@@ -226,7 +226,7 @@ namespace RankingListNew
             while (node.UserBucket == null)
             {
                 node.Count--;
-                node = user.CompareTo(node.Right.LeftUser) < 0 ? node.Left! : node.Right!;
+                node = user.CompareTo(node.Right!.LeftUser) < 0 ? node.Left! : node.Right!;
             }
 
             // 叶子节点
@@ -484,22 +484,22 @@ namespace RankingListNew
             return rankCount;
         }
 
-        public List<User> GetTopN(int topN)
+        public User[] GetTopN(int topN)
         {
-            List<User> result = new(topN);
+            topN = Math.Min(topN, GetRankingCount());
+            User[] result = new User[topN];
             int rankCount = 0;
             GetTopN(_root, topN, ref rankCount, ref result);
             return result;
         }
 
-        private static void GetTopN(TreeNode node, int topN, ref int rankCount, ref List<User> result)
+        private static void GetTopN(TreeNode node, int topN, ref int rankCount, ref User[] result)
         {
             if (node.UserBucket != null)
             {
-                for (int i = 0; i < node.UserBucket.UserCount && rankCount < topN; i++, rankCount++)
-                {
-                    result.Add(node.UserBucket.Users[i]);
-                }
+                int n = Math.Min(node.UserBucket.UserCount, topN - rankCount);
+                Array.Copy(node.UserBucket.Users, 0, result, rankCount, n);
+                rankCount += n;
 
                 return;
             }
@@ -512,94 +512,173 @@ namespace RankingListNew
             }
         }
 
-        // 先获取用户在树中的排名，再获取左右aroundN个用户
-        private static void GetAroundUserStep1(TreeNode node, User user, int aroundN, ref int rankCount,
-            ref int leftCount, ref int rightCount, ref User[] result)
+        private (int rankCount, User[] result) GetAroundUser(User user, int aroundN)
         {
-            if (node.UserBucket != null)
-            {
-                UserBucket bucket = node.UserBucket;
-                int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
-                Debug.Assert(userIndexInBucket >= 0);
-                rankCount += userIndexInBucket;
-                // 左边
-                leftCount = Math.Min(userIndexInBucket, aroundN);
-                // 右边
-                rightCount = Math.Min(bucket.UserCount - userIndexInBucket - 1, aroundN);
-                Array.Copy(bucket.Users, userIndexInBucket - leftCount, result, aroundN - leftCount,
-                    leftCount + rightCount + 1);
-                return;
-            }
+            int rankCount = 0;
+            TreeNode node = _root;
 
-            Debug.Assert(node.Left != null && node.Right != null);
-            if (user.CompareTo(node.Right.LeftUser) < 0)
+            // 1. 找到对应的位置
+            while (node.Right != null)
             {
-                GetAroundUserStep1(node.Left, user, aroundN, ref rankCount, ref leftCount, ref rightCount, ref result);
-                // 找到用户后，进入第二阶段
-                if (rightCount < aroundN)
+                Debug.Assert(node.Left != null && node.Right != null);
+                if (user.CompareTo(node.Right.LeftUser) < 0)
                 {
-                    GetAroundUserStep2(node.Right, aroundN, false, ref rightCount, ref result);
-                }
-            }
-            else
-            {
-                rankCount += node.Left.Count;
-                GetAroundUserStep1(node.Right, user, aroundN, ref rankCount, ref leftCount, ref rightCount, ref result);
-                // 找到用户后，进入第二阶段
-                if (leftCount < aroundN)
-                {
-                    GetAroundUserStep2(node.Left, aroundN, true, ref leftCount, ref result);
-                }
-            }
-        }
-
-        private static void GetAroundUserStep2(TreeNode node, int aroundN, bool isRequiredLeft, ref int obtainedCount,
-            ref User[] result)
-        {
-            if (node.UserBucket != null)
-            {
-                UserBucket bucket = node.UserBucket;
-                int n = Math.Min(bucket.UserCount, aroundN - obtainedCount);
-                if (isRequiredLeft)
-                {
-                    // 缺少左边的用户
-                    Array.Copy(bucket.Users, bucket.UserCount - n, result, aroundN - obtainedCount - n, n);
+                    node = node.Left;
                 }
                 else
                 {
-                    // 缺少右边的用户
-                    Array.Copy(bucket.Users, 0, result, aroundN + obtainedCount + 1, n);
+                    rankCount += node.Left.Count;
+                    node = node.Right;
                 }
-                obtainedCount += n;
-                return;
             }
+            UserBucket bucket = node.UserBucket!;
+            int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
+            Debug.Assert(userIndexInBucket >= 0);
+            rankCount += userIndexInBucket;
 
-            Debug.Assert(node.Left != null && node.Right != null);
-            TreeNode[] children = isRequiredLeft ? [node.Right, node.Left] : [node.Left, node.Right];
-            foreach (TreeNode child in children)
+            // 2. 准备结果
+            int offset = 0;  // 结果数组内的偏移
+            int leftNum = aroundN, rightNum = aroundN; // 需求数目
+            if (rankCount < aroundN)
             {
-                GetAroundUserStep2(child, aroundN, isRequiredLeft, ref obtainedCount, ref result);
-                if (obtainedCount >= aroundN)
-                {
-                    break;
-                }
+                // 用户排名过靠前，无法获取足够的左边用户
+                leftNum = rankCount;
+                offset = rankCount - aroundN;
             }
+            if (rankCount + aroundN + 1 > _root.Count)
+            {
+                // 用户排名过靠后，无法获取足够的右边用户
+                rightNum = _root.Count - rankCount - 1;
+            }
+            User[] result = new User[leftNum + rightNum + 1];
+
+            // 3. 把桶内的用户填充到结果数组中
+            // 左边计数
+            int leftCount = Math.Min(userIndexInBucket, leftNum);
+            // 右边计数
+            int rightCount = Math.Min(bucket.UserCount - userIndexInBucket - 1, rightNum);
+            Array.Copy(bucket.Users, userIndexInBucket - leftCount, result, aroundN - leftCount + offset,
+                leftCount + rightCount + 1);
+
+            // 4. 获取缺少的用户
+            TreeNode tNode = node;
+            while (leftCount < leftNum)
+            {
+                // 查找tNode的左区间的叶子节点
+                while (tNode != tNode.Parent!.Right)
+                {
+                    tNode = tNode.Parent;
+                }
+                tNode = tNode.Parent!.Left!;
+                while (tNode.Right != null)
+                {
+                    tNode = tNode.Right;
+                }
+                bucket = tNode.UserBucket!;
+                int n = Math.Min(bucket.UserCount, leftNum - leftCount);
+                Array.Copy(bucket.Users, bucket.UserCount - n, result, aroundN - leftCount - n + offset, n);
+                leftCount += n;
+            }
+            tNode = node;
+            while (rightCount < rightNum)
+            {
+                // 查找tNode的右区间的叶子节点
+                while (tNode != tNode.Parent!.Left)
+                {
+                    tNode = tNode.Parent;
+                }
+                tNode = tNode.Parent!.Right!;
+                while (tNode.Left != null)
+                {
+                    tNode = tNode.Left;
+                }
+                bucket = tNode.UserBucket!;
+                int n = Math.Min(bucket.UserCount, rightNum - rightCount);
+                Array.Copy(bucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
+                rightCount += n;
+            }
+            return (rankCount, result);
         }
 
-        public (List<User>, int) GetAroundUser(int userId, int aroundN)
+        //// 先获取用户在树中的排名，再获取左右aroundN个用户
+        //private static void GetAroundUserStep1(TreeNode node, User user, int aroundN, ref int rankCount,
+        //    ref int leftCount, ref int rightCount, ref User[] result)
+        //{
+        //    if (node.UserBucket != null)
+        //    {
+        //        UserBucket bucket = node.UserBucket;
+        //        int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
+        //        Debug.Assert(userIndexInBucket >= 0);
+        //        rankCount += userIndexInBucket;
+        //        // 左边
+        //        leftCount = Math.Min(userIndexInBucket, aroundN);
+        //        // 右边
+        //        rightCount = Math.Min(bucket.UserCount - userIndexInBucket - 1, aroundN);
+        //        Array.Copy(bucket.Users, userIndexInBucket - leftCount, result, aroundN - leftCount,
+        //            leftCount + rightCount + 1);
+        //        return;
+        //    }
+
+        //    Debug.Assert(node.Left != null && node.Right != null);
+        //    if (user.CompareTo(node.Right.LeftUser) < 0)
+        //    {
+        //        GetAroundUserStep1(node.Left, user, aroundN, ref rankCount, ref leftCount, ref rightCount, ref result);
+        //        // 找到用户后，进入第二阶段
+        //        if (rightCount < aroundN)
+        //        {
+        //            GetAroundUserStep2(node.Right, aroundN, false, ref rightCount, ref result);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        rankCount += node.Left.Count;
+        //        GetAroundUserStep1(node.Right, user, aroundN, ref rankCount, ref leftCount, ref rightCount, ref result);
+        //        // 找到用户后，进入第二阶段
+        //        if (leftCount < aroundN)
+        //        {
+        //            GetAroundUserStep2(node.Left, aroundN, true, ref leftCount, ref result);
+        //        }
+        //    }
+        //}
+
+        //private static void GetAroundUserStep2(TreeNode node, int aroundN, bool isRequiredLeft, ref int obtainedCount,
+        //    ref User[] result)
+        //{
+        //    if (node.UserBucket != null)
+        //    {
+        //        UserBucket bucket = node.UserBucket;
+        //        int n = Math.Min(bucket.UserCount, aroundN - obtainedCount);
+        //        if (isRequiredLeft)
+        //        {
+        //            // 缺少左边的用户
+        //            Array.Copy(bucket.Users, bucket.UserCount - n, result, aroundN - obtainedCount - n, n);
+        //        }
+        //        else
+        //        {
+        //            // 缺少右边的用户
+        //            Array.Copy(bucket.Users, 0, result, aroundN + obtainedCount + 1, n);
+        //        }
+        //        obtainedCount += n;
+        //        return;
+        //    }
+
+        //    Debug.Assert(node.Left != null && node.Right != null);
+        //    TreeNode[] children = isRequiredLeft ? [node.Right, node.Left] : [node.Left, node.Right];
+        //    foreach (TreeNode child in children)
+        //    {
+        //        GetAroundUserStep2(child, aroundN, isRequiredLeft, ref obtainedCount, ref result);
+        //        if (obtainedCount >= aroundN)
+        //        {
+        //            break;
+        //        }
+        //    }
+        //}
+
+        public (User[], int) GetAroundUser(int userId, int aroundN)
         {
             Debug.Assert(_userMap.ContainsKey(userId));
             User user = _userMap[userId];
-            int rankCount = 0;
-            int leftCount = 0;
-            int rightCount = 0;
-            User[] result = new User[aroundN * 2 + 1];
-            GetAroundUserStep1(_root, user, aroundN, ref rankCount, ref leftCount, ref rightCount, ref result);
-            List<User> aroundUsers = new(leftCount + rightCount + 1);
-            for (int i = aroundN - leftCount; i < aroundN + rightCount + 1; i++)
-            {
-                aroundUsers.Add(result[i]);
-            }
+            (int rankCount, User[] aroundUsers) = GetAroundUser(user, aroundN);
             return (aroundUsers, rankCount);
         }
 

@@ -33,7 +33,7 @@ namespace RankingListTestNew
         public int Id;
         public TestOperationType OperationType;
         public int Rank;
-        public List<User>? Users;
+        public User[]? Users;
     }
 
     /// <summary>

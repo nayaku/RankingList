@@ -137,7 +137,7 @@ namespace RankingListNew
             return rankCount;
         }
 
-        public List<User> GetTopN(int topN)
+        public User[] GetTopN(int topN)
         {
             int rankCount = 0;
             List<User> result = new(topN);
@@ -151,10 +151,10 @@ namespace RankingListNew
                 }
             }
 
-            return result;
+            return result.ToArray();
         }
 
-        public (List<User>, int) GetAroundUser(int userId, int aroundN)
+        public (User[], int) GetAroundUser(int userId, int aroundN)
         {
             int rankCount = 0;
             int bucketIndex = -1;
@@ -197,7 +197,7 @@ namespace RankingListNew
                 inBucketIndex = 0;
             }
 
-            return (result, resultRank);
+            return (result.ToArray(), resultRank);
         }
 
         public int GetRankingCount()

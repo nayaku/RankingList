@@ -1,8 +1,7 @@
 {
   "profiles": {
     "RankingListTest": {
-      "commandName": "Project",
-      "commandLineArgs": "--test TreeBRTreeBucketRankingListST"
+      "commandName": "Project"
     }
   }
 }

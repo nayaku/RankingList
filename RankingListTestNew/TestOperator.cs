@@ -216,14 +216,14 @@ namespace RankingListTestNew
                     continue;
                 }
 
-                if (baseResult.Users.Count != testResult.Users.Count)
+                if (baseResult.Users.Length != testResult.Users.Length)
                 {
                     Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作");
                     errorCount++;
                     continue;
                 }
 
-                for (int j = 0; j < baseResult.Users.Count; j++)
+                for (int j = 0; j < baseResult.Users.Length; j++)
                 {
                     if (baseResult.Users[j] != testResult.Users[j])
                     {
