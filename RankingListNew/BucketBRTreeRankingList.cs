@@ -5,7 +5,7 @@ namespace RankingListNew
 {
     public class BucketBRTreeRankingList : IRankingList
     {
-        private static readonly int BucketSize = 64; // 每个bucket的用户数量
+        private static readonly int BucketSize = 256; // 每个bucket的用户数量
         private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
         private TreeNode _root;
         private Dictionary<int, User> _userMap;
@@ -14,17 +14,9 @@ namespace RankingListNew
         {
             users.Sort();
             UserBucket[] buckets = BuildBucket(users);
-            if (users.Length == 0)
-            {
-                // 没有用户
-                _root = new TreeNode();
-            }
-            else
-            {
-                _root = BuildTree(0, buckets.Length, 1, buckets);
-            }
+            // 没有用户
+            _root = users.Length == 0 ? new TreeNode() : BuildTree(0, buckets.Length, 1, buckets);
             _root.Color = ColorEnum.Black;
-            // _userMap = users.ToDictionary(u => u.Id, u => u);
             _userMap = new Dictionary<int, User>(users.Length);
             foreach (ref readonly var u in users)
             {
@@ -39,7 +31,6 @@ namespace RankingListNew
         public BucketBRTreeRankingList(List<User> users) :
             this(CollectionsMarshal.AsSpan(users))
         {
-
         }
 
         private static UserBucket[] BuildBucket(Span<User> users)
@@ -126,7 +117,7 @@ namespace RankingListNew
         private void AddUser(User user, ref int rankCount)
         {
             TreeNode node = _root;
-            while (node.UserBucket == null)
+            while (node.Right != null)
             {
                 node.Count++;
                 if (user.CompareTo(node.Right!.LeftUser) < 0)
@@ -150,7 +141,7 @@ namespace RankingListNew
                 // 调节树
                 if (node.Color == ColorEnum.Red)
                 {
-                    // 红色必定不是根节点
+                    // 红色必定不是根节点，因此父节点必定存在
                     TreeNode parentNode = node.Parent!;
                     TreeNode siblingNode = parentNode.Left == node
                         ? parentNode.Right!
@@ -224,6 +215,7 @@ namespace RankingListNew
                         // 左旋转
                         RotateLeft(grandParentNode);
                     }
+
                     break;
                 }
             }
@@ -235,7 +227,7 @@ namespace RankingListNew
         private void RemoveUser(User user)
         {
             TreeNode node = _root;
-            while (node.UserBucket == null)
+            while (node.Right != null)
             {
                 node.Count--;
                 node = user.CompareTo(node.Right!.LeftUser) < 0 ? node.Left! : node.Right!;
@@ -455,6 +447,7 @@ namespace RankingListNew
             {
                 AddUser(user, ref rankCount);
             }
+
             return rankCount;
         }
 
@@ -475,7 +468,7 @@ namespace RankingListNew
             int rankCount = 0;
             TreeNode node = _root;
 
-            while (node.UserBucket == null)
+            while (node.Right != null)
             {
                 Debug.Assert(node.Left != null && node.Right != null);
                 if (user.CompareTo(node.Right.LeftUser) < 0)
@@ -489,8 +482,8 @@ namespace RankingListNew
                 }
             }
 
-            UserBucket bucket = node.UserBucket;
-            int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
+            UserBucket bucket = node.UserBucket!;
+            int userIndexInBucket = bucket.IndexOf(user);
             Debug.Assert(userIndexInBucket >= 0);
             rankCount += userIndexInBucket;
             return rankCount;
@@ -543,13 +536,14 @@ namespace RankingListNew
                     node = node.Right;
                 }
             }
+
             UserBucket bucket = node.UserBucket!;
             int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
             Debug.Assert(userIndexInBucket >= 0);
             rankCount += userIndexInBucket;
 
             // 2. 准备结果
-            int offset = 0;  // 结果数组内的偏移
+            int offset = 0; // 结果数组内的偏移，用于处理用户排名过靠前，存在数据空位的情况
             int leftNum = aroundN, rightNum = aroundN; // 需求数目
             if (rankCount < aroundN)
             {
@@ -557,11 +551,13 @@ namespace RankingListNew
                 leftNum = rankCount;
                 offset = rankCount - aroundN;
             }
+
             if (rankCount + aroundN + 1 > _root.Count)
             {
                 // 用户排名过靠后，无法获取足够的右边用户
                 rightNum = _root.Count - rankCount - 1;
             }
+
             User[] result = new User[leftNum + rightNum + 1];
 
             // 3. 把桶内的用户填充到结果数组中
@@ -581,16 +577,19 @@ namespace RankingListNew
                 {
                     tNode = tNode.Parent;
                 }
+
                 tNode = tNode.Parent!.Left!;
                 while (tNode.Right != null)
                 {
                     tNode = tNode.Right;
                 }
+
                 bucket = tNode.UserBucket!;
                 int n = Math.Min(bucket.UserCount, leftNum - leftCount);
                 Array.Copy(bucket.Users, bucket.UserCount - n, result, aroundN - leftCount - n + offset, n);
                 leftCount += n;
             }
+
             tNode = node;
             while (rightCount < rightNum)
             {
@@ -599,16 +598,19 @@ namespace RankingListNew
                 {
                     tNode = tNode.Parent;
                 }
+
                 tNode = tNode.Parent!.Right!;
                 while (tNode.Left != null)
                 {
                     tNode = tNode.Left;
                 }
+
                 bucket = tNode.UserBucket!;
                 int n = Math.Min(bucket.UserCount, rightNum - rightCount);
                 Array.Copy(bucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
                 rightCount += n;
             }
+
             return (rankCount, result);
         }
 
@@ -866,6 +868,7 @@ namespace RankingListNew
                 {
                     UpdateRightUser(Right);
                 }
+
                 Debug.Assert(Count == Left.Count + Right.Count);
             }
 
@@ -981,7 +984,5 @@ namespace RankingListNew
                 UserCount += other.UserCount;
             }
         }
-
-
     }
 }
