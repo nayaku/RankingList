@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 
 namespace RankingListNew
 {
@@ -17,7 +18,7 @@ namespace RankingListNew
             // 没有用户
             _root = users.Length == 0 ? new TreeNode() : BuildTree(0, buckets.Length, 1, buckets);
             _root.Color = ColorEnum.Black;
-            _userMap = new Dictionary<int, User>(users.Length);
+            _userMap = new(users.Length);
             foreach (ref readonly var u in users)
             {
                 _userMap[u.Id] = u;
@@ -491,30 +492,42 @@ namespace RankingListNew
 
         public User[] GetTopN(int topN)
         {
+            TreeNode node = _root;
+
+            // 获取排名靠前的叶子节点
+            while (node.Left != null)
+            {
+                node = node.Left;
+            }
+            UserBucket bucket = node.UserBucket!;
             topN = Math.Min(topN, GetRankingCount());
             User[] result = new User[topN];
             int rankCount = 0;
-            GetTopN(_root, topN, ref rankCount, ref result);
-            return result;
-        }
+            int n = Math.Min(bucket.UserCount, topN - rankCount);
+            Array.Copy(bucket.Users, 0, result, rankCount, n);
+            rankCount += n;
 
-        private static void GetTopN(TreeNode node, int topN, ref int rankCount, ref User[] result)
-        {
-            if (node.UserBucket != null)
+            // 缺少的用户数
+            while (rankCount < topN)
             {
-                int n = Math.Min(node.UserBucket.UserCount, topN - rankCount);
-                Array.Copy(node.UserBucket.Users, 0, result, rankCount, n);
+                // 查找tNode的右区间的叶子节点
+                while (node != node.Parent!.Left)
+                {
+                    node = node.Parent;
+                }
+
+                node = node.Parent!.Right!;
+                while (node.Left != null)
+                {
+                    node = node.Left;
+                }
+
+                bucket = node.UserBucket!;
+                n = Math.Min(bucket.UserCount, topN - rankCount);
+                Array.Copy(bucket.Users, 0, result, rankCount, n);
                 rankCount += n;
-
-                return;
             }
-
-            Debug.Assert(node.Left != null && node.Right != null);
-            GetTopN(node.Left, topN, ref rankCount, ref result);
-            if (rankCount < topN)
-            {
-                GetTopN(node.Right, topN, ref rankCount, ref result);
-            }
+            return result;
         }
 
         private (int rankCount, User[] result) GetAroundUser(User user, int aroundN)
