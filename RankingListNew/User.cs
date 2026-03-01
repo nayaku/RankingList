@@ -1,8 +1,8 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace RankingListNew
 {
-    public readonly struct User : IComparable<User>, IEquatable<User>
+    public readonly struct User : IComparable<User>
     {
         public readonly int Id;
         public readonly int Score;
@@ -18,11 +18,12 @@ namespace RankingListNew
 
         public int CompareTo(User other)
         {
-            if (Score == other.Score)
+            if (Score != other.Score)
+                return -Score.CompareTo(other.Score);
+            else if (LastActive != other.LastActive)
                 return -LastActive.CompareTo(other.LastActive);
-            else if (LastActive == other.LastActive)
+            else
                 return -Id.CompareTo(other.Id);
-            return -Score.CompareTo(other.Score);
         }
 
         public bool Equals(User other)
@@ -42,36 +43,6 @@ namespace RankingListNew
             if (obj is User other)
                 return Equals(other);
             return false;
-        }
-
-        public static bool operator ==(User left, User right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(User left, User right)
-        {
-            return !(left == right);
-        }
-
-        public static bool operator <(User left, User right)
-        {
-            return left.CompareTo(right) < 0;
-        }
-
-        public static bool operator <=(User left, User right)
-        {
-            return left.CompareTo(right) <= 0;
-        }
-
-        public static bool operator >(User left, User right)
-        {
-            return left.CompareTo(right) > 0;
-        }
-
-        public static bool operator >=(User left, User right)
-        {
-            return left.CompareTo(right) >= 0;
         }
     }
 }

@@ -295,7 +295,7 @@ namespace RankingListTest
             {
                 int operationCount = operations.Count;
 #if DEBUG
-                Debug.Assert(operations.All(op=>op.Type == operations[0].Type), "所有操作类型必须相同");
+                Debug.Assert(operations.All(op => op.Type == operations[0].Type), "所有操作类型必须相同");
 #endif
 
                 (List<OperationResult> _, Stopwatch? singleOpStopwatch) =

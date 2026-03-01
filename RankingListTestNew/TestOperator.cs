@@ -225,7 +225,7 @@ namespace RankingListTestNew
 
                 for (int j = 0; j < baseResult.Users.Length; j++)
                 {
-                    if (baseResult.Users[j] != testResult.Users[j])
+                    if (baseResult.Users[j].CompareTo(testResult.Users[j]) != 0)
                     {
                         Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作，第{j}个响应");
                         errorCount++;

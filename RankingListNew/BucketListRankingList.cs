@@ -112,7 +112,7 @@ namespace RankingListNew
 
         public int UpdateUser(User user)
         {
-            var oldUser = _userDict[user.Id];
+            User oldUser = _userDict[user.Id];
             RemoveUser(oldUser);
             return AddUser(user);
         }
@@ -121,7 +121,7 @@ namespace RankingListNew
         {
             int rankCount = 0;
             User user = _userDict[userId];
-            foreach (var bucket in _buckets)
+            foreach (UserBucket bucket in _buckets)
             {
                 if (user.CompareTo(bucket.MaxUser) <= 0)
                 {

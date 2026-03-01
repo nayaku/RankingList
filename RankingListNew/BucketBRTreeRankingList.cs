@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Xml.Linq;
 
 namespace RankingListNew
 {
@@ -16,10 +15,11 @@ namespace RankingListNew
             users.Sort();
             UserBucket[] buckets = BuildBucket(users);
             // 没有用户
-            _root = users.Length == 0 ? new TreeNode() : BuildTree(0, buckets.Length, 1, buckets);
+            int maxDepth = (int)Math.Ceiling(Math.Log(buckets.Length - 1, 2)) + 1;
+            _root = users.Length == 0 ? new TreeNode() : BuildTree(0, buckets.Length, 1, maxDepth, buckets);
             _root.Color = ColorEnum.Black;
             _userMap = new(users.Length);
-            foreach (ref readonly var u in users)
+            foreach (ref readonly User u in users)
             {
                 _userMap[u.Id] = u;
             }
@@ -52,9 +52,8 @@ namespace RankingListNew
             return buckets;
         }
 
-        private static TreeNode BuildTree(int l, int r, int depth, UserBucket[] buckets)
+        private static TreeNode BuildTree(int l, int r, int depth, int maxDepth, UserBucket[] buckets)
         {
-            int maxDepth = (int)Math.Ceiling(Math.Log(buckets.Length - 1, 2)) + 1;
             // 初始化tree
             TreeNode node = new()
             {
@@ -70,10 +69,10 @@ namespace RankingListNew
             }
 
             int mid = (l + r) >> 1;
-            node.Left = BuildTree(l, mid, depth + 1, buckets);
+            node.Left = BuildTree(l, mid, depth + 1, maxDepth, buckets);
             node.Left.Parent = node;
             node.LeftUser = node.Left.LeftUser;
-            node.Right = BuildTree(mid, r, depth + 1, buckets);
+            node.Right = BuildTree(mid, r, depth + 1, maxDepth, buckets);
             node.Right.Parent = node;
             node.RightUser = node.Right.RightUser;
             node.Count = node.Left.Count + node.Right.Count;
@@ -100,8 +99,8 @@ namespace RankingListNew
             Debug.Assert(node.Right == null || node.Right.Parent == node);
             Debug.Assert(node.Left == null || node.Right == null || node.Left.Count + node.Right.Count == node.Count);
             Debug.Assert(node.UserBucket == null || node.UserBucket.UserCount == node.Count);
-            Debug.Assert(node.Left == null || node.LeftUser == node.Left.LeftUser);
-            Debug.Assert(node.Right == null || node.RightUser == node.Right.RightUser);
+            Debug.Assert(node.Left == null || node.LeftUser.CompareTo(node.Left.LeftUser) == 0);
+            Debug.Assert(node.Right == null || node.RightUser.CompareTo(node.Right.RightUser) == 0);
             if (node.Color == ColorEnum.Red)
             {
                 Debug.Assert(node.Left == null || node.Left.Color == ColorEnum.Black);
@@ -113,6 +112,7 @@ namespace RankingListNew
             return node.Color == ColorEnum.Black ? leftBlackCount + 1 : leftBlackCount;
         }
 #endif
+
         // 参考：https://www.cnblogs.com/crazymakercircle/p/16320430.html
         // 参考：https://blog.csdn.net/u014454538/article/details/120120216
         private void AddUser(User user, ref int rankCount)
@@ -256,7 +256,7 @@ namespace RankingListNew
                 CheckTree();
 #endif
             }
-            else if (siblingNode.UserBucket != null && parent.Count < BucketSize / 4)
+            else if (siblingNode.UserBucket != null && parent.Count < (BucketSize >> 2))
             {
                 parent.CombineChild();
                 parent.Color = ColorEnum.Black;
@@ -530,8 +530,10 @@ namespace RankingListNew
             return result;
         }
 
-        private (int rankCount, User[] result) GetAroundUser(User user, int aroundN)
+        public (User[], int) GetAroundUser(int userId, int aroundN)
         {
+            Debug.Assert(_userMap.ContainsKey(userId));
+            User user = _userMap[userId];
             int rankCount = 0;
             TreeNode node = _root;
 
@@ -623,90 +625,7 @@ namespace RankingListNew
                 Array.Copy(bucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
                 rightCount += n;
             }
-
-            return (rankCount, result);
-        }
-
-        //// 先获取用户在树中的排名，再获取左右aroundN个用户
-        //private static void GetAroundUserStep1(TreeNode node, User user, int aroundN, ref int rankCount,
-        //    ref int leftCount, ref int rightCount, ref User[] result)
-        //{
-        //    if (node.UserBucket != null)
-        //    {
-        //        UserBucket bucket = node.UserBucket;
-        //        int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
-        //        Debug.Assert(userIndexInBucket >= 0);
-        //        rankCount += userIndexInBucket;
-        //        // 左边
-        //        leftCount = Math.Min(userIndexInBucket, aroundN);
-        //        // 右边
-        //        rightCount = Math.Min(bucket.UserCount - userIndexInBucket - 1, aroundN);
-        //        Array.Copy(bucket.Users, userIndexInBucket - leftCount, result, aroundN - leftCount,
-        //            leftCount + rightCount + 1);
-        //        return;
-        //    }
-
-        //    Debug.Assert(node.Left != null && node.Right != null);
-        //    if (user.CompareTo(node.Right.LeftUser) < 0)
-        //    {
-        //        GetAroundUserStep1(node.Left, user, aroundN, ref rankCount, ref leftCount, ref rightCount, ref result);
-        //        // 找到用户后，进入第二阶段
-        //        if (rightCount < aroundN)
-        //        {
-        //            GetAroundUserStep2(node.Right, aroundN, false, ref rightCount, ref result);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        rankCount += node.Left.Count;
-        //        GetAroundUserStep1(node.Right, user, aroundN, ref rankCount, ref leftCount, ref rightCount, ref result);
-        //        // 找到用户后，进入第二阶段
-        //        if (leftCount < aroundN)
-        //        {
-        //            GetAroundUserStep2(node.Left, aroundN, true, ref leftCount, ref result);
-        //        }
-        //    }
-        //}
-
-        //private static void GetAroundUserStep2(TreeNode node, int aroundN, bool isRequiredLeft, ref int obtainedCount,
-        //    ref User[] result)
-        //{
-        //    if (node.UserBucket != null)
-        //    {
-        //        UserBucket bucket = node.UserBucket;
-        //        int n = Math.Min(bucket.UserCount, aroundN - obtainedCount);
-        //        if (isRequiredLeft)
-        //        {
-        //            // 缺少左边的用户
-        //            Array.Copy(bucket.Users, bucket.UserCount - n, result, aroundN - obtainedCount - n, n);
-        //        }
-        //        else
-        //        {
-        //            // 缺少右边的用户
-        //            Array.Copy(bucket.Users, 0, result, aroundN + obtainedCount + 1, n);
-        //        }
-        //        obtainedCount += n;
-        //        return;
-        //    }
-
-        //    Debug.Assert(node.Left != null && node.Right != null);
-        //    TreeNode[] children = isRequiredLeft ? [node.Right, node.Left] : [node.Left, node.Right];
-        //    foreach (TreeNode child in children)
-        //    {
-        //        GetAroundUserStep2(child, aroundN, isRequiredLeft, ref obtainedCount, ref result);
-        //        if (obtainedCount >= aroundN)
-        //        {
-        //            break;
-        //        }
-        //    }
-        //}
-
-        public (User[], int) GetAroundUser(int userId, int aroundN)
-        {
-            Debug.Assert(_userMap.ContainsKey(userId));
-            User user = _userMap[userId];
-            (int rankCount, User[] aroundUsers) = GetAroundUser(user, aroundN);
-            return (aroundUsers, rankCount);
+            return (result, rankCount);
         }
 
         public int GetRankingCount()
@@ -902,8 +821,8 @@ namespace RankingListNew
                 UserBucket = Left.UserBucket;
                 UserBucket.Combine(Right.UserBucket);
                 Debug.Assert(UserBucket.UserCount == Count);
-                Debug.Assert(UserBucket.MinUser == LeftUser);
-                Debug.Assert(UserBucket.MaxUser == RightUser);
+                Debug.Assert(UserBucket.MinUser.CompareTo(LeftUser) == 0);
+                Debug.Assert(UserBucket.MaxUser.CompareTo(RightUser) == 0);
                 Left = null;
                 Right = null;
             }
@@ -968,7 +887,6 @@ namespace RankingListNew
                 }
 
                 User[] newUsers = new User[BucketSize];
-                Dictionary<int, User> newUserDict = new(BucketSize);
                 int newUserCount = UserCount - mid;
                 if (userIndex >= mid)
                 {
@@ -981,8 +899,6 @@ namespace RankingListNew
                 {
                     Array.Copy(Users, mid, newUsers, 0, UserCount - mid);
                 }
-
-                Array.Clear(Users, mid, UserCount - mid);
 
                 UserCount = mid;
                 UserBucket newBucket = new(newUsers, newUserCount);
