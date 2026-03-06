@@ -21,9 +21,9 @@ namespace RankingListNew
             if (Score != other.Score)
                 return -Score.CompareTo(other.Score);
             else if (LastActive != other.LastActive)
-                return -LastActive.CompareTo(other.LastActive);
+                return LastActive.CompareTo(other.LastActive);
             else
-                return -Id.CompareTo(other.Id);
+                return Id.CompareTo(other.Id);
         }
 
         public bool Equals(User other)
