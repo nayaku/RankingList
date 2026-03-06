@@ -1,6 +1,12 @@
 <Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
   <Project Path="RankingList/RankingList.csproj" />
   <Project Path="RankingListNew/RankingListNew.csproj" Id="69fbb3ed-997c-4385-88e7-14b2416a1db8" />
+  <Project Path="RankingListNewCPP/RankingListNewCPP.vcxproj" Id="1e5533a8-1db5-44d9-8708-d52f2f34ee1e" />
   <Project Path="RankingListTest/RankingListTest.csproj" />
   <Project Path="RankingListTestNew/RankingListTestNew.csproj" Id="40c7728f-d3f4-4cb1-aa79-567d6ca18956" />
 </Solution>
