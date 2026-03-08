@@ -10,6 +10,10 @@ struct User
 		: Id(id), Score(score), LastActive(lastActive) {
 	}
 
+	friend bool operator==(const User& a, const User& b) {
+		return a.Id == b.Id;
+	}
+
 	friend bool operator<(const User& a, const User& b) {
 		if (a.Score != b.Score) {
 			return a.Score > b.Score; // Score higher is better

@@ -65,7 +65,7 @@
 //            return node;
 //        }
 
-//        private static void AddUser(TreeNode node, User user, ref int rankCount)
+//        private static void AddTreeUser(TreeNode node, User user, ref int rankCount)
 //        {
 //            // 叶子节点
 //            if (node.UserBucket != null)
@@ -90,13 +90,13 @@
 //            Debug.Assert(node.Left != null && node.Right != null);
 //            if (user.CompareTo(node.Right.LeftUser) < 0)
 //            {
-//                AddUser(node.Left, user, ref rankCount);
+//                AddTreeUser(node.Left, user, ref rankCount);
 //                node.LeftUser = node.Left.LeftUser;
 //            }
 //            else
 //            {
 //                rankCount += node.Left.Count;
-//                AddUser(node.Right, user, ref rankCount);
+//                AddTreeUser(node.Right, user, ref rankCount);
 //                node.RightUser = node.Right.RightUser;
 //            }
 
@@ -143,7 +143,7 @@
 //            }
 //        }
 
-//        public int AddUser(User user)
+//        public int AddTreeUser(User user)
 //        {
 //            Debug.Assert(!_userMap.ContainsKey(user.Id));
 //            _userMap.Add(user.Id, user);
@@ -159,7 +159,7 @@
 //            }
 //            else
 //            {
-//                AddUser(_root, user, ref rankCount);
+//                AddTreeUser(_root, user, ref rankCount);
 //            }
 //            return rankCount;
 //        }
@@ -169,7 +169,7 @@
 //            User oldUser = _userMap[user.Id];
 //            RemoveUser(_root, oldUser);
 //            int rankCount = 0;
-//            AddUser(_root, user, ref rankCount);
+//            AddTreeUser(_root, user, ref rankCount);
 //            _userMap[user.Id] = user;
 //            return rankCount;
 //        }

@@ -10,92 +10,86 @@
 class BucketBRTreeRankingList : public IRankingList
 {
 private:
-    static const int BUCKET_SIZE = 256; // 每个bucket的用户数量
-    static const int INITIAL_BUCKET_SIZE = BUCKET_SIZE / 2; // 初始每个bucket的用户数量
+	static const int BUCKET_SIZE = 256; // 每个bucket的用户数量
+	static const int INITIAL_BUCKET_SIZE = BUCKET_SIZE / 2; // 初始每个bucket的用户数量
 
-    enum class ColorEnum : uint8_t
-    {
-        Red = 0,
-        Black = 1
-    };
+	enum ColorEnum : uint8_t
+	{
+		Red = 0,
+		Black = 1
+	};
 
-    class UserBucket;
+	class UserBucket
+	{
+	public:
+		User Users[BUCKET_SIZE];
+		int UserCount;
 
-    class TreeNode
-    {
-    public:
-        int Count;
-        User LeftUser;
-        User RightUser;
-        TreeNode* Left;
-        TreeNode* Right;
-        TreeNode* Parent;
-        UserBucket* Bucket;
-        ColorEnum Color;
+		const User& GetMinUser() const { return Users[0]; }
+		const User& GetMaxUser() const { return Users[UserCount - 1]; }
+		inline bool IsFull() const { return UserCount >= BUCKET_SIZE; }
+		inline bool IsEmpty() const { return UserCount == 0; }
+		inline int IndexOf(const User& user) const;
 
-        TreeNode();
-        ~TreeNode();
+		int Insert(const User& user);
+		int Remove(const User& user);
+		UserBucket* Split(const User& user, int& userIndex);
+		void Combine(const UserBucket* other);
+	};
 
-        bool IsFull() const { return Count >= BUCKET_SIZE; }
-        bool IsEmpty() const { return Count == 0; }
+	class TreeNode
+	{
+	public:
+		int Count;
+		User LeftUser;
+		User RightUser;
+		TreeNode* Left;
+		TreeNode* Right;
+		TreeNode* Parent;
+		UserBucket* Bucket;
+		ColorEnum Color;
 
-        void MoveFromChild(TreeNode* child);
-        int Insert(const User& user);
-        void Remove(const User& user);
-        void Split(const User& user, int& userIndexInBucket);
-        void CombineChild();
+		TreeNode();
+		~TreeNode();
 
-    private:
-        static void UpdateLeftUser(TreeNode* node);
-        static void UpdateRightUser(TreeNode* node);
-    };
+		inline bool IsFull() const { return Count >= BUCKET_SIZE; }
+		inline bool IsEmpty() const { return Count == 0; }
 
-    class UserBucket
-    {
-    public:
-        std::vector<User> Users;
-        int UserCount;
+		void MoveFromChild(TreeNode* child);
+		int Insert(const User& user);
+		void Remove(const User& user);
+		void Split(const User& user, int& userIndexInBucket);
+		void CombineChild();
 
-        UserBucket();
-        UserBucket(const std::vector<User>& users, int userCount);
-        ~UserBucket() = default;
+	private:
+		static void UpdateLeftUser(TreeNode* node);
+		static void UpdateRightUser(TreeNode* node);
+	};
 
-        const User& GetMinUser() const { return Users[0]; }
-        const User& GetMaxUser() const { return Users[UserCount - 1]; }
-        bool IsFull() const { return UserCount >= Users.size(); }
-        bool IsEmpty() const { return UserCount == 0; }
-        int IndexOf(const User& user) const;
-
-        int Insert(const User& user);
-        int Remove(const User& user);
-        UserBucket* Split(const User& user, int& userIndex);
-        void Combine(const UserBucket* other);
-    };
-
-    TreeNode* _root;
-    std::unordered_map<int, User> _userMap;
+	TreeNode* _root;
+	std::unordered_map<int, User> _userMap;
 
 public:
-    BucketBRTreeRankingList(const std::vector<User>& users);
-    virtual ~BucketBRTreeRankingList() override;
+	BucketBRTreeRankingList(User* pUsers, int userCount);
+	virtual ~BucketBRTreeRankingList() override;
 
-    virtual int AddUser(const User& user) override;
-    virtual int UpdateUser(const User& user) override;
-    virtual User GetUserRank(int userId) const override;
-    virtual int GetTopN(int topN, User* pOutUsers) const override;
-    virtual int GetArroundUser(int userId, int arroundN, User* pOutUsers) const override;
-    virtual int GetUserCount() const override;
+	virtual int AddUser(const User& user) override;
+	virtual int UpdateUser(const User& user) override;
+	virtual int GetUserRank(int userId)  override;
+	virtual int GetTopN(int topN, User* pOutUsers)  override;
+	virtual int GetArroundUser(int userId, int arroundN, User* pOutUsers) override;
+	virtual int GetUserCount() override;
 
 private:
-    std::vector<UserBucket*> BuildBucket(std::vector<User>& users);
-    TreeNode* BuildTree(int l, int r, int depth, int maxDepth, const std::vector<UserBucket*>& buckets);
-    void AddUser(const User& user, int& rankCount);
-    void RemoveUser(const User& user);
-    void FixAfterAdd(TreeNode* node);
-    void FixAfterDel(TreeNode* node);
-    TreeNode* RotateLeft(TreeNode* x);
-    TreeNode* RotateRight(TreeNode* x);
-    void CheckTree();
-    int CheckTree(TreeNode* node);
+	std::vector<UserBucket*> BuildBucket(const User* pUsers, int userCount);
+	TreeNode* BuildTree(int l, int r, int depth, int maxDepth, const std::vector<UserBucket*>& buckets);
+	void AddUser(const User& user, int& rankCount);
+	void RemoveUser(const User& user);
+	void FixAfterAdd(TreeNode* node);
+	void FixAfterDel(TreeNode* node);
+	TreeNode* RotateLeft(TreeNode* x);
+	TreeNode* RotateRight(TreeNode* x);
+	void CheckTree();
+	int CheckTree(TreeNode* node);
 };
 

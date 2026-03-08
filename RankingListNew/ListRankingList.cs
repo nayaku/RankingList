@@ -10,7 +10,7 @@
 //            _users.Sort();
 //        }
 
-//        public int AddUser(User user)
+//        public int AddTreeUser(User user)
 //        {
 //            _users.Add(user);
 //            _users.Sort();

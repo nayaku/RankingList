@@ -1,51 +1,68 @@
+[TOC]
+
+# 游戏全服排行榜
+
 # 一、概述
-在游戏和社交应用中，排行榜是一个核心功能模块，需要支持高并发的增删改查操作，同时保持查询的实时性。 本文设计了一个由 红黑树 + 分桶 混合数据结构实现的高性能排行榜。红黑树用于快速定位玩家所在的桶，分桶用于存储玩家的有序数据，从而实现高效的增删改查操作。
+在游戏和社交应用中，排行榜是一个核心功能模块，需要支持高并发、实时的增改查和区间查询操作。本文设计了一个由 `区间红黑树 + 分桶` 混合数据结构实现的高性能排行榜。区间红黑树管理区间和桶，分桶存储玩家的有序数据。查询操作均能稳定在O(log M + log K)（M为桶数量，K为单桶玩家数），增改操作性能在O(log M + log K + K)以内。
 
-# 二、数据结构设计
+# 二、设计思路
+本文采用 `区间红黑树 + 分桶` 的混合数据结构，结合两者的优势，形成互补：
 
-## 2.1 排行榜接口设计
+- 分桶：将所有玩家按分数范围划分为多个桶，每个桶内部存储少量有序玩家。插入、删除操作和查询在单桶内进行。
+
+- 区间红黑树：用红黑树管理所有桶。红黑树的非叶子节点包含区间，叶子节点包含分桶指针。
+
+## QA：
+
+**为什么不直接用纯红黑树？**
+
+**内存局部性差**：红黑树节点分散在堆上，查询区间用户（排行榜前N名玩家、查询用户排名周围玩家）时， CPU 缓存命中率低，随机访问导致性能下降。增改的时候，插入/删除操作导致树的旋转，需要随机访问和读写大量节点，导致缓存不命中。（事实上也证明了如此，见测试数据：）
+
+# 三、数据结构设计
+
+## 3.1 排行榜接口设计
 首先需要定义一个排行榜，一个游戏的排行榜应该包含以下操作：
 - 添加玩家
 - 更新玩家分数
-- 获取排行榜前N名玩家
 - 获取某个玩家的排名
+- 获取排行榜前N名玩家
 - 获取玩家周围的排名
 - 获得玩家总数
 
 ```csharp
-    public interface IRankingList
-    {
-        int AddUser(User user);
-        int UpdateUser(User user);
-        int GetUserRank(int userId);
-        List<User> GetTopN(int topN);
-        (List<User>, int) GetAroundUser(int userId, int aroundN);
-        int GetRankingCount();
-    }
+public interface IRankingList
+{
+    int AddUser(User user);
+    int UpdateUser(User user);
+    int GetUserRank(int userId);
+    User[] GetTopN(int topN);
+    (User[], int) GetAroundUser(int userId, int aroundN);
+    int GetRankingCount();
+}
 ```
 
-## 2.2 用户数据结构：
-用户数据结构包含玩家的唯一标识符（Id）、分数（Score）和最后活跃时间（LastActive）。用户数据结构实现了 `IComparable<User>` 接口，用于在排行榜中进行排序。
+## 3.2 用户数据结构：
+用户数据结构包含玩家的唯一标识符（Id）、分数（Score）和最后更新时间（LastUpdateTime）。用户数据结构实现了 `IComparable<User>` 接口，用于在排行榜中进行排序。
 排序规则：
 - 首先根据分数降序排序
-- 如果分数相同，则根据最后活跃时间升序排序
-- 如果最后活跃时间也相同，则根据玩家ID升序排序
+- 如果分数相同，则根据最后更新时间升序排序
+- 如果最后更新时间也相同，则根据玩家ID升序排序
 
 ```csharp
 public readonly struct User : IComparable<User>
 {
     public readonly int Id;
     public readonly int Score;
-    public readonly DateTime LastActive;
+    public readonly DateTime LastUpdateTime;
 
     public int CompareTo(User other)
     {
         if (Score != other.Score)
             return -Score.CompareTo(other.Score);
-        else if (LastActive != other.LastActive)
-            return -LastActive.CompareTo(other.LastActive);
+        else if (LastUpdateTime != other.LastUpdateTime)
+            return LastUpdateTime.CompareTo(other.LastUpdateTime);
         else
-            return -Id.CompareTo(other.Id);
+            return Id.CompareTo(other.Id);
     }
 }
 ```
@@ -76,10 +93,10 @@ class UserBucket
 
 
 核心操作：
-- 添加玩家：根据玩家分数找到对应的桶，将玩家插入到桶内有序数组中。使用二分查找找到插入位置，O(log K + K) 复杂度（K 为桶内用户数）
-- 删除玩家：从桶中删除指定玩家。使用二分查找找到玩家位置并删除，O(log K + K) 复杂度。
-- 分裂桶：当桶内玩家过多时，需要分裂为两个桶。将桶内玩家平均分为两部分，分数低的玩家进入新桶，分数高的玩家保持在原桶。
-- 合并桶：当桶内玩家过少时，需要合并桶。将两个桶内玩家合并为一个桶，保持有序数组。
+- 添加玩家：根据玩家分数找到对应的桶，使用二分查找找到插入位置，将玩家插入到桶内有序数组中。
+- 删除玩家：使用二分查找找到玩家位置并删除。
+- 分裂桶：将桶内玩家平均分为两部分，桶的后半段进入新桶，前半段保持在原桶。分裂的时候，肯定为插入新节点时发现桶满的时候，插入和分裂同时进行，可以提升性能。
+- 合并桶：向后合并桶，将后一个桶内的玩家合并到当前桶的末尾。
 
 完整的用户桶实现如下：
 ```csharp
@@ -116,8 +133,6 @@ class UserBucket
     public int Remove(User user)
     {
         int index = Array.BinarySearch(Users, 0, UserCount, user);
-        Debug.Assert(index >= 0);
-
         Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
         UserCount--;
         return index;
@@ -190,14 +205,183 @@ class TreeNode
 **关键字段** ：
 
 - Count ：子树中的用户总数
-- LeftUser/RightUser ：子树的最小/最大用户（用于快速范围判断）
+- LeftUser/RightUser ：子树的最小/最大用户（用于区间判断）
 - Left/Right/Parent ：树结构指针
 - UserBucket ：叶子节点的用户桶
 - Color ：红黑树颜色标记
 
 **核心操作**：
+- 移动赋值：将子节点的信息赋值给当前节点。
+- 添加玩家：插入到新用户到叶子节点的用户桶中。如果插入的用户影响到子树的最小/最大用户，从下往上更新子树的最小/最大用户。
+- 删除玩家：从叶子节点的用户桶中删除玩家。同上检查并更新所有子树的最小/最大用户。
+- 分裂节点：新建2个子节点。将原先的桶分配左儿子，将新桶分配给右儿子。同上检查并更新子树的最小/最大用户。
+- 合并节点：左右儿子必须为叶子节点才能进行此操作。将右儿子的桶合并到左儿子的桶中。
 
 
+移动赋值：
+```csharp
+public void MoveFromChild(TreeNode child)
+{
+    Left = child.Left;
+    Right = child.Right;
+    child.Left?.Parent = this;
+    child.Right?.Parent = this;
+    UserBucket = child.UserBucket;
+}
+```
+
+当区间变化的时候，维护子树的最小/最大用户：
+```csharp
+private static void UpdateLeftUser(TreeNode node)
+{
+    while (node.Parent != null && node == node.Parent.Left)
+    {
+        node.Parent.LeftUser = node.LeftUser;
+        node = node.Parent;
+    }
+}
+
+private static void UpdateRightUser(TreeNode node)
+{
+    while (node.Parent != null && node == node.Parent.Right)
+    {
+        node.Parent.RightUser = node.RightUser;
+        node = node.Parent;
+    }
+}
+```
+
+添加玩家：
+```csharp
+public int Insert(User user)
+{
+    Debug.Assert(UserBucket != null);
+    int userIndexInBucket = UserBucket.Insert(user);
+    if (userIndexInBucket == 0)
+    {
+        LeftUser = user;
+        UpdateLeftUser(this);
+    }
+    else if (userIndexInBucket == UserBucket.UserCount - 1)
+    {
+        RightUser = user;
+        UpdateRightUser(this);
+    }
+
+    Count++;
+    return userIndexInBucket;
+}
+```
+
+删除玩家：这里需要处理一个特殊情况，当桶被清空的时候，需要更新父节点的最小/最大用户为兄弟节点的最小/最大用户，并向上一路更新子树。
+```csharp
+public void Remove(User user)
+{
+    Debug.Assert(UserBucket != null);
+    int userIndexInBucket = UserBucket.Remove(user);
+    if (UserBucket.Empty)
+    {
+        // LeftUser = null;
+        // RightUser = null;
+        if (Parent != null)
+        {
+            if (this == Parent.Left)
+            {
+                Parent.LeftUser = Parent.Right!.LeftUser;
+                UpdateLeftUser(Parent);
+            }
+            else
+            {
+                Parent.RightUser = Parent.Left!.RightUser;
+                UpdateRightUser(Parent);
+            }
+        }
+    }
+    else if (userIndexInBucket == 0)
+    {
+        LeftUser = UserBucket.MinUser;
+        UpdateLeftUser(this);
+    }
+    else if (userIndexInBucket == UserBucket.UserCount)
+    {
+        RightUser = UserBucket.MaxUser;
+        UpdateRightUser(this);
+    }
+
+    Count--;
+}
+```
+
+分裂节点：
+```csharp
+public void Split(User user, out int userIndexInBucket)
+{
+    Debug.Assert(UserBucket != null);
+    UserBucket newBucket = UserBucket.Split(user, out userIndexInBucket);
+    Left = new TreeNode()
+    {
+        UserBucket = UserBucket,
+        Count = UserBucket.UserCount,
+        LeftUser = UserBucket.MinUser,
+        RightUser = UserBucket.MaxUser,
+        Parent = this
+    };
+    Right = new TreeNode()
+    {
+        UserBucket = newBucket,
+        Count = newBucket.UserCount,
+        LeftUser = newBucket.MinUser,
+        RightUser = newBucket.MaxUser,
+        Parent = this
+    };
+    UserBucket = null;
+    Count++;
+    if (userIndexInBucket == 0)
+    {
+        UpdateLeftUser(Left);
+    }
+    else if (userIndexInBucket == Count - 1)
+    {
+        UpdateRightUser(Right);
+    }
+
+    Debug.Assert(Count == Left.Count + Right.Count);
+}
+```
+
+合并节点：
+```csharp
+public void CombineChild()
+{
+    Debug.Assert(Left != null && Right != null);
+    Debug.Assert(Left.UserBucket != null && Right.UserBucket != null);
+    UserBucket = Left.UserBucket;
+    UserBucket.Combine(Right.UserBucket);
+    Left = null;
+    Right = null;
+}
+```
+
+## 3.5 排行榜设计
+
+```csharp
+public class BucketBRTreeRankingList : IRankingList
+{
+    private static readonly int BucketSize = 256; // 每个bucket的用户数量
+    private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
+    private TreeNode _root;
+    private Dictionary<int, User> _userMap;
+}
+```
+`_root` 是根节点，`_userMap` 是用户id到用户的映射。
+
+添加玩家：
+更新玩家分数：
+获取某个玩家的排名：
+获取排行榜前N名玩家：
+获取玩家周围的排名：
+
+# 完整代码
 
 最后完整代码
 ```csharp

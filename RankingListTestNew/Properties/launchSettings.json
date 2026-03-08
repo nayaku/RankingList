@@ -2,7 +2,7 @@
   "profiles": {
     "RankingListTestNew": {
       "commandName": "Project",
-      "commandLineArgs": "test BucketBRTreeRankingList --base BucketListRankingList"
+      "commandLineArgs": "test BucketListRankingList --base BucketBRTreeRankingList "
     }
   }
 }

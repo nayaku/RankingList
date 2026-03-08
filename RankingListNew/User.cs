@@ -6,22 +6,22 @@ namespace RankingListNew
     {
         public readonly int Id;
         public readonly int Score;
-        public readonly DateTime LastActive;
+        public readonly DateTime LastUpdateTime;
 
         [JsonConstructor]
-        public User(int id = -1, int score = 0, DateTime lastActive = default)
+        public User(int id = -1, int score = 0, DateTime lastUpdateTime = default)
         {
             Id = id;
             Score = score;
-            LastActive = lastActive;
+            LastUpdateTime = lastUpdateTime;
         }
 
         public int CompareTo(User other)
         {
             if (Score != other.Score)
                 return -Score.CompareTo(other.Score);
-            else if (LastActive != other.LastActive)
-                return LastActive.CompareTo(other.LastActive);
+            else if (LastUpdateTime != other.LastUpdateTime)
+                return LastUpdateTime.CompareTo(other.LastUpdateTime);
             else
                 return Id.CompareTo(other.Id);
         }

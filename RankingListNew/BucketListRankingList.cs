@@ -4,7 +4,7 @@ namespace RankingListNew
 {
     public class BucketListRankingList : IRankingList
     {
-        private const int BucketSize = 512; // 每个桶包含的玩家数
+        private const int BucketSize = 256; // 每个桶包含的玩家数
         private const int InitialBucketSize = BucketSize / 2; // 初始桶大小
         private int _userCount;
         private List<UserBucket> _buckets;
@@ -140,18 +140,16 @@ namespace RankingListNew
         public User[] GetTopN(int topN)
         {
             int rankCount = 0;
-            List<User> result = new(topN);
+            User[] result = new User[Math.Min(topN, _userCount)];
             for (int bucketIndex = 0; bucketIndex < _buckets.Count && rankCount < topN; bucketIndex++)
             {
                 UserBucket bucket = _buckets[bucketIndex];
-                for (int inBucketIndex = 0; inBucketIndex < bucket.UserCount && rankCount < topN; inBucketIndex++)
-                {
-                    result.Add(bucket.Users[inBucketIndex]);
-                    rankCount++;
-                }
+                int n = Math.Min(bucket.UserCount, topN - rankCount);
+                Array.Copy(bucket.Users, 0, result, rankCount, n);
+                rankCount += n;
             }
 
-            return result.ToArray();
+            return result;
         }
 
         public (User[], int) GetAroundUser(int userId, int aroundN)
@@ -185,15 +183,18 @@ namespace RankingListNew
             }
 
             inBucketIndex = startRank - rankCount;
-            List<User> result = new(count);
+            User[] result = new User[count];
             for (int resultIndex = 0; resultIndex < count; bucketIndex++)
             {
                 UserBucket bucket = _buckets[bucketIndex];
-                for (; inBucketIndex < bucket.UserCount && resultIndex < count; inBucketIndex++)
-                {
-                    result.Add(bucket.Users[inBucketIndex]);
-                    resultIndex++;
-                }
+                int n = Math.Min(bucket.UserCount - inBucketIndex, count - resultIndex);
+                Array.Copy(bucket.Users, inBucketIndex, result, resultIndex, n);
+                resultIndex += n;
+                //for (; inBucketIndex < bucket.UserCount && resultIndex < count; inBucketIndex++)
+                //{
+                //    result.Add(bucket.Users[inBucketIndex]);
+                //    resultIndex++;
+                //}
                 inBucketIndex = 0;
             }
 
@@ -286,7 +287,6 @@ namespace RankingListNew
                 }
 
                 User[] newUsers = new User[BucketSize];
-                Dictionary<int, User> newUserDict = new(BucketSize);
                 int newUserCount = UserCount - mid;
                 if (userIndex >= mid)
                 {
@@ -317,3 +317,105 @@ namespace RankingListNew
         }
     }
 }
+/*
+== Test stau10w_10w ===
+用户数: 100000
+操作数: 100000
+限制操作类型: AddUser
+排行榜用户数: 200000
+总耗时: 238 ms
+平均耗时: 2.38 ms/1000操作
+内存占用: 9.18 MB
+内存峰值: 12.94 MB
+测试日期: 2026/3/7 19:54:12
+√ 所有操作结果验证通过！
+总耗时: 238 ms vs 31 ms (+667.74%)
+平均耗时: 2.38 ms/1k操作 vs 0.31 ms/1k操作 (+667.74%)
+内存占用: 9.18 MB vs 9.30 MB (-1.25%)
+内存峰值: 12.94 MB vs 13.05 MB (-0.84%)
+== Test stau10w_10w End ===
+
+== Test stgau10w_10w ===
+用户数: 100000
+操作数: 100000
+限制操作类型: GetAroundUser
+排行榜用户数: 100000
+总耗时: 357 ms
+平均耗时: 3.57 ms/1000操作
+内存占用: 36.67 MB
+内存峰值: 39.16 MB
+测试日期: 2026/3/7 19:54:12
+√ 所有操作结果验证通过！
+总耗时: 357 ms vs 85 ms (+320.00%)
+平均耗时: 3.57 ms/1k操作 vs 0.85 ms/1k操作 (+320.00%)
+内存占用: 36.67 MB vs 36.66 MB (+0.02%)
+内存峰值: 39.16 MB vs 36.68 MB (+6.77%)
+== Test stgau10w_10w End ===
+
+== Test stgt10w_10w ===
+用户数: 100000
+操作数: 100000
+限制操作类型: GetTopN
+排行榜用户数: 100000
+总耗时: 23 ms
+平均耗时: 0.23 ms/1000操作
+内存占用: 80.88 MB
+内存峰值: 80.97 MB
+测试日期: 2026/3/7 19:54:14
+√ 所有操作结果验证通过！
+总耗时: 23 ms vs 30 ms (-23.33%)
+平均耗时: 0.23 ms/1k操作 vs 0.30 ms/1k操作 (-23.33%)
+内存占用: 80.88 MB vs 80.88 MB (0.00%)
+内存峰值: 80.97 MB vs 80.96 MB (+0.01%)
+== Test stgt10w_10w End ===
+
+== Test stgu10w_10w ===
+用户数: 100000
+操作数: 100000
+限制操作类型: GetUserRank
+排行榜用户数: 100000
+总耗时: 190 ms
+平均耗时: 1.90 ms/1000操作
+内存占用: 2.29 MB
+内存峰值: 2.30 MB
+测试日期: 2026/3/7 19:54:17
+√ 所有操作结果验证通过！
+总耗时: 190 ms vs 28 ms (+578.57%)
+平均耗时: 1.90 ms/1k操作 vs 0.28 ms/1k操作 (+578.57%)
+内存占用: 2.29 MB vs 2.29 MB (+0.02%)
+内存峰值: 2.30 MB vs 2.30 MB (0.00%)
+== Test stgu10w_10w End ===
+
+== Test stuu10w_10w ===
+用户数: 100000
+操作数: 100000
+限制操作类型: UpdateUser
+排行榜用户数: 100000
+总耗时: 244 ms
+平均耗时: 2.44 ms/1000操作
+内存占用: 2.29 MB
+内存峰值: 2.30 MB
+测试日期: 2026/3/7 19:54:17
+√ 所有操作结果验证通过！
+总耗时: 244 ms vs 43 ms (+467.44%)
+平均耗时: 2.44 ms/1k操作 vs 0.43 ms/1k操作 (+467.44%)
+内存占用: 2.29 MB vs 2.29 MB (0.00%)
+内存峰值: 2.30 MB vs 2.30 MB (0.00%)
+== Test stuu10w_10w End ===
+
+== Test t100w_100w ===
+用户数: 1000000
+操作数: 1000000
+排行榜用户数: 1099921
+总耗时: 8858 ms
+平均耗时: 8.86 ms/1000操作
+内存占用: 251.70 MB
+内存峰值: 254.15 MB
+测试日期: 2026/3/7 19:54:27
+√ 所有操作结果验证通过！
+总耗时: 8858 ms vs 560 ms (+1481.79%)
+平均耗时: 8.86 ms/1k操作 vs 0.56 ms/1k操作 (+1481.79%)
+内存占用: 251.70 MB vs 251.84 MB (-0.06%)
+内存峰值: 254.15 MB vs 251.83 MB (+0.92%)
+== Test t100w_100w End ===
+*/

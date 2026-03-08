@@ -14,7 +14,7 @@
 //            _usersDict = _users.ToDictionary(u => u.Id);
 //        }
 
-//        public int AddUser(User user)
+//        public int AddTreeUser(User user)
 //        {
 //            int insertIndex = _users.BinarySearch(user);
 //            if (insertIndex < 0)
@@ -33,7 +33,7 @@
 //            int oldIndex = GetUserRank(user.Id);
 //            _users.RemoveAt(oldIndex);
 //            // 插入新用户
-//            int insertIndex = AddUser(user);
+//            int insertIndex = AddTreeUser(user);
 //            return insertIndex;
 //        }
 
