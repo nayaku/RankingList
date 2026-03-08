@@ -2,23 +2,23 @@
 
 namespace RankingListNew
 {
-    public class BucketListRankingList : IRankingList
+    public class BucketLinkedListRankingList : IRankingList
     {
         private const int BucketSize = 256; // 每个桶包含的玩家数
         private const int InitialBucketSize = BucketSize / 2; // 初始桶大小
         private int _userCount;
-        private List<UserBucket> _buckets;
+        private LinkedList<UserBucket> _buckets;
         private Dictionary<int, User> _userDict;
 #if DEBUG
         private int _splitCount;
         private int _combineCount;
 #endif
-        public BucketListRankingList(List<User> users)
+        public BucketLinkedListRankingList(List<User> users)
         {
             users.Sort();
             int bucketNum = (int)Math.Ceiling((double)users.Count / InitialBucketSize);
             // 初始化每个桶
-            _buckets = new(bucketNum);
+            _buckets = new();
             for (int i = 0; i < bucketNum; i++)
             {
                 int l = i * InitialBucketSize;
@@ -26,14 +26,13 @@ namespace RankingListNew
                 int userCount = r - l;
                 User[] bucketUsers = new User[BucketSize];
                 users.CopyTo(l, bucketUsers, 0, userCount);
-                _buckets.Add(new UserBucket(bucketUsers, userCount));
+                _buckets.AddLast(new UserBucket(bucketUsers, userCount));
             }
             if (users.Count == 0)
             {
                 User[] bucketUsers = new User[BucketSize];
-                _buckets.Add(new UserBucket(bucketUsers, 0));
+                _buckets.AddLast(new UserBucket(bucketUsers, 0));
             }
-
             _userDict = users.ToDictionary(u => u.Id, u => u);
             _userCount = users.Count;
         }
@@ -43,28 +42,28 @@ namespace RankingListNew
             int rankCount = 0;
             if (_userCount == 0)
             {
-                _buckets[0].Insert(user);
+                _buckets.Last!.Value.Insert(user);
             }
             else
             {
-                int bucketIndex;
+                LinkedListNode<UserBucket> bucketNode = _buckets.First!;
                 int userIndexInBucket;
-                for (bucketIndex = 0; bucketIndex < _buckets.Count - 1; bucketIndex++)
+                while (bucketNode.Next != null)
                 // 找不到就选择最后一个bucket
                 {
-                    if (user.CompareTo(_buckets[bucketIndex].MaxUser) <= 0)
+                    if (user.CompareTo(bucketNode.Value.MaxUser) <= 0)
                     {
                         break;
                     }
-
-                    rankCount += _buckets[bucketIndex].UserCount;
+                    rankCount += bucketNode.Value.UserCount;
+                    bucketNode = bucketNode.Next!;
                 }
 
-                if (_buckets[bucketIndex].Full)
+                if (bucketNode.Value.Full)
                 {
                     // 分裂bucket
-                    UserBucket newBucket = _buckets[bucketIndex].Split(user, out userIndexInBucket);
-                    _buckets.Insert(bucketIndex + 1, newBucket);
+                    UserBucket newBucket = bucketNode.Value.Split(user, out userIndexInBucket);
+                    _buckets.AddAfter(bucketNode, newBucket);
 #if DEBUG
                     _splitCount++;
 #endif
@@ -72,7 +71,7 @@ namespace RankingListNew
                 else
                 {
                     // 加入bucket
-                    userIndexInBucket = _buckets[bucketIndex].Insert(user);
+                    userIndexInBucket = bucketNode.Value.Insert(user);
                 }
                 rankCount += userIndexInBucket;
             }
@@ -83,30 +82,31 @@ namespace RankingListNew
 
         private void RemoveUser(User user)
         {
-            int bucketIndex;
-            for (bucketIndex = 0; bucketIndex < _buckets.Count; bucketIndex++)
+            LinkedListNode<UserBucket> bucketNode = _buckets.First!;
+            while (bucketNode != null)
             {
-                UserBucket bucket = _buckets[bucketIndex];
+                UserBucket bucket = bucketNode.Value;
                 if (user.CompareTo(bucket.MaxUser) <= 0)
                 {
                     bucket.Remove(user);
                     break;
                 }
+                bucketNode = bucketNode.Next!;
             }
 
-            Debug.Assert(bucketIndex < _buckets.Count, "用户不存在");
+            Debug.Assert(bucketNode != null, "用户不存在");
             if (_userCount == 1)
             { }
-            else if (_buckets[bucketIndex].Empty)
+            else if (bucketNode.Value.Empty)
             {
-                _buckets.RemoveAt(bucketIndex);
+                _buckets.Remove(bucketNode);
             }
-            else if (_buckets[bucketIndex].UserCount < BucketSize / 4 && bucketIndex != 0 &&
-                     _buckets[bucketIndex - 1].UserCount < BucketSize / 4)
+            else if (bucketNode.Value.UserCount < BucketSize / 4 && bucketNode.Previous != null &&
+                     bucketNode.Previous.Value.UserCount < BucketSize / 4)
             {
                 // 向前合并
-                _buckets[bucketIndex - 1].Combine(_buckets[bucketIndex]);
-                _buckets.RemoveAt(bucketIndex);
+                bucketNode.Previous.Value.Combine(bucketNode.Value);
+                _buckets.Remove(bucketNode);
 #if DEBUG
                 _combineCount++;
 #endif
@@ -145,13 +145,16 @@ namespace RankingListNew
         public User[] GetTopN(int topN)
         {
             int rankCount = 0;
-            User[] result = new User[Math.Min(topN, _userCount)];
-            for (int bucketIndex = 0; bucketIndex < _buckets.Count && rankCount < topN; bucketIndex++)
+            topN = Math.Min(topN, _userCount);
+            User[] result = new User[topN];
+            LinkedListNode<UserBucket>? bucketNode = _buckets.First;
+            while (rankCount < topN)
             {
-                UserBucket bucket = _buckets[bucketIndex];
+                UserBucket bucket = bucketNode.Value;
                 int n = Math.Min(bucket.UserCount, topN - rankCount);
                 Array.Copy(bucket.Users, 0, result, rankCount, n);
                 rankCount += n;
+                bucketNode = bucketNode.Next;
             }
 
             return result;
@@ -160,42 +163,42 @@ namespace RankingListNew
         public (User[], int) GetAroundUser(int userId, int aroundN)
         {
             int rankCount = 0;
-            int bucketIndex = -1;
             User user = _userDict[userId];
-            for (int i = 0; i < _buckets.Count; i++)
+
+            LinkedListNode<UserBucket> bucketNode = _buckets.First!;
+            while (bucketNode != null)
             {
-                if (user.CompareTo(_buckets[i].MaxUser) <= 0)
+                if (user.CompareTo(bucketNode.Value.MaxUser) <= 0)
                 {
-                    bucketIndex = i;
                     break;
                 }
-
-                rankCount += _buckets[i].UserCount;
+                rankCount += bucketNode.Value.UserCount;
+                bucketNode = bucketNode.Next;
             }
-
-            Debug.Assert(bucketIndex != -1);
-
-            int inBucketIndex = _buckets[bucketIndex].IndexOf(user);
+            Debug.Assert(bucketNode != null);
+            int inBucketIndex = bucketNode.Value.IndexOf(user);
             Debug.Assert(inBucketIndex != -1);
             int resultRank = rankCount + inBucketIndex;
             int startRank = Math.Max(0, resultRank - aroundN);
             int endRank = Math.Min(resultRank + aroundN, _userCount - 1);
             int count = endRank - startRank + 1;
 
-            for (; rankCount > startRank; bucketIndex--)
+            while (rankCount > startRank)
             {
-                rankCount -= _buckets[bucketIndex - 1].UserCount;
+                bucketNode = bucketNode.Previous!;
+                rankCount -= bucketNode.Value.UserCount;
             }
 
             inBucketIndex = startRank - rankCount;
             User[] result = new User[count];
-            for (int resultIndex = 0; resultIndex < count; bucketIndex++)
+            for (int resultIndex = 0; resultIndex < count;)
             {
-                UserBucket bucket = _buckets[bucketIndex];
+                UserBucket bucket = bucketNode.Value;
                 int n = Math.Min(bucket.UserCount - inBucketIndex, count - resultIndex);
                 Array.Copy(bucket.Users, inBucketIndex, result, resultIndex, n);
                 resultIndex += n;
                 inBucketIndex = 0;
+                bucketNode = bucketNode.Next!;
             }
 
             return (result, resultRank);
@@ -211,17 +214,17 @@ namespace RankingListNew
         {
             Console.WriteLine($"UserCount: {_userCount}");
             Console.Write("Each Bucket Number of Users: ");
-            for (int i = 0; i < _buckets.Count; i++)
+            for (LinkedListNode<UserBucket>? bucketNode = _buckets.First; bucketNode != null; bucketNode = bucketNode.Next)
             {
-                Console.Write($"{_buckets[i].UserCount} ");
+                Console.Write($"{bucketNode.Value.UserCount} ");
             }
 
             Console.WriteLine();
             Console.WriteLine("Each Bucket Score Range:");
-            for (int i = 0; i < _buckets.Count; i++)
+            for (LinkedListNode<UserBucket>? bucketNode = _buckets.First; bucketNode != null; bucketNode = bucketNode.Next)
             {
                 Console.WriteLine(
-                    $"Bucket {i}: {(_buckets[i].MinUser).Score} - {(_buckets[i].MaxUser).Score}");
+                    $"Bucket {(bucketNode.Value.MinUser).Score} - {(bucketNode.Value.MaxUser).Score}");
             }
 
             Console.WriteLine($"SplitCount: {_splitCount}");
@@ -317,105 +320,3 @@ namespace RankingListNew
         }
     }
 }
-/*
-== Test stau10w_10w ===
-用户数: 100000
-操作数: 100000
-限制操作类型: AddUser
-排行榜用户数: 200000
-总耗时: 238 ms
-平均耗时: 2.38 ms/1000操作
-内存占用: 9.18 MB
-内存峰值: 12.94 MB
-测试日期: 2026/3/7 19:54:12
-√ 所有操作结果验证通过！
-总耗时: 238 ms vs 31 ms (+667.74%)
-平均耗时: 2.38 ms/1k操作 vs 0.31 ms/1k操作 (+667.74%)
-内存占用: 9.18 MB vs 9.30 MB (-1.25%)
-内存峰值: 12.94 MB vs 13.05 MB (-0.84%)
-== Test stau10w_10w End ===
-
-== Test stgau10w_10w ===
-用户数: 100000
-操作数: 100000
-限制操作类型: GetAroundUser
-排行榜用户数: 100000
-总耗时: 357 ms
-平均耗时: 3.57 ms/1000操作
-内存占用: 36.67 MB
-内存峰值: 39.16 MB
-测试日期: 2026/3/7 19:54:12
-√ 所有操作结果验证通过！
-总耗时: 357 ms vs 85 ms (+320.00%)
-平均耗时: 3.57 ms/1k操作 vs 0.85 ms/1k操作 (+320.00%)
-内存占用: 36.67 MB vs 36.66 MB (+0.02%)
-内存峰值: 39.16 MB vs 36.68 MB (+6.77%)
-== Test stgau10w_10w End ===
-
-== Test stgt10w_10w ===
-用户数: 100000
-操作数: 100000
-限制操作类型: GetTopN
-排行榜用户数: 100000
-总耗时: 23 ms
-平均耗时: 0.23 ms/1000操作
-内存占用: 80.88 MB
-内存峰值: 80.97 MB
-测试日期: 2026/3/7 19:54:14
-√ 所有操作结果验证通过！
-总耗时: 23 ms vs 30 ms (-23.33%)
-平均耗时: 0.23 ms/1k操作 vs 0.30 ms/1k操作 (-23.33%)
-内存占用: 80.88 MB vs 80.88 MB (0.00%)
-内存峰值: 80.97 MB vs 80.96 MB (+0.01%)
-== Test stgt10w_10w End ===
-
-== Test stgu10w_10w ===
-用户数: 100000
-操作数: 100000
-限制操作类型: GetUserRank
-排行榜用户数: 100000
-总耗时: 190 ms
-平均耗时: 1.90 ms/1000操作
-内存占用: 2.29 MB
-内存峰值: 2.30 MB
-测试日期: 2026/3/7 19:54:17
-√ 所有操作结果验证通过！
-总耗时: 190 ms vs 28 ms (+578.57%)
-平均耗时: 1.90 ms/1k操作 vs 0.28 ms/1k操作 (+578.57%)
-内存占用: 2.29 MB vs 2.29 MB (+0.02%)
-内存峰值: 2.30 MB vs 2.30 MB (0.00%)
-== Test stgu10w_10w End ===
-
-== Test stuu10w_10w ===
-用户数: 100000
-操作数: 100000
-限制操作类型: UpdateUser
-排行榜用户数: 100000
-总耗时: 244 ms
-平均耗时: 2.44 ms/1000操作
-内存占用: 2.29 MB
-内存峰值: 2.30 MB
-测试日期: 2026/3/7 19:54:17
-√ 所有操作结果验证通过！
-总耗时: 244 ms vs 43 ms (+467.44%)
-平均耗时: 2.44 ms/1k操作 vs 0.43 ms/1k操作 (+467.44%)
-内存占用: 2.29 MB vs 2.29 MB (0.00%)
-内存峰值: 2.30 MB vs 2.30 MB (0.00%)
-== Test stuu10w_10w End ===
-
-== Test t100w_100w ===
-用户数: 1000000
-操作数: 1000000
-排行榜用户数: 1099921
-总耗时: 8858 ms
-平均耗时: 8.86 ms/1000操作
-内存占用: 251.70 MB
-内存峰值: 254.15 MB
-测试日期: 2026/3/7 19:54:27
-√ 所有操作结果验证通过！
-总耗时: 8858 ms vs 560 ms (+1481.79%)
-平均耗时: 8.86 ms/1k操作 vs 0.56 ms/1k操作 (+1481.79%)
-内存占用: 251.70 MB vs 251.84 MB (-0.06%)
-内存峰值: 254.15 MB vs 251.83 MB (+0.92%)
-== Test t100w_100w End ===
-*/

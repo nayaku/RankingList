@@ -72,7 +72,9 @@ namespace RankingListNew
 
         public void DebugPrint()
         {
+#if DEBUG
             _tree.DebugPrint();
+#endif
         }
 
         class Tree
