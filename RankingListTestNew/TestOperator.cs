@@ -296,6 +296,12 @@ namespace RankingListTestNew
 
         public static void TestAll(string rankingListClassName, string? baseTestName = null)
         {
+            Console.WriteLine($"测试类: {rankingListClassName}");
+            if (baseTestName != null)
+            {
+                Console.WriteLine($"基准测试类: {baseTestName}");
+            }
+            
             string[] testList = Directory.GetFiles("Test", "*.json");
             foreach (string test in testList)
             {
