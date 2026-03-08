@@ -18,6 +18,23 @@
 
 **内存局部性差**：红黑树节点分散在堆上，查询区间用户（排行榜前N名玩家、查询用户排名周围玩家）时， CPU 缓存命中率低，随机访问导致性能下降。增改的时候，插入/删除操作导致树的旋转，需要随机访问和读写大量节点，导致缓存不命中。（事实上也证明了如此，见测试数据：）
 
+**排名计算原理**：
+- 红黑树按分数有序，左子树分数 < 右子树分数
+- 当进入右子树时，说明左子树所有用户都在目标用户之前
+- 累加所有左子树的Count，再加上桶内索引，得到最终排名
+
+**示例**：假设树结构如下
+```
+        根节点(Count=1000)
+       /              \
+   左子树(Count=400)  右子树(Count=600)
+```
+- 如果用户在右子树，排名至少为 400
+- 继续在右子树中递归计算，直到找到用户所在桶
+- 桶内索引加上左子树Count，就是用户的排名
+
+**时间复杂度**：O(log M + log K)
+
 # 三、数据结构设计
 
 ## 3.1 排行榜接口设计
@@ -187,6 +204,11 @@ class UserBucket
 红黑树节点，非叶子节点存储子树统计信息，叶子节点关联一个用户桶。
 
 ```csharp
+enum ColorEnum : byte
+{
+    Red = 0,
+    Black = 1,
+}
 class TreeNode
 {
     public int Count;
@@ -362,24 +384,325 @@ public void CombineChild()
 }
 ```
 
-## 3.5 排行榜设计
+## 3.5 排行榜核心设计
 
 ```csharp
-public class BucketBRTreeRankingList : IRankingList
+public class class Tree
 {
-    private static readonly int BucketSize = 256; // 每个bucket的用户数量
-    private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
     private TreeNode _root;
-    private Dictionary<int, User> _userMap;
 }
 ```
-`_root` 是根节点，`_userMap` 是用户id到用户的映射。
+树采用的是红黑树，每个节点包含一个用户桶，桶中存储用户信息。树的每个节点都有一个计数，记录以该节点为根的子树中的用户数。红黑树的规则：
 
-添加玩家：
-更新玩家分数：
-获取某个玩家的排名：
-获取排行榜前N名玩家：
-获取玩家周围的排名：
+1. 每个节点要么是红色，要么是黑色（非红即黑）。
+2. 根节点是黑色的。
+3. 所有叶子节点（NIL节点）都是黑色的。
+4. 如果一个节点是红色的，那么它的两个子节点都是黑色的（即不存在连续的红色节点）。
+5. 从任意节点到其每个叶子节点的所有简单路径都包含相同数量的黑色节点（即所有路径的黑色节点数相同）。
+
+本文不再详细讲解红黑树的原理，需要了解红黑树的原理可以参考：[一文带你彻底读懂红黑树（附详细图解） - 知乎](https://zhuanlan.zhihu.com/p/91960960)、[红黑树（图解+秒懂+史上最全） - 技术自由圈 - 博客园](https://www.cnblogs.com/crazymakercircle/p/16320430.html)、[红黑树详解-CSDN博客](https://blog.csdn.net/u014454538/article/details/120120216)
+
+#### 1. 添加玩家
+
+```csharp
+public int AddUser(User user)
+{
+    // 如果树为空，直接添加
+    if (_root.Count == 0)
+    {
+        UserBucket bucket = _root.UserBucket!;
+        bucket.Users[0] = user;
+        bucket.UserCount = 1;
+        _root.Count = 1;
+        _root.LeftUser = user;
+        _root.RightUser = user;
+        return 0;
+    }
+
+    int rankCount = 0;
+    TreeNode node = _root;
+    // 步骤1：遍历红黑树，找到目标叶子节点
+    while (node.Right != null)  // 判断是否为叶子节点，叶子节点必定没有左右子树
+    {
+        node.Count++;  // 更新路径上每个节点的计数
+        if (user.CompareTo(node.Right!.LeftUser) < 0)
+        {
+            // 用户分数小于右子树最小值，进入左子树
+            node = node.Left!;
+        }
+        else
+        {
+            // 用户分数大于等于右子树最小值，进入右子树
+            rankCount += node.Left!.Count;  // 累加左子树的用户数
+            node = node.Right!;
+        }
+    }
+
+    // 步骤2：到达叶子节点，判断桶是否已满
+    int userIndexInBucket;
+    if (node.Full)  // 桶已满，需要分裂
+    {
+        // 步骤3a：分裂TreeNode
+        node.Split(user, out userIndexInBucket);
+        rankCount += userIndexInBucket;
+        
+        // 步骤4：如果当前节点为红色，需要调整红黑树
+        if (node.Color == ColorEnum.Red)
+        {
+            // 红色必定不是根节点，因此父节点必定存在
+            TreeNode parentNode = node.Parent!;
+            TreeNode siblingNode = parentNode.Left == node
+                ? parentNode.Right!
+                : parentNode.Left!;
+            
+            // 兄弟必定为红色，否则违反规则5，兄弟会多出一个黑节点
+            node.Color = ColorEnum.Black;
+            siblingNode.Color = ColorEnum.Black;
+            parentNode.Color = ColorEnum.Red;
+            FixAfterAdd(parentNode);  // 红黑树平衡调整
+        }
+    }
+    else
+    {
+        // 步骤3b：桶未满，直接插入
+        userIndexInBucket = node.Insert(user);
+        rankCount += userIndexInBucket;
+    }
+
+    return rankCount;
+}
+```
+
+#### 2. 删除用户逻辑
+
+```csharp
+private void RemoveUser(User user)
+{
+    TreeNode node = _root;
+    // 步骤1：遍历红黑树，找到目标叶子节点
+    while (node.Right != null)
+    {
+        node.Count--;  // 更新路径上每个节点的计数
+        node = user.CompareTo(node.Right!.LeftUser) < 0 ? node.Left! : node.Right!;
+    }
+
+    // 步骤2：从桶中删除用户
+    node.Remove(user);
+    if (node == _root) // 如果为根节点，直接返回
+        return;
+
+    // 步骤3：处理桶空或桶过小的情况
+    TreeNode parent = node.Parent!;
+    ColorEnum parentColor = parent.Color;
+    TreeNode siblingNode = parent.Left == node ? parent.Right! : parent.Left!;
+    ColorEnum siblingColor = siblingNode.Color;
+    
+    if (node.Empty)  // 桶空了，需要合并
+    {
+        parent.MoveFromChild(siblingNode);  // 用兄弟节点替换父节点
+        parent.Color = ColorEnum.Black;
+        if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
+        {
+            // 合并以后就会少了一个黑，需要调整
+            FixAfterDel(parent);
+        }
+    }
+    else if (siblingNode.UserBucket != null && parent.Count < BucketSize / 4)
+    {
+        // 桶太小，需要合并
+        parent.CombineChild();
+        parent.Color = ColorEnum.Black;
+        if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
+        {
+            // 合并以后就会少了一个黑，需要调整
+            FixAfterDel(parent);
+        }
+    }
+}
+```
+
+#### 3. 获取某个玩家的排名
+
+```csharp
+public int GetUserRank(User user)
+{
+    int rankCount = 0;
+    TreeNode node = _root;
+
+    // 步骤1：遍历红黑树，累加排名
+    while (node.Right != null)  // 判断是否为叶子节点
+    {
+        if (user.CompareTo(node.Right.LeftUser) < 0)
+        {
+            // 用户在左子树，不累加排名
+            node = node.Left;
+        }
+        else
+        {
+            // 用户在右子树，累加左子树的用户数
+            rankCount += node.Left.Count;
+            node = node.Right;
+        }
+    }
+
+    // 步骤2：在桶内找到用户索引
+    UserBucket bucket = node.UserBucket!;
+    int userIndexInBucket = bucket.IndexOf(user);
+    rankCount += userIndexInBucket;
+    
+    return rankCount;
+}
+```
+
+#### 4. 获取排行榜前N名玩家
+
+**实现逻辑**：
+```csharp
+public User[] GetTopN(int topN)
+{
+    TreeNode node = _root;
+
+    // 步骤1：找到最左边的叶子节点（排名最小的用户）
+    while (node.Left != null)
+    {
+        node = node.Left;
+    }
+    
+    // 步骤2：准备结果数组
+    UserBucket bucket = node.UserBucket!;
+    topN = Math.Min(topN, GetRankingCount());
+    User[] result = new User[topN];
+    int rankCount = 0;
+    
+    // 步骤3：复制第一个桶的用户
+    int n = Math.Min(bucket.UserCount, topN - rankCount);
+    Array.Copy(bucket.Users, 0, result, rankCount, n);
+    rankCount += n;
+
+    // 步骤4：继续获取后续桶的用户，即右子树的最左节点
+    // 此处采用简单的循环，避免函数递归调用的开销
+    while (rankCount < topN)
+    {
+        // 步骤4a：向上查找，直到当前节点是父节点的左子节点
+        while (node != node.Parent!.Left)
+        {
+            node = node.Parent;
+        }
+
+        // 步骤4b：跳转到父节点的右子树
+        node = node.Parent!.Right!;
+        
+        // 步骤4c：在右子树中找到最左边的叶子节点
+        while (node.Left != null)
+        {
+            node = node.Left;
+        }
+
+        // 步骤4d：复制桶内用户
+        bucket = node.UserBucket!;
+        n = Math.Min(bucket.UserCount, topN - rankCount);
+        Array.Copy(bucket.Users, 0, result, rankCount, n);
+        rankCount += n;
+    }
+    return result;
+}
+```
+
+#### 5. 获取玩家周围的排名
+
+```csharp
+public (User[], int) GetAroundUser(User user, int aroundN)
+{
+    int rankCount = 0;
+    TreeNode node = _root;
+
+    // 步骤1：找到用户所在的桶和排名
+    while (node.Right != null)
+    {
+        if (user.CompareTo(node.Right.LeftUser) < 0)
+        {
+            node = node.Left;
+        }
+        else
+        {
+            rankCount += node.Left.Count;
+            node = node.Right;
+        }
+    }
+    UserBucket bucket = node.UserBucket!;
+    int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
+    rankCount += userIndexInBucket;
+
+    // 步骤2：计算需要获取的左右用户数量
+    int offset = 0;
+    int leftNum = aroundN, rightNum = aroundN;
+    if (rankCount < aroundN)
+    {
+        leftNum = rankCount;  // 左边用户不足
+        offset = rankCount - aroundN;
+    }
+    if (rankCount + aroundN + 1 > _root.Count)
+    {
+        rightNum = _root.Count - rankCount - 1;  // 右边用户不足
+    }
+    User[] result = new User[leftNum + rightNum + 1];
+
+    // 步骤3：从当前桶内获取用户
+    int leftCount = Math.Min(userIndexInBucket, leftNum);
+    int rightCount = Math.Min(bucket.UserCount - userIndexInBucket - 1, rightNum);
+    Array.Copy(bucket.Users, userIndexInBucket - leftCount, result, 
+               aroundN - leftCount + offset, leftCount + rightCount + 1);
+
+    // 步骤4：获取左边缺少的用户，即左子树的最右节点
+    TreeNode tNode = node;
+    while (leftCount < leftNum)
+    {
+        // 向上查找，直到当前节点是父节点的右子节点
+        while (tNode != tNode.Parent!.Right)
+        {
+            tNode = tNode.Parent;
+        }
+        // 跳转到父节点的左子树
+        tNode = tNode.Parent!.Left!;
+        // 找到左子树的最右节点
+        while (tNode.Right != null)
+        {
+            tNode = tNode.Right;
+        }
+        // 复制桶内用户（从末尾开始）
+        bucket = tNode.UserBucket!;
+        int n = Math.Min(bucket.UserCount, leftNum - leftCount);
+        Array.Copy(bucket.Users, bucket.UserCount - n, result, 
+                   aroundN - leftCount - n + offset, n);
+        leftCount += n;
+    }
+
+    // 步骤5：获取右边缺少的用户，即右子树的最左节点
+    tNode = node;
+    while (rightCount < rightNum)
+    {
+        // 向上查找，直到当前节点是父节点的左子节点
+        while (tNode != tNode.Parent!.Left)
+        {
+            tNode = tNode.Parent;
+        }
+        // 跳转到父节点的右子树
+        tNode = tNode.Parent!.Right!;
+        // 找到右子树的最左节点
+        while (tNode.Left != null)
+        {
+            tNode = tNode.Left;
+        }
+        // 复制桶内用户（从开头开始）
+        bucket = tNode.UserBucket!;
+        int n = Math.Min(bucket.UserCount, rightNum - rightCount);
+        Array.Copy(bucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
+        rightCount += n;
+    }
+    
+    return (result, rankCount);
+}
+```
 
 # 完整代码
 
@@ -389,26 +712,20 @@ public class BucketBRTreeRankingList : IRankingList
 {
     private static readonly int BucketSize = 256; // 每个bucket的用户数量
     private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
-    private TreeNode _root;
+
+    private Tree _tree;
     private Dictionary<int, User> _userMap;
 
     public BucketBRTreeRankingList(Span<User> users)
     {
         users.Sort();
-        UserBucket[] buckets = BuildBucket(users);
-        // 没有用户
-        int maxDepth = (int)Math.Ceiling(Math.Log(buckets.Length - 1, 2)) + 1;
-        _root = users.Length == 0 ? new TreeNode() : BuildTree(0, buckets.Length, 1, maxDepth, buckets);
-        _root.Color = ColorEnum.Black;
+        _tree = new Tree(users);
+
         _userMap = new(users.Length);
         foreach (ref readonly User u in users)
         {
             _userMap[u.Id] = u;
         }
-#if DEBUG
-        if (users.Length > 0)
-            CheckTree();
-#endif
     }
 
     public BucketBRTreeRankingList(List<User> users) :
@@ -416,420 +733,11 @@ public class BucketBRTreeRankingList : IRankingList
     {
     }
 
-    private static UserBucket[] BuildBucket(Span<User> users)
-    {
-        // 初始化bucket
-        int bucketNum = (int)Math.Ceiling((double)users.Length / InitialBucketSize);
-        UserBucket[] buckets = new UserBucket[bucketNum];
-        for (int i = 0; i < bucketNum; i++)
-        {
-            int l = i * InitialBucketSize;
-            int r = Math.Min((i + 1) * InitialBucketSize, users.Length);
-            int userCount = r - l;
-            User[] bucketUsers = new User[BucketSize];
-            users.Slice(l, userCount).CopyTo(bucketUsers);
-            buckets[i] = new UserBucket(bucketUsers, userCount);
-        }
-
-        return buckets;
-    }
-
-    private static TreeNode BuildTree(int l, int r, int depth, int maxDepth, UserBucket[] buckets)
-    {
-        // 初始化tree
-        TreeNode node = new()
-        {
-            Color = (maxDepth - depth) % 2 == 0 ? ColorEnum.Red : ColorEnum.Black
-        };
-        if (l + 1 == r)
-        {
-            node.Count = buckets[l].UserCount;
-            node.UserBucket = buckets[l];
-            node.LeftUser = buckets[l].MinUser;
-            node.RightUser = buckets[l].MaxUser;
-            return node;
-        }
-
-        int mid = (l + r) >> 1;
-        node.Left = BuildTree(l, mid, depth + 1, maxDepth, buckets);
-        node.Left.Parent = node;
-        node.LeftUser = node.Left.LeftUser;
-        node.Right = BuildTree(mid, r, depth + 1, maxDepth, buckets);
-        node.Right.Parent = node;
-        node.RightUser = node.Right.RightUser;
-        node.Count = node.Left.Count + node.Right.Count;
-        return node;
-    }
-
-#if DEBUG
-    public void CheckTree()
-    {
-        Debug.Assert(_root.Color == ColorEnum.Black);
-        CheckTree(_root);
-    }
-
-    private static int CheckTree(TreeNode? node)
-    {
-        if (node == null)
-        {
-            return 1;
-        }
-
-        int leftBlackCount = CheckTree(node.Left);
-        Debug.Assert(node.Left == null || node.Left.Parent == node);
-        int rightBlackCount = CheckTree(node.Right);
-        Debug.Assert(node.Right == null || node.Right.Parent == node);
-        Debug.Assert(node.Left == null || node.Right == null || node.Left.Count + node.Right.Count == node.Count);
-        Debug.Assert(node.UserBucket == null || node.UserBucket.UserCount == node.Count);
-        Debug.Assert(node.Left == null || node.LeftUser.CompareTo(node.Left.LeftUser) == 0);
-        Debug.Assert(node.Right == null || node.RightUser.CompareTo(node.Right.RightUser) == 0);
-        if (node.Color == ColorEnum.Red)
-        {
-            Debug.Assert(node.Left == null || node.Left.Color == ColorEnum.Black);
-            Debug.Assert(node.Right == null || node.Right.Color == ColorEnum.Black);
-        }
-
-        Debug.Assert(leftBlackCount == rightBlackCount,
-            $"leftBlackCount: {leftBlackCount}, rightBlackCount: {rightBlackCount}");
-        return node.Color == ColorEnum.Black ? leftBlackCount + 1 : leftBlackCount;
-    }
-#endif
-
-    // 参考：https://www.cnblogs.com/crazymakercircle/p/16320430.html
-    // 参考：https://blog.csdn.net/u014454538/article/details/120120216
-    private void AddUser(User user, ref int rankCount)
-    {
-        TreeNode node = _root;
-        while (node.Right != null)
-        {
-            node.Count++;
-            if (user.CompareTo(node.Right!.LeftUser) < 0)
-            {
-                node = node.Left!;
-            }
-            else
-            {
-                rankCount += node.Left!.Count;
-                node = node.Right!;
-            }
-        }
-
-        // 叶子节点
-        int userIndexInBucket;
-        if (node.Full)
-        {
-            // 分裂TreeNode
-            node.Split(user, out userIndexInBucket);
-            rankCount += userIndexInBucket;
-            // 调节树
-            if (node.Color == ColorEnum.Red)
-            {
-                // 红色必定不是根节点，因此父节点必定存在
-                TreeNode parentNode = node.Parent!;
-                TreeNode siblingNode = parentNode.Left == node
-                    ? parentNode.Right!
-                    : parentNode.Left!;
-                // 兄弟必定为红色
-                Debug.Assert(siblingNode.Color == ColorEnum.Red);
-                node.Color = ColorEnum.Black;
-                siblingNode.Color = ColorEnum.Black;
-                parentNode.Color = ColorEnum.Red;
-                FixAfterAdd(parentNode);
-            }
-#if DEBUG
-            CheckTree();
-#endif
-        }
-        else
-        {
-            // 加入bucket
-            userIndexInBucket = node.Insert(user);
-            rankCount += userIndexInBucket;
-        }
-    }
-
-    private void FixAfterAdd(TreeNode node)
-    {
-        while (node != _root && node.Parent!.Color == ColorEnum.Red)
-        {
-            TreeNode parentNode = node.Parent!;
-            // 父亲为红
-            TreeNode grandParentNode = parentNode.Parent!;
-            TreeNode uncleNode = grandParentNode.Left == parentNode
-                ? grandParentNode.Right!
-                : grandParentNode.Left!;
-            if (uncleNode.Color == ColorEnum.Red)
-            {
-                // 叔叔为红
-                parentNode.Color = ColorEnum.Black;
-                uncleNode.Color = ColorEnum.Black;
-                grandParentNode.Color = ColorEnum.Red;
-                node = grandParentNode;
-            }
-            else
-            {
-                // 叔叔为黑
-                if (parentNode == grandParentNode.Left)
-                {
-                    if (node == parentNode.Right)
-                    {
-                        // 左旋转
-                        parentNode = RotateLeft(parentNode);
-                        // node不需要多余赋值
-                    }
-
-                    // 变色
-                    parentNode.Color = ColorEnum.Black;
-                    grandParentNode.Color = ColorEnum.Red;
-                    // 右旋转
-                    RotateRight(grandParentNode);
-                }
-                else
-                {
-                    if (node == parentNode.Left)
-                    {
-                        // 右旋转
-                        parentNode = RotateRight(parentNode);
-                    }
-
-                    // 变色
-                    parentNode.Color = ColorEnum.Black;
-                    grandParentNode.Color = ColorEnum.Red;
-                    // 左旋转
-                    RotateLeft(grandParentNode);
-                }
-
-                break;
-            }
-        }
-
-        _root.Color = ColorEnum.Black;
-    }
-
-    // 参考： https://zhuanlan.zhihu.com/p/91960960
-    private void RemoveUser(User user)
-    {
-        TreeNode node = _root;
-        while (node.Right != null)
-        {
-            node.Count--;
-            node = user.CompareTo(node.Right!.LeftUser) < 0 ? node.Left! : node.Right!;
-        }
-
-        // 叶子节点
-        node.Remove(user);
-        if (node == _root)
-            return;
-
-        TreeNode parent = node.Parent!;
-        ColorEnum parentColor = parent.Color;
-        TreeNode siblingNode = parent.Left == node ? parent.Right! : parent.Left!;
-        ColorEnum siblingColor = siblingNode.Color;
-        if (node.Empty)
-        {
-            parent.MoveFromChild(siblingNode);
-            parent.Color = ColorEnum.Black;
-            if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
-            {
-                // 合并以后就会少了一个黑，需要调整
-                FixAfterDel(parent);
-            }
-#if DEBUG
-            CheckTree();
-#endif
-        }
-        else if (siblingNode.UserBucket != null && parent.Count < (BucketSize >> 2))
-        {
-            parent.CombineChild();
-            parent.Color = ColorEnum.Black;
-            if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
-            {
-                // 合并以后就会少了一个黑，需要调整
-                FixAfterDel(parent);
-            }
-#if DEBUG
-            CheckTree();
-#endif
-        }
-    }
-
-    private void FixAfterDel(TreeNode node)
-    {
-        while (node != _root && node.Color == ColorEnum.Black)
-        {
-            TreeNode parentNode = node.Parent!;
-            if (node == parentNode.Left)
-            {
-                TreeNode siblingNode = parentNode.Right!;
-                // 兄弟节点为红
-                if (siblingNode.Color == ColorEnum.Red)
-                {
-                    // 变色
-                    siblingNode.Color = ColorEnum.Black;
-                    parentNode.Color = ColorEnum.Red;
-                    // 左旋转
-                    RotateLeft(parentNode);
-                    siblingNode = parentNode.Right!;
-                }
-
-                // 兄弟节点为黑
-                if (siblingNode.Left!.Color == ColorEnum.Black && siblingNode.Right!.Color == ColorEnum.Black)
-                {
-                    // 变色
-                    siblingNode.Color = ColorEnum.Red;
-                    node = parentNode;
-                }
-                else
-                {
-                    if (siblingNode.Right!.Color == ColorEnum.Black)
-                    {
-                        // 变色
-                        siblingNode.Left!.Color = ColorEnum.Black;
-                        siblingNode.Color = ColorEnum.Red;
-                        // 右旋转
-                        siblingNode = RotateRight(siblingNode);
-                    }
-
-                    // 变色
-                    siblingNode.Color = parentNode.Color;
-                    parentNode.Color = ColorEnum.Black;
-                    siblingNode.Right!.Color = ColorEnum.Black;
-                    // 左旋转
-                    RotateLeft(parentNode);
-                    node = _root;
-                }
-            }
-            else
-            {
-                TreeNode siblingNode = parentNode.Left!;
-                // 兄弟节点为红
-                if (siblingNode.Color == ColorEnum.Red)
-                {
-                    // 变色
-                    siblingNode.Color = ColorEnum.Black;
-                    parentNode.Color = ColorEnum.Red;
-                    // 右旋转
-                    RotateRight(parentNode);
-                    siblingNode = parentNode.Left!;
-                }
-
-                // 兄弟节点为黑
-                if (siblingNode.Left!.Color == ColorEnum.Black && siblingNode.Right!.Color == ColorEnum.Black)
-                {
-                    // 变色
-                    siblingNode.Color = ColorEnum.Red;
-                    node = parentNode;
-                }
-                else
-                {
-                    if (siblingNode.Left!.Color == ColorEnum.Black)
-                    {
-                        // 变色
-                        siblingNode.Right!.Color = ColorEnum.Black;
-                        siblingNode.Color = ColorEnum.Red;
-                        // 左旋转
-                        siblingNode = RotateLeft(siblingNode);
-                    }
-
-                    // 变色
-                    siblingNode.Color = parentNode.Color;
-                    parentNode.Color = ColorEnum.Black;
-                    siblingNode.Left!.Color = ColorEnum.Black;
-                    // 右旋转
-                    RotateRight(parentNode);
-                    node = _root;
-                }
-            }
-        }
-
-        // 根节点
-        node.Color = ColorEnum.Black;
-    }
-
-    private TreeNode RotateLeft(TreeNode x)
-    {
-        Debug.Assert(x.Right != null && x.Left != null &&
-                        x.Right.Left != null && x.Right.Right != null);
-        TreeNode y = x.Right;
-        x.Right = y.Left;
-        x.Right.Parent = x;
-        y.Left = x;
-        y.Parent = x.Parent;
-        x.Parent = y;
-        if (y.Parent != null)
-        {
-            if (x == y.Parent.Left)
-            {
-                y.Parent.Left = y;
-            }
-            else if (x == y.Parent.Right)
-            {
-                y.Parent.Right = y;
-            }
-            else
-            {
-                Debug.Assert(false);
-            }
-        }
-
-        x.RightUser = x.Right.RightUser;
-        y.LeftUser = x.LeftUser;
-        x.Count = x.Left.Count + x.Right.Count;
-        y.Count = y.Left.Count + y.Right.Count;
-        if (y.Parent == null)
-            _root = y;
-        return y;
-    }
-
-    private TreeNode RotateRight(TreeNode x)
-    {
-        Debug.Assert(x.Left != null && x.Left.Left != null &&
-                        x.Left.Right != null && x.Right != null);
-        TreeNode y = x.Left;
-        x.Left = y.Right;
-        x.Left.Parent = x;
-        y.Right = x;
-        y.Parent = x.Parent;
-        x.Parent = y;
-        if (y.Parent != null)
-        {
-            if (x == y.Parent.Left)
-            {
-                y.Parent.Left = y;
-            }
-            else
-            {
-                y.Parent.Right = y;
-            }
-        }
-
-        x.LeftUser = x.Left.LeftUser;
-        y.RightUser = x.RightUser;
-        x.Count = x.Left.Count + x.Right.Count;
-        y.Count = y.Left.Count + y.Right.Count;
-        if (y.Parent == null)
-            _root = y;
-        return y;
-    }
-
     public int AddUser(User user)
     {
         Debug.Assert(!_userMap.ContainsKey(user.Id));
         _userMap.Add(user.Id, user);
-        int rankCount = 0;
-        if (_root.Count == 0)
-        {
-            User[] bucketUsers = new User[BucketSize];
-            bucketUsers[0] = user;
-            _root.UserBucket = new UserBucket(bucketUsers, 1);
-            _root.Count = 1;
-            _root.LeftUser = user;
-            _root.RightUser = user;
-        }
-        else
-        {
-            AddUser(user, ref rankCount);
-        }
+        int rankCount = _tree.AddUser(user);
 
         return rankCount;
     }
@@ -837,9 +745,8 @@ public class BucketBRTreeRankingList : IRankingList
     public int UpdateUser(User newUser)
     {
         User oldUser = _userMap[newUser.Id];
-        RemoveUser(oldUser);
-        int rankCount = 0;
-        AddUser(newUser, ref rankCount);
+        _tree.RemoveTreeUser(oldUser);
+        int rankCount = _tree.AddUser(newUser);
         _userMap[newUser.Id] = newUser;
         return rankCount;
     }
@@ -848,201 +755,664 @@ public class BucketBRTreeRankingList : IRankingList
     {
         Debug.Assert(_userMap.ContainsKey(userId));
         User user = _userMap[userId];
-        int rankCount = 0;
-        TreeNode node = _root;
-
-        while (node.Right != null)
-        {
-            Debug.Assert(node.Left != null && node.Right != null);
-            if (user.CompareTo(node.Right.LeftUser) < 0)
-            {
-                node = node.Left;
-            }
-            else
-            {
-                rankCount += node.Left.Count;
-                node = node.Right;
-            }
-        }
-
-        UserBucket bucket = node.UserBucket!;
-        int userIndexInBucket = bucket.IndexOf(user);
-        Debug.Assert(userIndexInBucket >= 0);
-        rankCount += userIndexInBucket;
-        return rankCount;
+        return _tree.GetUserRank(user);
     }
 
     public User[] GetTopN(int topN)
     {
-        TreeNode node = _root;
-
-        // 获取排名靠前的叶子节点
-        while (node.Left != null)
-        {
-            node = node.Left;
-        }
-        UserBucket bucket = node.UserBucket!;
-        topN = Math.Min(topN, GetRankingCount());
-        User[] result = new User[topN];
-        int rankCount = 0;
-        int n = Math.Min(bucket.UserCount, topN - rankCount);
-        Array.Copy(bucket.Users, 0, result, rankCount, n);
-        rankCount += n;
-
-        // 缺少的用户数
-        while (rankCount < topN)
-        {
-            // 查找tNode的右区间的叶子节点
-            while (node != node.Parent!.Left)
-            {
-                node = node.Parent;
-            }
-
-            node = node.Parent!.Right!;
-            while (node.Left != null)
-            {
-                node = node.Left;
-            }
-
-            bucket = node.UserBucket!;
-            n = Math.Min(bucket.UserCount, topN - rankCount);
-            Array.Copy(bucket.Users, 0, result, rankCount, n);
-            rankCount += n;
-        }
-        return result;
+        return _tree.GetTopN(topN);
     }
 
     public (User[], int) GetAroundUser(int userId, int aroundN)
     {
         Debug.Assert(_userMap.ContainsKey(userId));
         User user = _userMap[userId];
-        int rankCount = 0;
-        TreeNode node = _root;
-
-        // 1. 找到对应的位置
-        while (node.Right != null)
-        {
-            Debug.Assert(node.Left != null && node.Right != null);
-            if (user.CompareTo(node.Right.LeftUser) < 0)
-            {
-                node = node.Left;
-            }
-            else
-            {
-                rankCount += node.Left.Count;
-                node = node.Right;
-            }
-        }
-
-        UserBucket bucket = node.UserBucket!;
-        int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
-        Debug.Assert(userIndexInBucket >= 0);
-        rankCount += userIndexInBucket;
-
-        // 2. 准备结果
-        int offset = 0; // 结果数组内的偏移，用于处理用户排名过靠前，存在数据空位的情况
-        int leftNum = aroundN, rightNum = aroundN; // 需求数目
-        if (rankCount < aroundN)
-        {
-            // 用户排名过靠前，无法获取足够的左边用户
-            leftNum = rankCount;
-            offset = rankCount - aroundN;
-        }
-
-        if (rankCount + aroundN + 1 > _root.Count)
-        {
-            // 用户排名过靠后，无法获取足够的右边用户
-            rightNum = _root.Count - rankCount - 1;
-        }
-
-        User[] result = new User[leftNum + rightNum + 1];
-
-        // 3. 把桶内的用户填充到结果数组中
-        // 左边计数
-        int leftCount = Math.Min(userIndexInBucket, leftNum);
-        // 右边计数
-        int rightCount = Math.Min(bucket.UserCount - userIndexInBucket - 1, rightNum);
-        Array.Copy(bucket.Users, userIndexInBucket - leftCount, result, aroundN - leftCount + offset,
-            leftCount + rightCount + 1);
-
-        // 4. 获取缺少的用户
-        TreeNode tNode = node;
-        while (leftCount < leftNum)
-        {
-            // 查找tNode的左区间的叶子节点
-            while (tNode != tNode.Parent!.Right)
-            {
-                tNode = tNode.Parent;
-            }
-
-            tNode = tNode.Parent!.Left!;
-            while (tNode.Right != null)
-            {
-                tNode = tNode.Right;
-            }
-
-            bucket = tNode.UserBucket!;
-            int n = Math.Min(bucket.UserCount, leftNum - leftCount);
-            Array.Copy(bucket.Users, bucket.UserCount - n, result, aroundN - leftCount - n + offset, n);
-            leftCount += n;
-        }
-
-        tNode = node;
-        while (rightCount < rightNum)
-        {
-            // 查找tNode的右区间的叶子节点
-            while (tNode != tNode.Parent!.Left)
-            {
-                tNode = tNode.Parent;
-            }
-
-            tNode = tNode.Parent!.Right!;
-            while (tNode.Left != null)
-            {
-                tNode = tNode.Left;
-            }
-
-            bucket = tNode.UserBucket!;
-            int n = Math.Min(bucket.UserCount, rightNum - rightCount);
-            Array.Copy(bucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
-            rightCount += n;
-        }
-        return (result, rankCount);
+        return _tree.GetAroundUser(user, aroundN);
     }
 
     public int GetRankingCount()
     {
-        return _root.Count;
+        return _tree.GetRankingCount();
     }
 
-#if DEBUG
     public void DebugPrint()
     {
-        List<(int depth, int count)> results = [];
-        DebugPrint(_root, 0, ref results);
-        for (int i = 0; i < results.Count; i++)
+        _tree.DebugPrint();
+    }
+
+    class Tree
+    {
+        private TreeNode _root;
+
+        public Tree(Span<User> users)
         {
-            Console.Write($"{results[i].depth}-{results[i].count}  ");
-            // 每10个换行
-            if ((i + 1) % 10 == 0)
+            UserBucket[] buckets = BuildBucket(users);
+            int maxDepth = (int)Math.Ceiling(Math.Log(buckets.Length - 1, 2)) + 1;
+            // 没有用户
+            _root = users.Length == 0
+                ? new TreeNode()
+                {
+                    UserBucket = new UserBucket(new User[BucketSize], 0),
+                }
+                : BuildTree(0, buckets.Length, 1, maxDepth, buckets);
+            _root.Color = ColorEnum.Black;
+#if DEBUG
+            if (users.Length > 0)
+                CheckTree();
+#endif
+        }
+
+        private static UserBucket[] BuildBucket(Span<User> users)
+        {
+            // 初始化bucket
+            int bucketNum = (int)Math.Ceiling((double)users.Length / InitialBucketSize);
+            UserBucket[] buckets = new UserBucket[bucketNum];
+            for (int i = 0; i < bucketNum; i++)
             {
-                Console.WriteLine();
+                int l = i * InitialBucketSize;
+                int r = Math.Min((i + 1) * InitialBucketSize, users.Length);
+                int userCount = r - l;
+                User[] bucketUsers = new User[BucketSize];
+                users.Slice(l, userCount).CopyTo(bucketUsers);
+                buckets[i] = new UserBucket(bucketUsers, userCount);
+            }
+
+            return buckets;
+        }
+
+        private static TreeNode BuildTree(int l, int r, int depth, int maxDepth, UserBucket[] buckets)
+        {
+            // 初始化tree
+            TreeNode node = new()
+            {
+                Color = (maxDepth - depth) % 2 == 0 ? ColorEnum.Red : ColorEnum.Black
+            };
+            if (l + 1 == r)
+            {
+                node.Count = buckets[l].UserCount;
+                node.UserBucket = buckets[l];
+                node.LeftUser = buckets[l].MinUser;
+                node.RightUser = buckets[l].MaxUser;
+                return node;
+            }
+
+            int mid = (l + r) >> 1;
+            node.Left = BuildTree(l, mid, depth + 1, maxDepth, buckets);
+            node.Left.Parent = node;
+            node.LeftUser = node.Left.LeftUser;
+            node.Right = BuildTree(mid, r, depth + 1, maxDepth, buckets);
+            node.Right.Parent = node;
+            node.RightUser = node.Right.RightUser;
+            node.Count = node.Left.Count + node.Right.Count;
+            return node;
+        }
+
+#if DEBUG
+        public void CheckTree()
+        {
+            Debug.Assert(_root.Color == ColorEnum.Black);
+            CheckTree(_root);
+        }
+
+        private static int CheckTree(TreeNode? node)
+        {
+            if (node == null)
+            {
+                return 1;
+            }
+
+            int leftBlackCount = CheckTree(node.Left);
+            Debug.Assert(node.Left == null || node.Left.Parent == node);
+            int rightBlackCount = CheckTree(node.Right);
+            Debug.Assert(node.Right == null || node.Right.Parent == node);
+            Debug.Assert(
+                node.Left == null || node.Right == null || node.Left.Count + node.Right.Count == node.Count);
+            Debug.Assert(node.UserBucket == null || node.UserBucket.UserCount == node.Count);
+            Debug.Assert(node.Left == null || node.LeftUser.CompareTo(node.Left.LeftUser) == 0);
+            Debug.Assert(node.Right == null || node.RightUser.CompareTo(node.Right.RightUser) == 0);
+            if (node.Color == ColorEnum.Red)
+            {
+                Debug.Assert(node.Left == null || node.Left.Color == ColorEnum.Black);
+                Debug.Assert(node.Right == null || node.Right.Color == ColorEnum.Black);
+            }
+
+            Debug.Assert(leftBlackCount == rightBlackCount,
+                $"leftBlackCount: {leftBlackCount}, rightBlackCount: {rightBlackCount}");
+            return node.Color == ColorEnum.Black ? leftBlackCount + 1 : leftBlackCount;
+        }
+#endif
+
+        // 参考：https://www.cnblogs.com/crazymakercircle/p/16320430.html
+        // 参考：https://blog.csdn.net/u014454538/article/details/120120216
+        public int AddUser(User user)
+        {
+            if (_root.Count == 0)
+            {
+                UserBucket bucket = _root.UserBucket!;
+                bucket.Users[0] = user;
+                bucket.UserCount = 1;
+                _root.Count = 1;
+                _root.LeftUser = user;
+                _root.RightUser = user;
+                return 0;
+            }
+
+            int rankCount = 0;
+            TreeNode node = _root;
+            while (node.Right != null)
+            {
+                node.Count++;
+                if (user.CompareTo(node.Right!.LeftUser) < 0)
+                {
+                    node = node.Left!;
+                }
+                else
+                {
+                    rankCount += node.Left!.Count;
+                    node = node.Right!;
+                }
+            }
+
+            // 叶子节点
+            int userIndexInBucket;
+            if (node.Full)
+            {
+                // 分裂TreeNode
+                node.Split(user, out userIndexInBucket);
+                rankCount += userIndexInBucket;
+                // 调节树
+                if (node.Color == ColorEnum.Red)
+                {
+                    // 红色必定不是根节点，因此父节点必定存在
+                    TreeNode parentNode = node.Parent!;
+                    TreeNode siblingNode = parentNode.Left == node
+                        ? parentNode.Right!
+                        : parentNode.Left!;
+                    // 兄弟必定为红色
+                    Debug.Assert(siblingNode.Color == ColorEnum.Red);
+                    node.Color = ColorEnum.Black;
+                    siblingNode.Color = ColorEnum.Black;
+                    parentNode.Color = ColorEnum.Red;
+                    FixAfterAdd(parentNode);
+                }
+#if DEBUG
+                CheckTree();
+#endif
+            }
+            else
+            {
+                // 加入bucket
+                userIndexInBucket = node.Insert(user);
+                rankCount += userIndexInBucket;
+            }
+
+            return rankCount;
+        }
+
+        private void FixAfterAdd(TreeNode node)
+        {
+            while (node != _root && node.Parent!.Color == ColorEnum.Red)
+            {
+                TreeNode parentNode = node.Parent!;
+                // 父亲为红
+                TreeNode grandParentNode = parentNode.Parent!;
+                TreeNode uncleNode = grandParentNode.Left == parentNode
+                    ? grandParentNode.Right!
+                    : grandParentNode.Left!;
+                if (uncleNode.Color == ColorEnum.Red)
+                {
+                    // 叔叔为红
+                    parentNode.Color = ColorEnum.Black;
+                    uncleNode.Color = ColorEnum.Black;
+                    grandParentNode.Color = ColorEnum.Red;
+                    node = grandParentNode;
+                }
+                else
+                {
+                    // 叔叔为黑
+                    if (parentNode == grandParentNode.Left)
+                    {
+                        if (node == parentNode.Right)
+                        {
+                            // 左旋转
+                            parentNode = RotateLeft(parentNode);
+                            // node不需要多余赋值
+                        }
+
+                        // 变色
+                        parentNode.Color = ColorEnum.Black;
+                        grandParentNode.Color = ColorEnum.Red;
+                        // 右旋转
+                        RotateRight(grandParentNode);
+                    }
+                    else
+                    {
+                        if (node == parentNode.Left)
+                        {
+                            // 右旋转
+                            parentNode = RotateRight(parentNode);
+                        }
+
+                        // 变色
+                        parentNode.Color = ColorEnum.Black;
+                        grandParentNode.Color = ColorEnum.Red;
+                        // 左旋转
+                        RotateLeft(grandParentNode);
+                    }
+
+                    break;
+                }
+            }
+
+            _root.Color = ColorEnum.Black;
+        }
+
+        // 参考： https://zhuanlan.zhihu.com/p/91960960
+        public void RemoveTreeUser(User user)
+        {
+            TreeNode node = _root;
+            while (node.Right != null)
+            {
+                node.Count--;
+                node = user.CompareTo(node.Right!.LeftUser) < 0 ? node.Left! : node.Right!;
+            }
+
+            // 叶子节点
+            node.Remove(user);
+            if (node == _root)
+                return;
+
+            TreeNode parent = node.Parent!;
+            ColorEnum parentColor = parent.Color;
+            TreeNode siblingNode = parent.Left == node ? parent.Right! : parent.Left!;
+            ColorEnum siblingColor = siblingNode.Color;
+            if (node.Empty)
+            {
+                parent.MoveFromChild(siblingNode);
+                parent.Color = ColorEnum.Black;
+                if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
+                {
+                    // 合并以后就会少了一个黑，需要调整
+                    FixAfterDel(parent);
+                }
+#if DEBUG
+                CheckTree();
+#endif
+            }
+            else if (siblingNode.UserBucket != null && parent.Count < (BucketSize >> 2))
+            {
+                parent.CombineChild();
+                parent.Color = ColorEnum.Black;
+                if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
+                {
+                    // 合并以后就会少了一个黑，需要调整
+                    FixAfterDel(parent);
+                }
+#if DEBUG
+                CheckTree();
+#endif
             }
         }
-    }
 
-    private void DebugPrint(TreeNode node, int depth, ref List<(int depth, int count)> results)
-    {
-        if (node.UserBucket != null)
+        private void FixAfterDel(TreeNode node)
         {
-            results.Add((depth, node.UserBucket.UserCount));
-            return;
+            while (node != _root && node.Color == ColorEnum.Black)
+            {
+                TreeNode parentNode = node.Parent!;
+                if (node == parentNode.Left)
+                {
+                    TreeNode siblingNode = parentNode.Right!;
+                    // 兄弟节点为红
+                    if (siblingNode.Color == ColorEnum.Red)
+                    {
+                        // 变色
+                        siblingNode.Color = ColorEnum.Black;
+                        parentNode.Color = ColorEnum.Red;
+                        // 左旋转
+                        RotateLeft(parentNode);
+                        siblingNode = parentNode.Right!;
+                    }
+
+                    // 兄弟节点为黑
+                    if (siblingNode.Left!.Color == ColorEnum.Black && siblingNode.Right!.Color == ColorEnum.Black)
+                    {
+                        // 变色
+                        siblingNode.Color = ColorEnum.Red;
+                        node = parentNode;
+                    }
+                    else
+                    {
+                        if (siblingNode.Right!.Color == ColorEnum.Black)
+                        {
+                            // 变色
+                            siblingNode.Left!.Color = ColorEnum.Black;
+                            siblingNode.Color = ColorEnum.Red;
+                            // 右旋转
+                            siblingNode = RotateRight(siblingNode);
+                        }
+
+                        // 变色
+                        siblingNode.Color = parentNode.Color;
+                        parentNode.Color = ColorEnum.Black;
+                        siblingNode.Right!.Color = ColorEnum.Black;
+                        // 左旋转
+                        RotateLeft(parentNode);
+                        node = _root;
+                    }
+                }
+                else
+                {
+                    TreeNode siblingNode = parentNode.Left!;
+                    // 兄弟节点为红
+                    if (siblingNode.Color == ColorEnum.Red)
+                    {
+                        // 变色
+                        siblingNode.Color = ColorEnum.Black;
+                        parentNode.Color = ColorEnum.Red;
+                        // 右旋转
+                        RotateRight(parentNode);
+                        siblingNode = parentNode.Left!;
+                    }
+
+                    // 兄弟节点为黑
+                    if (siblingNode.Left!.Color == ColorEnum.Black && siblingNode.Right!.Color == ColorEnum.Black)
+                    {
+                        // 变色
+                        siblingNode.Color = ColorEnum.Red;
+                        node = parentNode;
+                    }
+                    else
+                    {
+                        if (siblingNode.Left!.Color == ColorEnum.Black)
+                        {
+                            // 变色
+                            siblingNode.Right!.Color = ColorEnum.Black;
+                            siblingNode.Color = ColorEnum.Red;
+                            // 左旋转
+                            siblingNode = RotateLeft(siblingNode);
+                        }
+
+                        // 变色
+                        siblingNode.Color = parentNode.Color;
+                        parentNode.Color = ColorEnum.Black;
+                        siblingNode.Left!.Color = ColorEnum.Black;
+                        // 右旋转
+                        RotateRight(parentNode);
+                        node = _root;
+                    }
+                }
+            }
+
+            // 根节点
+            node.Color = ColorEnum.Black;
         }
 
-        DebugPrint(node.Left, depth + 1, ref results);
-        DebugPrint(node.Right, depth + 1, ref results);
-    }
+        private TreeNode RotateLeft(TreeNode x)
+        {
+            Debug.Assert(x.Right != null && x.Left != null &&
+                            x.Right.Left != null && x.Right.Right != null);
+            TreeNode y = x.Right;
+            x.Right = y.Left;
+            x.Right.Parent = x;
+            y.Left = x;
+            y.Parent = x.Parent;
+            x.Parent = y;
+            if (y.Parent != null)
+            {
+                if (x == y.Parent.Left)
+                {
+                    y.Parent.Left = y;
+                }
+                else if (x == y.Parent.Right)
+                {
+                    y.Parent.Right = y;
+                }
+                else
+                {
+                    Debug.Assert(false);
+                }
+            }
+
+            x.RightUser = x.Right.RightUser;
+            y.LeftUser = x.LeftUser;
+            x.Count = x.Left.Count + x.Right.Count;
+            y.Count = y.Left.Count + y.Right.Count;
+            if (y.Parent == null)
+                _root = y;
+            return y;
+        }
+
+        private TreeNode RotateRight(TreeNode x)
+        {
+            Debug.Assert(x.Left != null && x.Left.Left != null &&
+                            x.Left.Right != null && x.Right != null);
+            TreeNode y = x.Left;
+            x.Left = y.Right;
+            x.Left.Parent = x;
+            y.Right = x;
+            y.Parent = x.Parent;
+            x.Parent = y;
+            if (y.Parent != null)
+            {
+                if (x == y.Parent.Left)
+                {
+                    y.Parent.Left = y;
+                }
+                else
+                {
+                    y.Parent.Right = y;
+                }
+            }
+
+            x.LeftUser = x.Left.LeftUser;
+            y.RightUser = x.RightUser;
+            x.Count = x.Left.Count + x.Right.Count;
+            y.Count = y.Left.Count + y.Right.Count;
+            if (y.Parent == null)
+                _root = y;
+            return y;
+        }
+
+        public int GetUserRank(User user)
+        {
+            int rankCount = 0;
+            TreeNode node = _root;
+
+            while (node.Right != null)
+            {
+                Debug.Assert(node.Left != null && node.Right != null);
+                if (user.CompareTo(node.Right.LeftUser) < 0)
+                {
+                    node = node.Left;
+                }
+                else
+                {
+                    rankCount += node.Left.Count;
+                    node = node.Right;
+                }
+            }
+
+            UserBucket bucket = node.UserBucket!;
+            int userIndexInBucket = bucket.IndexOf(user);
+            Debug.Assert(userIndexInBucket >= 0);
+            rankCount += userIndexInBucket;
+            return rankCount;
+        }
+
+        public User[] GetTopN(int topN)
+        {
+            TreeNode node = _root;
+
+            // 获取排名靠前的叶子节点
+            while (node.Left != null)
+            {
+                node = node.Left;
+            }
+
+            UserBucket bucket = node.UserBucket!;
+            topN = Math.Min(topN, GetRankingCount());
+            User[] result = new User[topN];
+            int rankCount = 0;
+            int n = Math.Min(bucket.UserCount, topN - rankCount);
+            Array.Copy(bucket.Users, 0, result, rankCount, n);
+            rankCount += n;
+
+            // 缺少的用户数
+            while (rankCount < topN)
+            {
+                // 查找tNode的右区间的叶子节点
+                while (node != node.Parent!.Left)
+                {
+                    node = node.Parent;
+                }
+
+                node = node.Parent!.Right!;
+                while (node.Left != null)
+                {
+                    node = node.Left;
+                }
+
+                bucket = node.UserBucket!;
+                n = Math.Min(bucket.UserCount, topN - rankCount);
+                Array.Copy(bucket.Users, 0, result, rankCount, n);
+                rankCount += n;
+            }
+
+            return result;
+        }
+
+        public (User[], int) GetAroundUser(User user, int aroundN)
+        {
+            int rankCount = 0;
+            TreeNode node = _root;
+
+            // 1. 找到对应的位置
+            while (node.Right != null)
+            {
+                Debug.Assert(node.Left != null && node.Right != null);
+                if (user.CompareTo(node.Right.LeftUser) < 0)
+                {
+                    node = node.Left;
+                }
+                else
+                {
+                    rankCount += node.Left.Count;
+                    node = node.Right;
+                }
+            }
+
+            UserBucket bucket = node.UserBucket!;
+            int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
+            Debug.Assert(userIndexInBucket >= 0);
+            rankCount += userIndexInBucket;
+
+            // 2. 准备结果
+            int offset = 0; // 结果数组内的偏移，用于处理用户排名过靠前，存在数据空位的情况
+            int leftNum = aroundN, rightNum = aroundN; // 需求数目
+            if (rankCount < aroundN)
+            {
+                // 用户排名过靠前，无法获取足够的左边用户
+                leftNum = rankCount;
+                offset = rankCount - aroundN;
+            }
+
+            if (rankCount + aroundN + 1 > _root.Count)
+            {
+                // 用户排名过靠后，无法获取足够的右边用户
+                rightNum = _root.Count - rankCount - 1;
+            }
+
+            User[] result = new User[leftNum + rightNum + 1];
+
+            // 3. 把桶内的用户填充到结果数组中
+            // 左边计数
+            int leftCount = Math.Min(userIndexInBucket, leftNum);
+            // 右边计数
+            int rightCount = Math.Min(bucket.UserCount - userIndexInBucket - 1, rightNum);
+            Array.Copy(bucket.Users, userIndexInBucket - leftCount, result, aroundN - leftCount + offset,
+                leftCount + rightCount + 1);
+
+            // 4. 获取缺少的用户
+            TreeNode tNode = node;
+            while (leftCount < leftNum)
+            {
+                // 查找tNode的左区间的叶子节点
+                while (tNode != tNode.Parent!.Right)
+                {
+                    tNode = tNode.Parent;
+                }
+
+                tNode = tNode.Parent!.Left!;
+                while (tNode.Right != null)
+                {
+                    tNode = tNode.Right;
+                }
+
+                bucket = tNode.UserBucket!;
+                int n = Math.Min(bucket.UserCount, leftNum - leftCount);
+                Array.Copy(bucket.Users, bucket.UserCount - n, result, aroundN - leftCount - n + offset, n);
+                leftCount += n;
+            }
+
+            tNode = node;
+            while (rightCount < rightNum)
+            {
+                // 查找tNode的右区间的叶子节点
+                while (tNode != tNode.Parent!.Left)
+                {
+                    tNode = tNode.Parent;
+                }
+
+                tNode = tNode.Parent!.Right!;
+                while (tNode.Left != null)
+                {
+                    tNode = tNode.Left;
+                }
+
+                bucket = tNode.UserBucket!;
+                int n = Math.Min(bucket.UserCount, rightNum - rightCount);
+                Array.Copy(bucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
+                rightCount += n;
+            }
+
+            return (result, rankCount);
+        }
+
+        public int GetRankingCount()
+        {
+            return _root.Count;
+        }
+
+#if DEBUG
+        public void DebugPrint()
+        {
+            List<(int depth, int count)> results = [];
+            DebugPrint(_root, 0, ref results);
+            for (int i = 0; i < results.Count; i++)
+            {
+                Console.Write($"{results[i].depth}-{results[i].count}  ");
+                // 每10个换行
+                if ((i + 1) % 10 == 0)
+                {
+                    Console.WriteLine();
+                }
+            }
+        }
+
+        private void DebugPrint(TreeNode node, int depth, ref List<(int depth, int count)> results)
+        {
+            if (node.UserBucket != null)
+            {
+                results.Add((depth, node.UserBucket.UserCount));
+                return;
+            }
+
+            DebugPrint(node.Left, depth + 1, ref results);
+            DebugPrint(node.Right, depth + 1, ref results);
+        }
 #endif
+    }
+
     enum ColorEnum : byte
     {
         Red = 0,
@@ -1246,8 +1616,6 @@ public class BucketBRTreeRankingList : IRankingList
         public int Remove(User user)
         {
             int index = Array.BinarySearch(Users, 0, UserCount, user);
-            Debug.Assert(index >= 0);
-
             Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
             UserCount--;
             return index;

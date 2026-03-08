@@ -32,7 +32,7 @@ namespace RankingListNew
         {
             Debug.Assert(!_userMap.ContainsKey(user.Id));
             _userMap.Add(user.Id, user);
-            int rankCount = _tree.AddTreeUser(user);
+            int rankCount = _tree.AddUser(user);
 
             return rankCount;
         }
@@ -40,8 +40,8 @@ namespace RankingListNew
         public int UpdateUser(User newUser)
         {
             User oldUser = _userMap[newUser.Id];
-            _tree.RemoveTreeUser(oldUser);
-            int rankCount = _tree.AddTreeUser(newUser);
+            _tree.RemoveUser(oldUser);
+            int rankCount = _tree.AddUser(newUser);
             _userMap[newUser.Id] = newUser;
             return rankCount;
         }
@@ -179,8 +179,9 @@ namespace RankingListNew
 
             // 参考：https://www.cnblogs.com/crazymakercircle/p/16320430.html
             // 参考：https://blog.csdn.net/u014454538/article/details/120120216
-            public int AddTreeUser(User user)
+            public int AddUser(User user)
             {
+                // 如果树为空，直接添加
                 if (_root.Count == 0)
                 {
                     UserBucket bucket = _root.UserBucket!;
@@ -194,7 +195,8 @@ namespace RankingListNew
 
                 int rankCount = 0;
                 TreeNode node = _root;
-                while (node.Right != null)
+                // 步骤1：遍历红黑树，找到目标叶子节点
+                while (node.Right != null) // 判断是否为叶子节点
                 {
                     node.Count++;
                     if (user.CompareTo(node.Right!.LeftUser) < 0)
@@ -303,7 +305,7 @@ namespace RankingListNew
             }
 
             // 参考： https://zhuanlan.zhihu.com/p/91960960
-            public void RemoveTreeUser(User user)
+            public void RemoveUser(User user)
             {
                 TreeNode node = _root;
                 while (node.Right != null)
@@ -334,7 +336,7 @@ namespace RankingListNew
                     CheckTree();
 #endif
                 }
-                else if (siblingNode.UserBucket != null && parent.Count < (BucketSize >> 2))
+                else if (siblingNode.UserBucket != null && parent.Count < BucketSize / 4)
                 {
                     parent.CombineChild();
                     parent.Color = ColorEnum.Black;
@@ -548,6 +550,7 @@ namespace RankingListNew
                 topN = Math.Min(topN, GetRankingCount());
                 User[] result = new User[topN];
                 int rankCount = 0;
+
                 int n = Math.Min(bucket.UserCount, topN - rankCount);
                 Array.Copy(bucket.Users, 0, result, rankCount, n);
                 rankCount += n;
@@ -965,7 +968,7 @@ namespace RankingListNew
 == Test stau10w_10w ===
 用户数: 100000
 操作数: 100000
-限制操作类型: AddTreeUser
+限制操作类型: AddUser
 排行榜用户数: 200000
 总耗时: 31 ms
 平均耗时: 0.31 ms/1000操作
