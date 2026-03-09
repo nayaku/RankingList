@@ -549,7 +549,7 @@ namespace RankingListNew
                 }
 
                 UserBucket bucket = node.UserBucket!;
-                topN = Math.Min(topN, GetRankingCount());
+                topN = Math.Min(topN, _root.Count);
                 User[] result = new User[topN];
                 int rankCount = 0;
 
@@ -859,12 +859,12 @@ namespace RankingListNew
             public void CombineChild()
             {
                 Debug.Assert(Left != null && Right != null);
-                // if (Left.UserBucket == null)
+                // if (Left.UserBlock == null)
                 // {
                 //     Left.CombineChild();
                 // }
 
-                // if (Right.UserBucket == null)
+                // if (Right.UserBlock == null)
                 // {
                 //     Right.CombineChild();
                 // }
