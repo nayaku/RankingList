@@ -16,6 +16,48 @@ namespace RankingListNew
             public int Count;
             private int _level;
 
+            public SkipList(Span<User> initialUsers)
+            {
+            }
+
+            private static UserBlock[] BuildBlock(Span<User> users)
+            {
+                // 初始化Block
+                int blockNum = (int)Math.Ceiling((double)users.Length / InitialBlockSize);
+                UserBlock[] blocks = new UserBlock[blockNum];
+                for (int i = 0; i < blockNum; i++)
+                {
+                    int l = i * InitialBlockSize;
+                    int r = Math.Min((i + 1) * InitialBlockSize, users.Length);
+                    int userCount = r - l;
+                    User[] blockUsers = new User[BlockSize];
+                    users.Slice(l, userCount).CopyTo(blockUsers);
+                    blocks[i] = new UserBlock(blockUsers, userCount);
+                }
+
+                return blocks;
+            }
+
+            private void BuildSkipList(UserBlock[] blocks)
+            {
+                // 构建跳表
+                SkipListNode[] currentLevelNodes = new SkipListNode[MaxLevel];
+                for (int i = 0; i < MaxLevel; i++)
+                {
+                    currentLevelNodes[i] = Head;
+                }
+                foreach (var block in blocks)
+                {
+                    int randomLevel = RandomLevel();
+                    SkipListNode newNode = new(block, randomLevel);
+                    for (int i = 0; i < randomLevel; i++)
+                    {
+                        currentLevelNodes[i].Next[i] = newNode;
+                        currentLevelNodes[i] = newNode;
+                    }
+                }
+            }
+
             private int RandomLevel()
             {
                 int level = 1;
@@ -68,10 +110,7 @@ namespace RankingListNew
                         newNode.Next[i] = update[i].Next[i];
                         update[i].Next[i] = newNode;
                         newNode.PreviousCount[i] = count;
-                        if (newNode.Next[i] != null)
-                        {
-                            newNode.Next[i].PreviousCount[i] -= count;
-                        }
+                        newNode.Next[i]?.PreviousCount[i] -= count;
                         count += userCount[i];
                     }
                 }
