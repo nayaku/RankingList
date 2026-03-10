@@ -624,7 +624,7 @@ namespace RankingListNew
 
                 User[] result = new User[leftNum + rightNum + 1];
 
-                // 3. 把桶内的用户填充到结果数组中
+                // 3. 把块内的用户填充到结果数组中
                 // 左边计数
                 int leftCount = Math.Min(userIndexInBlock, leftNum);
                 // 右边计数
@@ -881,7 +881,7 @@ namespace RankingListNew
         }
 
         /// <summary>
-        /// 每个桶
+        /// 每个块
         /// </summary>
         class UserBlock
         {
@@ -922,11 +922,11 @@ namespace RankingListNew
             }
 
             /// <summary>
-            /// 分裂成两个桶
+            /// 分裂成两个块
             /// </summary>
             /// <param name="user"></param>
             /// <param name="userIndex"></param>
-            /// <returns>右边的新桶</returns>
+            /// <returns>右边的新块</returns>
             public UserBlock Split(User user, out int userIndex)
             {
                 int mid = UserCount / 2;
