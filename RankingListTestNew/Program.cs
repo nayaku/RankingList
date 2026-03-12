@@ -33,6 +33,30 @@ namespace RankingListTestNew
                 int userNum = parseResult.GetValue<int>("userNum");
                 int operationNum = parseResult.GetValue<int>("operationNum");
                 TestOperationType? limitOperationType = parseResult.GetValue<TestOperationType?>("--limitOperationType");
+                if (Path.Exists(Path.Combine("Test", name + ".json")))
+                {
+                    Console.WriteLine($"测试数据{name}已存在，覆盖还是重命名？(o/r)");
+                    string input = Console.ReadLine();
+                    if (input == "o")
+                    {
+                        Console.WriteLine($"覆盖测试数据{name}");
+                    }
+                    else if (input == "r")
+                    {
+                        int suffix = 1;
+                        while (Path.Exists(Path.Combine("Test", $"{name}_{suffix}.json")))
+                        {
+                            suffix++;
+                        }
+                        name = $"{name}_{suffix}";
+                        Console.WriteLine($"使用测试名{name}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("输入无效，取消生成");
+                        return;
+                    }
+                }
                 Generator generator = new(name, userNum, operationNum, limitOperationType);
                 generator.Generate();
             });
