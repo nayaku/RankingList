@@ -5,9 +5,9 @@ namespace RankingListNew
 {
     public class BlockSkipListRankingList : IRankingList
     {
-        private static readonly int MaxLevel = 16; // 跳表的最大层数
+        private static readonly int MaxLevel = 32; // 跳表的最大层数
         private static readonly double P = 0.5; // 跳表的概率
-        private static readonly int BlockSize = 16; // 每个block的用户数量
+        private static readonly int BlockSize = 256; // 每个block的用户数量
         private static readonly int InitialBlockSize = BlockSize / 2; // 初始每个block的用户数量
 
         private SkipList _userList;
