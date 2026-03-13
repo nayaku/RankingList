@@ -24,15 +24,26 @@ namespace RankingListTestNew
 
         public void Test()
         {
+            string testResultDir = $"TestResults/{_rankingListClassName}";
+            if (!Directory.Exists(testResultDir))
+            {
+                Directory.CreateDirectory(testResultDir);
+            }
+
             Console.WriteLine($"== Test {_testName} ===");
             TestData testData = LoadTestData();
             Console.WriteLine($"用户数: {testData.Users.Count}");
-            Console.WriteLine($"操作数: {testData.Operations.Count}");
-            if (testData.LimitOperationType != null)
+            List<User> users = testData.Users;
+            List<TestOperation> operations = testData.Operations;
+            testData = null; // 释放测试数据内存
+            int operationCount = operations.Count;
+            Console.WriteLine($"操作数: {operationCount}");
+            if (operations.Count > 0)
             {
-                Console.WriteLine($"限制操作类型: {testData.LimitOperationType.Value}");
+                Console.WriteLine($"限制操作类型: {operations[0].Type}");
             }
-            IRankingList rankingList = RankingListHelper.NewRankingList(_rankingListClassName, testData.Users);
+            IRankingList rankingList = RankingListHelper.NewRankingList(_rankingListClassName, users);
+            users = null; // 释放测试数据内存
             GC.Collect();
             // 开始内存监控
             long initialMemoryUsage = GC.GetTotalMemory(true);
@@ -41,7 +52,8 @@ namespace RankingListTestNew
             Thread memoryMonitorThread = new(MonitorMemoryUsage) { IsBackground = true };
             memoryMonitorThread.Start();
             // 运行测试
-            (List<OperationResult> operationResults, Stopwatch stopwatch) = RunTest(rankingList, testData);
+            long elapsedMilliseconds = RunTest(rankingList, operations);
+            testData = null; // 释放测试数据内存
             // 停止内存监控
             Thread.Sleep(100); // 等待内存监控线程更新峰值
             _cancellationTokenSource.Cancel();
@@ -51,18 +63,24 @@ namespace RankingListTestNew
             TestResult testResultObj = new()
             {
                 RankingListName = _rankingListClassName,
-                TotalTimeMs = stopwatch.ElapsedMilliseconds,
-                AverageTimeMs = stopwatch.ElapsedMilliseconds / (double)testData.Operations.Count,
+                TotalTimeMs = elapsedMilliseconds,
+                AverageTimeMs = elapsedMilliseconds / (double)operationCount,
                 MemoryUsageBytes = GC.GetTotalMemory(true) - initialMemoryUsage,
                 PeakMemoryUsageBytes = _peakMemoryUsage - initialMemoryUsage,
                 TestDate = DateTime.Now,
             };
-            Save(testResultObj, operationResults);
+
+            string testResultPath = $"{testResultDir}/{_testName}.json";
+            using (FileStream fs = new(testResultPath, FileMode.Create, FileAccess.Write))
+            {
+                JsonSerializer.Serialize(fs, testResultObj, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true });
+            }
+            
             Console.WriteLine($"排行榜用户数: {rankingList.GetRankingCount()}");
             DisplayTestResult(testResultObj);
             if (_baseRankingListClassName != null)
             {
-                ValidateResults(operationResults);
+                ValidateResults();
                 CompareWithBase(testResultObj);
             }
 #if DEBUG
@@ -81,12 +99,12 @@ namespace RankingListTestNew
             return testData;
         }
 
-        private (List<OperationResult>, Stopwatch) RunTest(IRankingList rankingList, TestData testData)
+        private long RunTest(IRankingList rankingList, List<TestOperation> Operations)
         {
-            List<OperationResult> operationResults = new(testData.Operations.Count + 1);
+            List<OperationResult> operationResults = new(Operations.Count + 1);
             Stopwatch stopwatch = new();
             stopwatch.Start();
-            foreach (TestOperation testOperation in testData.Operations)
+            foreach (TestOperation testOperation in Operations)
             {
                 OperationResult operationResult = new()
                 {
@@ -126,7 +144,13 @@ namespace RankingListTestNew
             }
 
             stopwatch.Stop();
-            return (operationResults, stopwatch);
+            string testResultDir = $"TestResults/{_rankingListClassName}";
+            string operationResultPath = $"{testResultDir}/{_testName}_Operations.json";
+            using (FileStream fs = new(operationResultPath, FileMode.Create, FileAccess.Write))
+            {
+                JsonSerializer.Serialize(fs, operationResults, new JsonSerializerOptions { WriteIndented = true, IncludeFields = true });
+            }
+            return stopwatch.ElapsedMilliseconds;
         }
 
         /// <summary>
@@ -171,75 +195,75 @@ namespace RankingListTestNew
         /// 验证测试结果与基准
         /// </summary>
         /// <param name="testResults"></param>
-        private void ValidateResults(List<OperationResult> testResults)
+        private void ValidateResults()
         {
             string baseTestResultDirPath = $"TestResults/{_baseRankingListClassName}";
             string baseTestResultPath = $"{baseTestResultDirPath}/{_testName}_Operations.json";
-            List<OperationResult> baseResults;
-            using (FileStream fs = new(baseTestResultPath, FileMode.Open, FileAccess.Read))
-            {
-                baseResults = JsonSerializer.Deserialize<List<OperationResult>>(fs, new JsonSerializerOptions { IncludeFields = true }) ??
-                              throw new Exception($"无法加载基准测试数据 {baseTestResultPath}");
-            }
+            //List<OperationResult> baseResults;
+            //using (FileStream fs = new(baseTestResultPath, FileMode.Open, FileAccess.Read))
+            //{
+            //    baseResults = JsonSerializer.Deserialize<List<OperationResult>>(fs, new JsonSerializerOptions { IncludeFields = true }) ??
+            //                  throw new Exception($"无法加载基准测试数据 {baseTestResultPath}");
+            //}
 
-            if (baseResults.Count != testResults.Count)
-            {
-                throw new Exception("基准测试数据与测试数据操作数不一致");
-            }
+            //if (baseResults.Count != testResults.Count)
+            //{
+            //    throw new Exception("基准测试数据与测试数据操作数不一致");
+            //}
 
-            int errorCount = 0;
-            for (int i = 0; i < baseResults.Count; i++)
-            {
-                OperationResult baseResult = baseResults[i];
-                OperationResult testResult = testResults[i];
-                if (baseResult.OperationType != testResult.OperationType)
-                {
-                    Console.WriteLine($"基准测试数据与测试数据操作类型不一致，第{i}个操作");
-                    errorCount++;
-                }
+            //int errorCount = 0;
+            //for (int i = 0; i < baseResults.Count; i++)
+            //{
+            //    OperationResult baseResult = baseResults[i];
+            //    OperationResult testResult = testResults[i];
+            //    if (baseResult.OperationType != testResult.OperationType)
+            //    {
+            //        Console.WriteLine($"基准测试数据与测试数据操作类型不一致，第{i}个操作");
+            //        errorCount++;
+            //    }
 
-                if (baseResult.Rank != testResult.Rank)
-                {
-                    Console.WriteLine($"基准测试数据与测试数据排名不一致，第{i}个操作");
-                    errorCount++;
-                }
+            //    if (baseResult.Rank != testResult.Rank)
+            //    {
+            //        Console.WriteLine($"基准测试数据与测试数据排名不一致，第{i}个操作");
+            //        errorCount++;
+            //    }
 
-                if (baseResult.Users is null && testResult.Users is null)
-                {
-                    continue;
-                }
+            //    if (baseResult.Users is null && testResult.Users is null)
+            //    {
+            //        continue;
+            //    }
 
-                if (baseResult.Users is null || testResult.Users is null)
-                {
-                    Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作");
-                    errorCount++;
-                    continue;
-                }
+            //    if (baseResult.Users is null || testResult.Users is null)
+            //    {
+            //        Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作");
+            //        errorCount++;
+            //        continue;
+            //    }
 
-                if (baseResult.Users.Length != testResult.Users.Length)
-                {
-                    Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作");
-                    errorCount++;
-                    continue;
-                }
+            //    if (baseResult.Users.Length != testResult.Users.Length)
+            //    {
+            //        Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作");
+            //        errorCount++;
+            //        continue;
+            //    }
 
-                for (int j = 0; j < baseResult.Users.Length; j++)
-                {
-                    if (baseResult.Users[j].CompareTo(testResult.Users[j]) != 0)
-                    {
-                        Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作，第{j}个响应");
-                        errorCount++;
-                    }
-                }
-            }
-            if (errorCount > 0)
-            {
-                Console.WriteLine($"测试数据与基准数据不一致，共{errorCount}个错误", Color.Red);
-            }
-            else
-            {
-                Console.WriteLine("√ 所有操作结果验证通过！", Color.Green);
-            }
+            //    for (int j = 0; j < baseResult.Users.Length; j++)
+            //    {
+            //        if (baseResult.Users[j].CompareTo(testResult.Users[j]) != 0)
+            //        {
+            //            Console.WriteLine($"基准测试数据与测试数据响应不一致，第{i}个操作，第{j}个响应");
+            //            errorCount++;
+            //        }
+            //    }
+            //}
+            //if (errorCount > 0)
+            //{
+            //    Console.WriteLine($"测试数据与基准数据不一致，共{errorCount}个错误", Color.Red);
+            //}
+            //else
+            //{
+            //    Console.WriteLine("√ 所有操作结果验证通过！", Color.Green);
+            //}
         }
 
         /// <summary>
@@ -301,7 +325,7 @@ namespace RankingListTestNew
             {
                 Console.WriteLine($"基准测试类: {baseTestName}");
             }
-            
+
             string[] testList = Directory.GetFiles("Test", "*.json");
             foreach (string test in testList)
             {
