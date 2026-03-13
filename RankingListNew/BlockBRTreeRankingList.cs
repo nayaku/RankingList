@@ -80,6 +80,14 @@ namespace RankingListNew
         class Tree
         {
             private TreeNode _root;
+#if DEBUG 
+            private int _addCount;
+            private int _addCompareCount = 0;
+            private int _removeCount = 0;
+            private int _removeCompareCount = 0;
+            private int _getRankCount = 0;
+            private int _getRankCompareCount = 0;
+#endif
 
             public Tree(Span<User> users)
             {
@@ -183,6 +191,9 @@ namespace RankingListNew
             // 参考：https://blog.csdn.net/u014454538/article/details/120120216
             public int AddUser(User user)
             {
+#if DEBUG
+                _addCount++;
+#endif
                 // 如果树为空，直接添加
                 if (_root.Count == 0)
                 {
@@ -201,6 +212,9 @@ namespace RankingListNew
                 while (node.Right != null) // 判断是否为叶子节点
                 {
                     node.Count++;
+#if DEBUG
+                    _addCompareCount++;
+#endif
                     if (user.CompareTo(node.Right!.LeftUser) < 0)
                     {
                         node = node.Left!;
@@ -309,11 +323,17 @@ namespace RankingListNew
             // 参考： https://zhuanlan.zhihu.com/p/91960960
             public void RemoveUser(User user)
             {
+#if DEBUG
+                _removeCount++;
+#endif
                 TreeNode node = _root;
                 while (node.Right != null)
                 {
                     node.Count--;
                     node = user.CompareTo(node.Right!.LeftUser) < 0 ? node.Left! : node.Right!;
+#if DEBUG
+                    _removeCompareCount++;
+#endif
                 }
 
                 // 叶子节点
@@ -514,6 +534,9 @@ namespace RankingListNew
 
             public int GetUserRank(User user)
             {
+#if DEBUG
+                _getRankCount++;
+#endif
                 int rankCount = 0;
                 TreeNode node = _root;
 
@@ -529,6 +552,9 @@ namespace RankingListNew
                         rankCount += node.Left.Count;
                         node = node.Right;
                     }
+#if DEBUG
+                    _getRankCompareCount++;
+#endif
                 }
 
                 UserBlock block = node.UserBlock!;
@@ -691,12 +717,10 @@ namespace RankingListNew
                 for (int i = 0; i < results.Count; i++)
                 {
                     Console.Write($"{results[i].depth}-{results[i].count}  ");
-                    // 每10个换行
-                    if ((i + 1) % 10 == 0)
-                    {
-                        Console.WriteLine();
-                    }
                 }
+                Console.WriteLine($"AddUser调用次数：{_addCount}，比较次数：{_addCompareCount}，平均比较次数：{(double)_addCompareCount / _addCount}");
+                Console.WriteLine($"RemoveUser调用次数：{_removeCount}，比较次数：{_removeCompareCount}，平均比较次数：{(double)_removeCompareCount / _removeCount}");
+                Console.WriteLine($"GetUserRank调用次数：{_getRankCount}，比较次数：{_getRankCompareCount}，平均比较次数：{(double)_getRankCompareCount / _getRankCount}");
             }
 
             private void DebugPrint(TreeNode node, int depth, ref List<(int depth, int count)> results)
