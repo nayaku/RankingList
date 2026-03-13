@@ -81,6 +81,7 @@ namespace RankingListNew
 
         // 参考：https://cloud.tencent.com/developer/article/2512982（不正确，level不对）
         // 参考：https://www.baeldung-cn.com/java-skiplist
+        // 源码：https://github.com/tedcy/algorithm_test/blob/master/order_set/t_zset.h
         class SkipList
         {
             public SkipListNode Head;
