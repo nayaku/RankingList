@@ -61,14 +61,7 @@ namespace RankingListTestNew
                 generator.Generate();
             });
 
-            Command fastGeneratorCommand = new("fastGenerate", "快速生成测试数据：生成用户数据和操作列表")
-            {
-            };
-            fastGeneratorCommand.SetAction(p =>
-            {
-                FastGenerator fastGenerator = new();
-                fastGenerator.Generate();
-            });
+            
             Command testCommand = new("test", "执行测试")
             {
                 new Argument<string>("rankingListClassName")
@@ -92,7 +85,6 @@ namespace RankingListTestNew
             RootCommand rootCommand = new()
             {
                 generatorCommand,
-                fastGeneratorCommand,
                 testCommand
             };
             ParseResult parseResult = rootCommand.Parse(args);
