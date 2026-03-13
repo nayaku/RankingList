@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
-    public class BlockSkipListRankingList : IRankingList
+    public class BlockSkipListRankingList2 : IRankingList
     {
         private static readonly int MaxLevel = 16; // 跳表的最大层数
         private static readonly double P = 0.5; // 跳表的概率
@@ -13,7 +13,7 @@ namespace RankingListNew
         private SkipList _userList;
         private Dictionary<int, User> _userMap;
 
-        public BlockSkipListRankingList(Span<User> users)
+        public BlockSkipListRankingList2(Span<User> users)
         {
             users.Sort();
             _userList = new SkipList(users);
@@ -25,7 +25,7 @@ namespace RankingListNew
             }
         }
 
-        public BlockSkipListRankingList(List<User> users) :
+        public BlockSkipListRankingList2(List<User> users) :
             this(CollectionsMarshal.AsSpan(users))
         {
         }
@@ -145,9 +145,9 @@ namespace RankingListNew
                     SkipListNode newNode = new(block, randomLevel);
                     for (int i = 0; i < randomLevel; i++)
                     {
-                        currentLevelNodes[i].Next[i] = newNode;
-                        newNode.Previous[i] = currentLevelNodes[i];
-                        newNode.PreviousCount[i] = userCount[i];
+                        currentLevelNodes[i].Level[i].Next = newNode;
+                        newNode.Level[i].Previous = currentLevelNodes[i];
+                        newNode.Level[i].PreviousCount = userCount[i];
                         userCount[i] = 0;
                         currentLevelNodes[i] = newNode;
                     }
@@ -157,7 +157,7 @@ namespace RankingListNew
                     }
                 }
                 _level = MaxLevel;
-                while (_level > 1 && Head.Next[_level - 1] == null)
+                while (_level > 1 && Head.Level[_level - 1].Next == null)
                 {
                     _level--;
                 }
@@ -183,16 +183,16 @@ namespace RankingListNew
                 SkipListNode current = Head;
                 for (int i = _level - 1; i >= 0; i--)
                 {
-                    while (current.Next[i] != null && current.Next[i].MinUser.CompareTo(user) <= 0)
+                    while (current.Level[i].Next != null && current.Level[i].Next.MinUser.CompareTo(user) <= 0)
                     {
-                        current = current.Next[i];
-                        userCount[i] += current.PreviousCount[i];
+                        current = current.Level[i].Next;
+                        userCount[i] += current.Level[i].PreviousCount;
                     }
                     update[i] = current;
                     // 增加区间用户数量
-                    if (current.Next[i] != null)
+                    if (current.Level[i].Next != null)
                     {
-                        current.Next[i].PreviousCount[i]++;
+                        current.Level[i].Next.Level[i].PreviousCount++;
                     }
                 }
 
@@ -219,14 +219,14 @@ namespace RankingListNew
                     int previousCount = userBlock.UserCount;
                     for (int i = 0; i < randomLevel; i++)
                     {
-                        newNode.Next[i] = update[i].Next[i];
-                        update[i].Next[i] = newNode;
-                        newNode.Previous[i] = update[i];
-                        newNode.PreviousCount[i] = previousCount;
-                        if (newNode.Next[i] != null)
+                        newNode.Level[i].Next = update[i].Level[i].Next;
+                        update[i].Level[i].Next = newNode;
+                        newNode.Level[i].Previous = update[i];
+                        newNode.Level[i].PreviousCount = previousCount;
+                        if (newNode.Level[i].Next != null)
                         {
-                            newNode.Next[i].PreviousCount[i] -= previousCount;
-                            newNode.Next[i].Previous[i] = newNode;
+                            newNode.Level[i].Next.Level[i].PreviousCount -= previousCount;
+                            newNode.Level[i].Next.Level[i].Previous = newNode;
                         }
                         previousCount += userCount[i];
                     }
@@ -247,16 +247,16 @@ namespace RankingListNew
                 SkipListNode current = Head;
                 for (int i = _level - 1; i >= 0; i--)
                 {
-                    while (current.Next[i] != null && current.Next[i].MinUser.CompareTo(user) <= 0)
+                    while (current.Level[i].Next != null && current.Level[i].Next.MinUser.CompareTo(user) <= 0)
                     {
-                        current = current.Next[i];
-                        userCount[i] += current.PreviousCount[i];
+                        current = current.Level[i].Next;
+                        userCount[i] += current.Level[i].PreviousCount;
                     }
                     //update[i] = current;
                     // 减少区间用户数量
-                    if (current.Next[i] != null)
+                    if (current.Level[i].Next != null)
                     {
-                        current.Next[i].PreviousCount[i]--;
+                        current.Level[i].Next.Level[i].PreviousCount--;
                     }
                 }
 
@@ -270,23 +270,23 @@ namespace RankingListNew
                         needDelete = true;
                     }
                     else if (current.UserBlock.UserCount < BlockSize / 4
-                        && current.Previous[0]?.UserBlock.UserCount < BlockSize / 4)
+                        && current.Level[0].Previous?.UserBlock.UserCount < BlockSize / 4)
                     {
-                        current.Previous[0].UserBlock.Combine(current.UserBlock);
+                        current.Level[0].Previous.UserBlock.Combine(current.UserBlock);
                         needDelete = true;
                     }
                     if (needDelete)
                     {
-                        for (int i = 0; i < current.Previous.Length; i++)
+                        for (int i = 0; i < current.Level.Length; i++)
                         {
-                            current.Previous[i]!.Next[i] = current.Next[i];
-                            if (current.Next[i] != null)
+                            current.Level[i].Previous.Level[i].Next = current.Level[i].Next;
+                            if (current.Level[i].Next != null)
                             {
-                                current.Next[i].PreviousCount[i] += current.PreviousCount[i];
-                                current.Next[i].Previous[i] = current.Previous[i];
+                                current.Level[i].Next.Level[i].PreviousCount += current.Level[i].PreviousCount;
+                                current.Level[i].Next.Level[i].Previous = current.Level[i].Previous;
                             }
                         }
-                        while (_level > 1 && Head.Next[_level - 1] == null)
+                        while (_level > 1 && Head.Level[_level - 1].Next == null)
                         {
                             _level--;
                         }
@@ -304,10 +304,10 @@ namespace RankingListNew
                 SkipListNode current = Head;
                 for (int i = _level - 1; i >= 0; i--)
                 {
-                    while (current.Next[i] != null && current.Next[i].MinUser.CompareTo(user) <= 0)
+                    while (current.Level[i].Next != null && current.Level[i].Next.MinUser.CompareTo(user) <= 0)
                     {
-                        current = current.Next[i];
-                        userCount += current.PreviousCount[i];
+                        current = current.Level[i].Next;
+                        userCount += current.Level[i].PreviousCount;
                     }
                 }
                 UserBlock userBlock = current.UserBlock;
@@ -328,7 +328,7 @@ namespace RankingListNew
                     int n = Math.Min(current.UserBlock.UserCount, topN - userCount);
                     Array.Copy(current.UserBlock.Users, 0, result, userCount, n);
                     userCount += n;
-                    current = current.Next[0];
+                    current = current.Level[0].Next;
                 }
                 return result;
             }
@@ -341,10 +341,10 @@ namespace RankingListNew
                 SkipListNode current = Head;
                 for (int i = _level - 1; i >= 0; i--)
                 {
-                    while (current.Next[i] != null && current.Next[i].MinUser.CompareTo(user) <= 0)
+                    while (current.Level[i].Next != null && current.Level[i].Next.MinUser.CompareTo(user) <= 0)
                     {
-                        current = current.Next[i];
-                        rankCount += current.PreviousCount[i];
+                        current = current.Level[i].Next;
+                        rankCount += current.Level[i].PreviousCount;
                     }
                 }
                 UserBlock userBlock = current.UserBlock;
@@ -377,23 +377,23 @@ namespace RankingListNew
                     leftCount + rightCount + 1);
 
                 // 4. 获取缺少的用户
-                SkipListNode tNode = current.Previous[0]!;
+                SkipListNode tNode = current.Level[0].Previous!;
                 while (leftCount < leftNum)
                 {
                     userBlock = tNode.UserBlock!;
                     int n = Math.Min(userBlock.UserCount, leftNum - leftCount);
                     Array.Copy(userBlock.Users, userBlock.UserCount - n, result, aroundN - leftCount - n + offset, n);
                     leftCount += n;
-                    tNode = tNode.Previous[0];
+                    tNode = tNode.Level[0].Previous!;
                 }
-                tNode = current.Next[0]!;
+                tNode = current.Level[0].Next!;
                 while (rightCount < rightNum)
                 {
                     userBlock = tNode.UserBlock!;
                     int n = Math.Min(userBlock.UserCount, rightNum - rightCount);
                     Array.Copy(userBlock.Users, 0, result, aroundN + rightCount + 1 + offset, n);
                     rightCount += n;
-                    tNode = tNode.Next[0];
+                    tNode = tNode.Level[0].Next!;
                 }
                 return (result, rankCount);
             }
@@ -404,8 +404,8 @@ namespace RankingListNew
                 SkipListNode? current = Head;
                 while (current != null)
                 {
-                    levelCount[current.Next.Length - 1]++;
-                    current = current.Next[0];
+                    levelCount[current.Level.Length - 1]++;
+                    current = current.Level[0].Next;
                 }
                 Console.WriteLine($"总用户数：{Count}");
                 for (int i = 0; i < MaxLevel; i++)
@@ -427,17 +427,17 @@ namespace RankingListNew
                 {
                     userCount[i] += Head.UserBlock.UserCount;
                 }
-                SkipListNode? current = Head.Next[0];
+                SkipListNode? current = Head.Level[0].Next;
                 int nodeCount = 1;
                 while (current != null)
                 {
-                    for (int i = 0; i < current.PreviousCount.Length; i++)
+                    for (int i = 0; i < current.Level.Length; i++)
                     {
-                        Debug.Assert(current.PreviousCount[i] == userCount[i], "用户数量统计错误");
+                        Debug.Assert(current.Level[i].PreviousCount == userCount[i], "用户数量统计错误");
                         userCount[i] = 0;
 
-                        Debug.Assert(update[i].Next[i] == current, "跳表连接错误");
-                        Debug.Assert(current.Previous[i] == update[i], "跳表连接错误");
+                        Debug.Assert(update[i].Level[i].Next == current, "跳表连接错误");
+                        Debug.Assert(current.Level[i].Previous == update[i], "跳表连接错误");
                         update[i] = current;
                     }
 
@@ -446,7 +446,7 @@ namespace RankingListNew
                         userCount[i] += current.UserBlock.UserCount;
                     }
 
-                    current = current.Next[0];
+                    current = current.Level[0].Next;
                     nodeCount++;
                 }
             }
@@ -455,11 +455,14 @@ namespace RankingListNew
 
         class SkipListNode
         {
+            public struct SkipListLevel
+            {
+                public SkipListNode? Next;
+                public SkipListNode? Previous;
+                public int PreviousCount; // 到前一个节点的用户数量（不包含本节点的用户数量）
+            }
             public UserBlock UserBlock;
-            public SkipListNode?[] Next;
-            public SkipListNode?[] Previous;
-            // 每一层到前一个节点的用户数量（不包含本节点的用户数量）
-            public int[] PreviousCount;
+            public SkipListLevel[] Level;
             public User MinUser => UserBlock.MinUser;
 
 #if DEBUG
@@ -472,9 +475,7 @@ namespace RankingListNew
                 Id = TotalNodeCount++;
 #endif
                 UserBlock = block;
-                Next = new SkipListNode[level];
-                PreviousCount = new int[level];
-                Previous = new SkipListNode[level];
+                Level = new SkipListLevel[level];
             }
         }
 
