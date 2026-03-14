@@ -5,7 +5,7 @@ namespace RankingListTestNew
     /// <summary>
     /// 操作类型枚举
     /// </summary>
-    public enum TestOperationType
+    public enum TestOperationType : byte
     {
         AddUser,
         UpdateUser,
