@@ -82,6 +82,26 @@ namespace RankingListTestNew
                 TestOperator.TestAll(rankingListClassName, baseTestName);
             });
 
+            Command displayCommand = new("display", "显示测试结果")
+            {
+                new Argument<string>("rankingListClassName")
+                {
+                    Description = "排行榜类名"
+                },
+                new Option<string?>(
+                    "--base","-b"
+                )
+                {
+                    Description = "基准测试名，默认为null"
+                }
+            };
+            displayCommand.SetAction(parseResult =>
+            {
+                string rankingListClassName = parseResult.GetValue<string>("rankingListClassName")!;
+                string? baseTestName = parseResult.GetValue<string?>("--base");
+                TestOperator.TestAll(rankingListClassName, baseTestName);
+            });
+
             RootCommand rootCommand = new()
             {
                 generatorCommand,

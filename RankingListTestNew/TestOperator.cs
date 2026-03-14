@@ -1,7 +1,7 @@
-﻿using RankingListNew;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
 using System.Text.Json;
+using RankingListNew;
 using Console = Colorful.Console;
 
 namespace RankingListTestNew
@@ -33,17 +33,13 @@ namespace RankingListTestNew
             // 准备测试
             Console.WriteLine($"== Test {_testName} ===");
             TestData testData = LoadTestData();
-            Console.WriteLine($"用户数: {testData.Users.Count}");
+            int initialUserNum = testData.Users.Count;
             List<User> users = testData.Users;
             List<TestOperation> operations = testData.Operations;
-            testData = null; // 释放测试数据内存
             int operationCount = operations.Count;
-            Console.WriteLine($"操作数: {operationCount}");
-            if (operations.Count > 0)
-            {
-                Console.WriteLine($"限制操作类型: {operations[0].Type}");
-            }
-
+            TestOperationType? limitOperationType = testData.LimitOperationType;
+            testData = null; // 释放测试数据内存
+            // 创建排行榜实例
             IRankingList rankingList = RankingListHelper.NewRankingList(_rankingListClassName, users);
             users = null; // 释放测试数据内存
             GC.Collect();
@@ -64,7 +60,12 @@ namespace RankingListTestNew
             // 计算测试结果
             TestResult testResultObj = new()
             {
+                TestName = _testName,
                 RankingListName = _rankingListClassName,
+                InitUserNum = initialUserNum,
+                LimitOperationType = limitOperationType,
+                OperationNum = operationCount,
+                RankingListUserNum = rankingList.GetRankingCount(),
                 TotalTimeMs = stopwatch.ElapsedMilliseconds,
                 AverageTimeMs = stopwatch.ElapsedMilliseconds / (double)operations.Count,
                 MemoryUsageBytes = GC.GetTotalMemory(true) - initialMemoryUsage,
@@ -79,18 +80,20 @@ namespace RankingListTestNew
                     new JsonSerializerOptions { WriteIndented = true, IncludeFields = true });
             }
 
-            Console.WriteLine($"排行榜用户数: {rankingList.GetRankingCount()}");
-            DisplayTestResult(testResultObj);
+#if DEBUG
+            rankingList.DebugPrint();
+#endif
             if (_baseRankingListClassName != null)
             {
 #if DEBUG
                 ValidateResults(operationResults);
 #endif
-                CompareWithBase(testResultObj);
+                CompareWithBase(testResultObj, _baseRankingListClassName, _testName);
             }
-#if DEBUG
-            rankingList.DebugPrint();
-#endif
+            else
+            {
+                DisplayTestResult(testResultObj);
+            }
             Console.WriteLine($"== Test {_testName} End ===\n");
         }
 
@@ -120,19 +123,19 @@ namespace RankingListTestNew
                 switch (testOperation.Type)
                 {
                     case TestOperationType.AddUser:
-                    {
-                        User user = new(testOperation.UserId, testOperation.ScoreOrN,
-                            InitialUserCreateTime.AddSeconds(testOperation.Id));
-                        operationResult.Rank = rankingList.AddUser(user);
-                        break;
-                    }
+                        {
+                            User user = new(testOperation.UserId, testOperation.ScoreOrN,
+                                InitialUserCreateTime.AddSeconds(testOperation.Id));
+                            operationResult.Rank = rankingList.AddUser(user);
+                            break;
+                        }
                     case TestOperationType.UpdateUser:
-                    {
-                        User user = new(testOperation.UserId, testOperation.ScoreOrN,
-                            InitialUserCreateTime.AddSeconds(testOperation.Id));
-                        operationResult.Rank = rankingList.UpdateUser(user);
-                        break;
-                    }
+                        {
+                            User user = new(testOperation.UserId, testOperation.ScoreOrN,
+                                InitialUserCreateTime.AddSeconds(testOperation.Id));
+                            operationResult.Rank = rankingList.UpdateUser(user);
+                            break;
+                        }
 
                     case TestOperationType.GetUserRank:
                         operationResult.Rank = rankingList.GetUserRank(testOperation.UserId);
@@ -158,7 +161,7 @@ namespace RankingListTestNew
                     new JsonSerializerOptions { WriteIndented = true, IncludeFields = true });
             }
 #if !DEBUG
-    operationResults
+            operationResults = null;
 #endif
             return (operationResults, stopwatch);
         }
@@ -261,19 +264,15 @@ namespace RankingListTestNew
         /// <summary>
         /// 对比测试结果与基准
         /// </summary>
-        /// <param name="testResult"></param>
-        private void CompareWithBase(TestResult testResult)
+        private static void CompareWithBase(TestResult testResult, string baseRankingListClassName, string testName)
         {
-            string baseTestResultDirPath = $"TestResults/{_baseRankingListClassName}";
-            string baseTestResultPath = $"{baseTestResultDirPath}/{_testName}.json";
-            TestResult baseTestResult;
-            using (FileStream fs = new(baseTestResultPath, FileMode.Open, FileAccess.Read))
-            {
-                baseTestResult =
-                    JsonSerializer.Deserialize<TestResult>(fs, new JsonSerializerOptions { IncludeFields = true }) ??
-                    throw new Exception($"无法加载基准测试数据 {baseTestResultPath}");
-            }
+            TestResult baseTestResult = LoadTestResult(baseRankingListClassName, testName);
 
+            Console.WriteLine($"对比基准测试: {baseRankingListClassName} {testName}");
+            Console.WriteLine($"初始用户数: {testResult.InitUserNum}");
+            Console.WriteLine($"限制操作类型: {testResult.LimitOperationType}");
+            Console.WriteLine($"操作数: {testResult.OperationNum}");
+            Console.WriteLine($"排名列表用户数: {testResult.RankingListUserNum} vs {baseTestResult.RankingListUserNum}");
             Console.WriteLine(
                 $"总耗时: {testResult.TotalTimeMs} ms vs {baseTestResult.TotalTimeMs} ms " +
                 $"({CalculateDifference(testResult.TotalTimeMs, baseTestResult.TotalTimeMs):+0.00;-0.00;0.00}%)");
@@ -286,11 +285,31 @@ namespace RankingListTestNew
             Console.WriteLine(
                 $"内存峰值: {BytesToMB(testResult.PeakMemoryUsageBytes):0.00} MB vs {BytesToMB(baseTestResult.PeakMemoryUsageBytes):0.00} MB " +
                 $"({CalculateDifference(testResult.PeakMemoryUsageBytes, baseTestResult.PeakMemoryUsageBytes):+0.00;-0.00;0.00}%)");
+            Console.WriteLine($"测试日期: {testResult.TestDate} vs {baseTestResult.TestDate}");
+        }
+
+        private static TestResult LoadTestResult(string rankingListClassName, string testName)
+        {
+            string testResultDirPath = $"TestResults/{rankingListClassName}";
+            string testResultPath = $"{testResultDirPath}/{testName}.json";
+            TestResult testResult;
+            using (FileStream fs = new(testResultPath, FileMode.Open, FileAccess.Read))
+            {
+                testResult =
+                    JsonSerializer.Deserialize<TestResult>(fs, new JsonSerializerOptions { IncludeFields = true }) ??
+                    throw new Exception($"无法加载测试数据 {testResultPath}");
+            }
+            return testResult;
         }
 
         // 显示测试结果
-        private void DisplayTestResult(TestResult result)
+        private static void DisplayTestResult(TestResult result)
         {
+            Console.WriteLine($"测试: {result.RankingListName} {result.TestName}"); 
+            Console.WriteLine($"初始用户数: {result.InitUserNum}");
+            Console.WriteLine($"限制操作类型: {result.LimitOperationType}");
+            Console.WriteLine($"操作数: {result.OperationNum}");
+            Console.WriteLine($"排名列表用户数: {result.RankingListUserNum}");
             Console.WriteLine($"总耗时: {result.TotalTimeMs} ms");
             Console.WriteLine($"平均耗时: {1000 * result.AverageTimeMs:0.00} ms/1000操作");
             Console.WriteLine($"内存占用: {BytesToMB(result.MemoryUsageBytes):0.00} MB");
@@ -326,6 +345,30 @@ namespace RankingListTestNew
                 TestOperator testOperator = new(rankingListClassName, testName, baseTestName);
                 testOperator.Test();
                 GC.Collect();
+            }
+        }
+
+        public static void CompareAllWithBase(string rankingListClassName, string? baseTestName = null)
+        {
+            Console.WriteLine($"测试类: {rankingListClassName}");
+            if (baseTestName != null)
+            {
+                Console.WriteLine($"基准测试类: {baseTestName}");
+            }
+
+            string[] testList = Directory.GetFiles("Test", "*.json");
+            foreach (string test in testList)
+            {
+                string testName = Path.GetFileNameWithoutExtension(test);
+                TestResult testResult = LoadTestResult(rankingListClassName, testName);
+                if (baseTestName != null)
+                {
+                    CompareWithBase(testResult, baseTestName, testName);
+                }
+                else
+                {
+                    DisplayTestResult(testResult);
+                }
             }
         }
     }

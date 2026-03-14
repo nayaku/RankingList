@@ -3,15 +3,15 @@ using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
-    public class BlockBRTreeRankingList : IRankingList
+    public class BucketBRTreeRankingList : IRankingList
     {
-        private static readonly int BlockSize = 256; // 每个block的用户数量
-        private static readonly int InitialBlockSize = BlockSize / 2; // 初始每个block的用户数量
+        private static readonly int BucketSize = 256; // 每个bucket的用户数量
+        private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
 
         private Tree _tree;
         private Dictionary<int, User> _userMap;
 
-        public BlockBRTreeRankingList(Span<User> users)
+        public BucketBRTreeRankingList(Span<User> users)
         {
             users.Sort();
             _tree = new Tree(users);
@@ -23,7 +23,7 @@ namespace RankingListNew
             }
         }
 
-        public BlockBRTreeRankingList(List<User> users) :
+        public BucketBRTreeRankingList(List<User> users) :
             this(CollectionsMarshal.AsSpan(users))
         {
         }
@@ -91,15 +91,15 @@ namespace RankingListNew
 
             public Tree(Span<User> users)
             {
-                UserBlock[] blocks = BuildBlock(users);
-                int maxDepth = (int)Math.Ceiling(Math.Log(blocks.Length - 1, 2)) + 1;
+                UserBucket[] buckets = BuildBucket(users);
+                int maxDepth = (int)Math.Ceiling(Math.Log(buckets.Length - 1, 2)) + 1;
                 // 没有用户
                 _root = users.Length == 0
                     ? new TreeNode()
                     {
-                        UserBlock = new UserBlock(new User[BlockSize], 0),
+                        UserBucket = new UserBucket(new User[BucketSize], 0),
                     }
-                    : BuildTree(0, blocks.Length, 1, maxDepth, blocks);
+                    : BuildTree(0, buckets.Length, 1, maxDepth, buckets);
                 _root.Color = ColorEnum.Black;
 #if DEBUG
                 if (users.Length > 0)
@@ -107,25 +107,25 @@ namespace RankingListNew
 #endif
             }
 
-            private static UserBlock[] BuildBlock(Span<User> users)
+            private static UserBucket[] BuildBucket(Span<User> users)
             {
-                // 初始化block
-                int blockNum = (int)Math.Ceiling((double)users.Length / InitialBlockSize);
-                UserBlock[] blocks = new UserBlock[blockNum];
-                for (int i = 0; i < blockNum; i++)
+                // 初始化bucket
+                int bucketNum = (int)Math.Ceiling((double)users.Length / InitialBucketSize);
+                UserBucket[] buckets = new UserBucket[bucketNum];
+                for (int i = 0; i < bucketNum; i++)
                 {
-                    int l = i * InitialBlockSize;
-                    int r = Math.Min((i + 1) * InitialBlockSize, users.Length);
+                    int l = i * InitialBucketSize;
+                    int r = Math.Min((i + 1) * InitialBucketSize, users.Length);
                     int userCount = r - l;
-                    User[] blockUsers = new User[BlockSize];
-                    users.Slice(l, userCount).CopyTo(blockUsers);
-                    blocks[i] = new UserBlock(blockUsers, userCount);
+                    User[] bucketUsers = new User[BucketSize];
+                    users.Slice(l, userCount).CopyTo(bucketUsers);
+                    buckets[i] = new UserBucket(bucketUsers, userCount);
                 }
 
-                return blocks;
+                return buckets;
             }
 
-            private static TreeNode BuildTree(int l, int r, int depth, int maxDepth, UserBlock[] blocks)
+            private static TreeNode BuildTree(int l, int r, int depth, int maxDepth, UserBucket[] buckets)
             {
                 // 初始化tree
                 TreeNode node = new()
@@ -134,18 +134,18 @@ namespace RankingListNew
                 };
                 if (l + 1 == r)
                 {
-                    node.Count = blocks[l].UserCount;
-                    node.UserBlock = blocks[l];
-                    node.LeftUser = blocks[l].MinUser;
-                    node.RightUser = blocks[l].MaxUser;
+                    node.Count = buckets[l].UserCount;
+                    node.UserBucket = buckets[l];
+                    node.LeftUser = buckets[l].MinUser;
+                    node.RightUser = buckets[l].MaxUser;
                     return node;
                 }
 
                 int mid = (l + r) >> 1;
-                node.Left = BuildTree(l, mid, depth + 1, maxDepth, blocks);
+                node.Left = BuildTree(l, mid, depth + 1, maxDepth, buckets);
                 node.Left.Parent = node;
                 node.LeftUser = node.Left.LeftUser;
-                node.Right = BuildTree(mid, r, depth + 1, maxDepth, blocks);
+                node.Right = BuildTree(mid, r, depth + 1, maxDepth, buckets);
                 node.Right.Parent = node;
                 node.RightUser = node.Right.RightUser;
                 node.Count = node.Left.Count + node.Right.Count;
@@ -172,7 +172,7 @@ namespace RankingListNew
                 Debug.Assert(node.Right == null || node.Right.Parent == node);
                 Debug.Assert(
                     node.Left == null || node.Right == null || node.Left.Count + node.Right.Count == node.Count);
-                Debug.Assert(node.UserBlock == null || node.UserBlock.UserCount == node.Count);
+                Debug.Assert(node.UserBucket == null || node.UserBucket.UserCount == node.Count);
                 Debug.Assert(node.Left == null || node.LeftUser.CompareTo(node.Left.LeftUser) == 0);
                 Debug.Assert(node.Right == null || node.RightUser.CompareTo(node.Right.RightUser) == 0);
                 if (node.Color == ColorEnum.Red)
@@ -197,9 +197,9 @@ namespace RankingListNew
                 // 如果树为空，直接添加
                 if (_root.Count == 0)
                 {
-                    UserBlock block = _root.UserBlock!;
-                    block.Users[0] = user;
-                    block.UserCount = 1;
+                    UserBucket bucket = _root.UserBucket!;
+                    bucket.Users[0] = user;
+                    bucket.UserCount = 1;
                     _root.Count = 1;
                     _root.LeftUser = user;
                     _root.RightUser = user;
@@ -227,12 +227,12 @@ namespace RankingListNew
                 }
 
                 // 叶子节点
-                int userIndexInBlock;
+                int userIndexInBucket;
                 if (node.Full)
                 {
                     // 分裂TreeNode
-                    node.Split(user, out userIndexInBlock);
-                    rankCount += userIndexInBlock;
+                    node.Split(user, out userIndexInBucket);
+                    rankCount += userIndexInBucket;
                     // 调节树
                     if (node.Color == ColorEnum.Red)
                     {
@@ -254,9 +254,9 @@ namespace RankingListNew
                 }
                 else
                 {
-                    // 加入block
-                    userIndexInBlock = node.Insert(user);
-                    rankCount += userIndexInBlock;
+                    // 加入bucket
+                    userIndexInBucket = node.Insert(user);
+                    rankCount += userIndexInBucket;
                 }
 
                 return rankCount;
@@ -358,7 +358,7 @@ namespace RankingListNew
                     CheckTree();
 #endif
                 }
-                else if (siblingNode.UserBlock != null && parent.Count < BlockSize / 4)
+                else if (siblingNode.UserBucket != null && parent.Count < BucketSize / 4)
                 {
                     parent.CombineChild();
                     parent.Color = ColorEnum.Black;
@@ -557,10 +557,10 @@ namespace RankingListNew
 #endif
                 }
 
-                UserBlock block = node.UserBlock!;
-                int userIndexInBlock = block.IndexOf(user);
-                Debug.Assert(userIndexInBlock >= 0);
-                rankCount += userIndexInBlock;
+                UserBucket bucket = node.UserBucket!;
+                int userIndexInBucket = bucket.IndexOf(user);
+                Debug.Assert(userIndexInBucket >= 0);
+                rankCount += userIndexInBucket;
                 return rankCount;
             }
 
@@ -574,13 +574,13 @@ namespace RankingListNew
                     node = node.Left;
                 }
 
-                UserBlock block = node.UserBlock!;
+                UserBucket bucket = node.UserBucket!;
                 topN = Math.Min(topN, _root.Count);
                 User[] result = new User[topN];
                 int rankCount = 0;
 
-                int n = Math.Min(block.UserCount, topN - rankCount);
-                Array.Copy(block.Users, 0, result, rankCount, n);
+                int n = Math.Min(bucket.UserCount, topN - rankCount);
+                Array.Copy(bucket.Users, 0, result, rankCount, n);
                 rankCount += n;
 
                 // 缺少的用户数
@@ -598,9 +598,9 @@ namespace RankingListNew
                         node = node.Left;
                     }
 
-                    block = node.UserBlock!;
-                    n = Math.Min(block.UserCount, topN - rankCount);
-                    Array.Copy(block.Users, 0, result, rankCount, n);
+                    bucket = node.UserBucket!;
+                    n = Math.Min(bucket.UserCount, topN - rankCount);
+                    Array.Copy(bucket.Users, 0, result, rankCount, n);
                     rankCount += n;
                 }
 
@@ -627,10 +627,10 @@ namespace RankingListNew
                     }
                 }
 
-                UserBlock block = node.UserBlock!;
-                int userIndexInBlock = Array.BinarySearch(block.Users, 0, block.UserCount, user);
-                Debug.Assert(userIndexInBlock >= 0);
-                rankCount += userIndexInBlock;
+                UserBucket bucket = node.UserBucket!;
+                int userIndexInBucket = Array.BinarySearch(bucket.Users, 0, bucket.UserCount, user);
+                Debug.Assert(userIndexInBucket >= 0);
+                rankCount += userIndexInBucket;
 
                 // 2. 准备结果
                 int offset = 0; // 结果数组内的偏移，用于处理用户排名过靠前，存在数据空位的情况
@@ -650,12 +650,12 @@ namespace RankingListNew
 
                 User[] result = new User[leftNum + rightNum + 1];
 
-                // 3. 把块内的用户填充到结果数组中
+                // 3. 把桶内的用户填充到结果数组中
                 // 左边计数
-                int leftCount = Math.Min(userIndexInBlock, leftNum);
+                int leftCount = Math.Min(userIndexInBucket, leftNum);
                 // 右边计数
-                int rightCount = Math.Min(block.UserCount - userIndexInBlock - 1, rightNum);
-                Array.Copy(block.Users, userIndexInBlock - leftCount, result, aroundN - leftCount + offset,
+                int rightCount = Math.Min(bucket.UserCount - userIndexInBucket - 1, rightNum);
+                Array.Copy(bucket.Users, userIndexInBucket - leftCount, result, aroundN - leftCount + offset,
                     leftCount + rightCount + 1);
 
                 // 4. 获取缺少的用户
@@ -674,9 +674,9 @@ namespace RankingListNew
                         tNode = tNode.Right;
                     }
 
-                    block = tNode.UserBlock!;
-                    int n = Math.Min(block.UserCount, leftNum - leftCount);
-                    Array.Copy(block.Users, block.UserCount - n, result, aroundN - leftCount - n + offset, n);
+                    bucket = tNode.UserBucket!;
+                    int n = Math.Min(bucket.UserCount, leftNum - leftCount);
+                    Array.Copy(bucket.Users, bucket.UserCount - n, result, aroundN - leftCount - n + offset, n);
                     leftCount += n;
                 }
 
@@ -695,9 +695,9 @@ namespace RankingListNew
                         tNode = tNode.Left;
                     }
 
-                    block = tNode.UserBlock!;
-                    int n = Math.Min(block.UserCount, rightNum - rightCount);
-                    Array.Copy(block.Users, 0, result, aroundN + rightCount + 1 + offset, n);
+                    bucket = tNode.UserBucket!;
+                    int n = Math.Min(bucket.UserCount, rightNum - rightCount);
+                    Array.Copy(bucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
                     rightCount += n;
                 }
 
@@ -725,9 +725,9 @@ namespace RankingListNew
 
             private void DebugPrint(TreeNode node, int depth, ref List<(int depth, int count)> results)
             {
-                if (node.UserBlock != null)
+                if (node.UserBucket != null)
                 {
-                    results.Add((depth, node.UserBlock.UserCount));
+                    results.Add((depth, node.UserBucket.UserCount));
                     return;
                 }
 
@@ -751,8 +751,8 @@ namespace RankingListNew
             public TreeNode? Left;
             public TreeNode? Right;
             public TreeNode? Parent;
-            public UserBlock? UserBlock;
-            public bool Full => Count >= BlockSize;
+            public UserBucket? UserBucket;
+            public bool Full => Count >= BucketSize;
             public bool Empty => Count == 0;
             public ColorEnum Color = ColorEnum.Red;
 
@@ -763,9 +763,9 @@ namespace RankingListNew
                 Right = child.Right;
                 child.Left?.Parent = this;
                 child.Right?.Parent = this;
-                UserBlock = child.UserBlock;
+                UserBucket = child.UserBucket;
 #if DEBUG
-                child.UserBlock = null;
+                child.UserBucket = null;
                 child.Count = 0;
                 child.Left = null;
                 child.Right = null;
@@ -793,28 +793,28 @@ namespace RankingListNew
 
             public int Insert(User user)
             {
-                Debug.Assert(UserBlock != null);
-                int userIndexInBlock = UserBlock.Insert(user);
-                if (userIndexInBlock == 0)
+                Debug.Assert(UserBucket != null);
+                int userIndexInBucket = UserBucket.Insert(user);
+                if (userIndexInBucket == 0)
                 {
                     LeftUser = user;
                     UpdateLeftUser(this);
                 }
-                else if (userIndexInBlock == UserBlock.UserCount - 1)
+                else if (userIndexInBucket == UserBucket.UserCount - 1)
                 {
                     RightUser = user;
                     UpdateRightUser(this);
                 }
 
                 Count++;
-                return userIndexInBlock;
+                return userIndexInBucket;
             }
 
             public void Remove(User user)
             {
-                Debug.Assert(UserBlock != null);
-                int userIndexInBlock = UserBlock.Remove(user);
-                if (UserBlock.Empty)
+                Debug.Assert(UserBucket != null);
+                int userIndexInBucket = UserBucket.Remove(user);
+                if (UserBucket.Empty)
                 {
                     // LeftUser = null;
                     // RightUser = null;
@@ -832,47 +832,47 @@ namespace RankingListNew
                         }
                     }
                 }
-                else if (userIndexInBlock == 0)
+                else if (userIndexInBucket == 0)
                 {
-                    LeftUser = UserBlock.MinUser;
+                    LeftUser = UserBucket.MinUser;
                     UpdateLeftUser(this);
                 }
-                else if (userIndexInBlock == UserBlock.UserCount)
+                else if (userIndexInBucket == UserBucket.UserCount)
                 {
-                    RightUser = UserBlock.MaxUser;
+                    RightUser = UserBucket.MaxUser;
                     UpdateRightUser(this);
                 }
 
                 Count--;
             }
 
-            public void Split(User user, out int userIndexInBlock)
+            public void Split(User user, out int userIndexInBucket)
             {
-                Debug.Assert(UserBlock != null);
-                UserBlock newBlock = UserBlock.Split(user, out userIndexInBlock);
+                Debug.Assert(UserBucket != null);
+                UserBucket newBucket = UserBucket.Split(user, out userIndexInBucket);
                 Left = new TreeNode()
                 {
-                    UserBlock = UserBlock,
-                    Count = UserBlock.UserCount,
-                    LeftUser = UserBlock.MinUser,
-                    RightUser = UserBlock.MaxUser,
+                    UserBucket = UserBucket,
+                    Count = UserBucket.UserCount,
+                    LeftUser = UserBucket.MinUser,
+                    RightUser = UserBucket.MaxUser,
                     Parent = this
                 };
                 Right = new TreeNode()
                 {
-                    UserBlock = newBlock,
-                    Count = newBlock.UserCount,
-                    LeftUser = newBlock.MinUser,
-                    RightUser = newBlock.MaxUser,
+                    UserBucket = newBucket,
+                    Count = newBucket.UserCount,
+                    LeftUser = newBucket.MinUser,
+                    RightUser = newBucket.MaxUser,
                     Parent = this
                 };
-                UserBlock = null;
+                UserBucket = null;
                 Count++;
-                if (userIndexInBlock == 0)
+                if (userIndexInBucket == 0)
                 {
                     UpdateLeftUser(Left);
                 }
-                else if (userIndexInBlock == Count - 1)
+                else if (userIndexInBucket == Count - 1)
                 {
                     UpdateRightUser(Right);
                 }
@@ -883,31 +883,31 @@ namespace RankingListNew
             public void CombineChild()
             {
                 Debug.Assert(Left != null && Right != null);
-                // if (Left.UserBlock == null)
+                // if (Left.UserBucket == null)
                 // {
                 //     Left.CombineChild();
                 // }
 
-                // if (Right.UserBlock == null)
+                // if (Right.UserBucket == null)
                 // {
                 //     Right.CombineChild();
                 // }
 
-                Debug.Assert(Left.UserBlock != null && Right.UserBlock != null);
-                UserBlock = Left.UserBlock;
-                UserBlock.Combine(Right.UserBlock);
-                Debug.Assert(UserBlock.UserCount == Count);
-                Debug.Assert(UserBlock.MinUser.CompareTo(LeftUser) == 0);
-                Debug.Assert(UserBlock.MaxUser.CompareTo(RightUser) == 0);
+                Debug.Assert(Left.UserBucket != null && Right.UserBucket != null);
+                UserBucket = Left.UserBucket;
+                UserBucket.Combine(Right.UserBucket);
+                Debug.Assert(UserBucket.UserCount == Count);
+                Debug.Assert(UserBucket.MinUser.CompareTo(LeftUser) == 0);
+                Debug.Assert(UserBucket.MaxUser.CompareTo(RightUser) == 0);
                 Left = null;
                 Right = null;
             }
         }
 
         /// <summary>
-        /// 每个块
+        /// 每个桶
         /// </summary>
-        class UserBlock
+        class UserBucket
         {
             public User MinUser => Users[0];
             public User MaxUser => Users[UserCount - 1];
@@ -917,7 +917,7 @@ namespace RankingListNew
             public bool Empty => UserCount == 0;
             public int IndexOf(User user) => Array.BinarySearch(Users, 0, UserCount, user);
 
-            public UserBlock(User[] users, int userCount)
+            public UserBucket(User[] users, int userCount)
             {
                 Users = users;
                 UserCount = userCount;
@@ -946,12 +946,12 @@ namespace RankingListNew
             }
 
             /// <summary>
-            /// 分裂成两个块
+            /// 分裂成两个桶
             /// </summary>
             /// <param name="user"></param>
             /// <param name="userIndex"></param>
-            /// <returns>右边的新块</returns>
-            public UserBlock Split(User user, out int userIndex)
+            /// <returns>右边的新桶</returns>
+            public UserBucket Split(User user, out int userIndex)
             {
                 int mid = UserCount / 2;
                 userIndex = Array.BinarySearch(Users, 0, UserCount, user);
@@ -960,7 +960,7 @@ namespace RankingListNew
                     userIndex = ~userIndex;
                 }
 
-                User[] newUsers = new User[BlockSize];
+                User[] newUsers = new User[BucketSize];
                 int newUserCount = UserCount - mid;
                 if (userIndex >= mid)
                 {
@@ -975,13 +975,13 @@ namespace RankingListNew
                 }
 
                 UserCount = mid;
-                UserBlock newBlock = new(newUsers, newUserCount);
+                UserBucket newBucket = new(newUsers, newUserCount);
                 if (userIndex < mid)
                     Insert(user);
-                return newBlock;
+                return newBucket;
             }
 
-            public void Combine(UserBlock other)
+            public void Combine(UserBucket other)
             {
                 Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
                 UserCount += other.UserCount;
@@ -991,7 +991,7 @@ namespace RankingListNew
 }
 
 /*
-测试类: BlockBRTreeRankingList
+测试类: BucketBRTreeRankingList
 == Test stau10w_10w ===
 用户数: 100000
 操作数: 100000

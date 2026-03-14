@@ -3,17 +3,17 @@ using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
-    public class BlockSkipListRankingList : IRankingList
+    public class BucketSkipListRankingList : IRankingList
     {
         private static readonly int MaxLevel = 16; // 跳表的最大层数
         private static readonly double P = 0.5; // 跳表的概率
-        private static readonly int BlockSize = 256; // 每个block的用户数量
-        private static readonly int InitialBlockSize = BlockSize / 2; // 初始每个block的用户数量
+        private static readonly int BucketSize = 256; // 每个bucket的用户数量
+        private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
 
         private SkipList _userList;
         private Dictionary<int, User> _userMap;
 
-        public BlockSkipListRankingList(Span<User> users)
+        public BucketSkipListRankingList(Span<User> users)
         {
             users.Sort();
             _userList = new SkipList(users);
@@ -25,7 +25,7 @@ namespace RankingListNew
             }
         }
 
-        public BlockSkipListRankingList(List<User> users) :
+        public BucketSkipListRankingList(List<User> users) :
             this(CollectionsMarshal.AsSpan(users))
         {
         }
@@ -95,54 +95,54 @@ namespace RankingListNew
 
             public SkipList(Span<User> initialUsers)
             {
-                UserBlock[] blocks = BuildBlock(initialUsers);
-                if (blocks.Length == 0)
+                UserBucket[] buckets = BuildBucket(initialUsers);
+                if (buckets.Length == 0)
                 {
                     // 没有用户
-                    UserBlock userBlock = new(new User[BlockSize], 0);
-                    Head = new SkipListNode(userBlock, MaxLevel);
+                    UserBucket userBucket = new(new User[BucketSize], 0);
+                    Head = new SkipListNode(userBucket, MaxLevel);
                     return;
                 }
                 else
                 {
-                    Head = new SkipListNode(blocks[0], MaxLevel);
-                    BuildSkipList(blocks.AsSpan(1));
+                    Head = new SkipListNode(buckets[0], MaxLevel);
+                    BuildSkipList(buckets.AsSpan(1));
                 }
                 Count = initialUsers.Length;
             }
 
-            private static UserBlock[] BuildBlock(Span<User> users)
+            private static UserBucket[] BuildBucket(Span<User> users)
             {
-                // 初始化Block
-                int blockNum = (int)Math.Ceiling((double)users.Length / InitialBlockSize);
-                UserBlock[] blocks = new UserBlock[blockNum];
-                for (int i = 0; i < blockNum; i++)
+                // 初始化Bucket
+                int bucketNum = (int)Math.Ceiling((double)users.Length / InitialBucketSize);
+                UserBucket[] buckets = new UserBucket[bucketNum];
+                for (int i = 0; i < bucketNum; i++)
                 {
-                    int l = i * InitialBlockSize;
-                    int r = Math.Min((i + 1) * InitialBlockSize, users.Length);
+                    int l = i * InitialBucketSize;
+                    int r = Math.Min((i + 1) * InitialBucketSize, users.Length);
                     int userCount = r - l;
-                    User[] blockUsers = new User[BlockSize];
-                    users.Slice(l, userCount).CopyTo(blockUsers);
-                    blocks[i] = new UserBlock(blockUsers, userCount);
+                    User[] bucketUsers = new User[BucketSize];
+                    users.Slice(l, userCount).CopyTo(bucketUsers);
+                    buckets[i] = new UserBucket(bucketUsers, userCount);
                 }
 
-                return blocks;
+                return buckets;
             }
 
-            private void BuildSkipList(Span<UserBlock> blocks)
+            private void BuildSkipList(Span<UserBucket> buckets)
             {
                 // 构建跳表
                 int[] userCount = new int[MaxLevel];
                 SkipListNode[] currentLevelNodes = new SkipListNode[MaxLevel];
                 for (int i = 0; i < MaxLevel; i++)
                 {
-                    userCount[i] = Head.UserBlock.UserCount;
+                    userCount[i] = Head.UserBucket.UserCount;
                     currentLevelNodes[i] = Head;
                 }
-                foreach (var block in blocks)
+                foreach (var bucket in buckets)
                 {
                     int randomLevel = RandomLevel();
-                    SkipListNode newNode = new(block, randomLevel);
+                    SkipListNode newNode = new(bucket, randomLevel);
                     for (int i = 0; i < randomLevel; i++)
                     {
                         currentLevelNodes[i].Next[i] = newNode;
@@ -153,7 +153,7 @@ namespace RankingListNew
                     }
                     for (int i = 0; i < MaxLevel; i++)
                     {
-                        userCount[i] += block.UserCount;
+                        userCount[i] += bucket.UserCount;
                     }
                 }
                 _level = MaxLevel;
@@ -196,15 +196,15 @@ namespace RankingListNew
                     }
                 }
 
-                int count = userCount.Sum(), userIndexInBlock;
-                UserBlock userBlock = current.UserBlock;
-                if (!userBlock.Full)
+                int count = userCount.Sum(), userIndexInBucket;
+                UserBucket userBucket = current.UserBucket;
+                if (!userBucket.Full)
                 {
-                    userIndexInBlock = userBlock.Insert(user);
+                    userIndexInBucket = userBucket.Insert(user);
                 }
                 else
                 {
-                    UserBlock newBlock = userBlock.Split(user, out userIndexInBlock);
+                    UserBucket newBucket = userBucket.Split(user, out userIndexInBucket);
 
                     int randomLevel = RandomLevel();
                     if (randomLevel > _level)
@@ -215,8 +215,8 @@ namespace RankingListNew
                         }
                         _level = randomLevel;
                     }
-                    SkipListNode newNode = new(newBlock, randomLevel);
-                    int previousCount = userBlock.UserCount;
+                    SkipListNode newNode = new(newBucket, randomLevel);
+                    int previousCount = userBucket.UserCount;
                     for (int i = 0; i < randomLevel; i++)
                     {
                         newNode.Next[i] = update[i].Next[i];
@@ -237,7 +237,7 @@ namespace RankingListNew
                 Check();
 #endif
 
-                return count + userIndexInBlock;
+                return count + userIndexInBucket;
             }
 
             public void RemoveUser(User user)
@@ -260,19 +260,19 @@ namespace RankingListNew
                     }
                 }
 
-                UserBlock userBlock = current.UserBlock;
-                userBlock.Remove(user);
+                UserBucket userBucket = current.UserBucket;
+                userBucket.Remove(user);
                 bool needDelete = false;
                 if (Count > 1)
                 {
-                    if (userBlock.Empty)
+                    if (userBucket.Empty)
                     {
                         needDelete = true;
                     }
-                    else if (current.UserBlock.UserCount < BlockSize / 4
-                        && current.Previous[0]?.UserBlock.UserCount < BlockSize / 4)
+                    else if (current.UserBucket.UserCount < BucketSize / 4
+                        && current.Previous[0]?.UserBucket.UserCount < BucketSize / 4)
                     {
-                        current.Previous[0].UserBlock.Combine(current.UserBlock);
+                        current.Previous[0].UserBucket.Combine(current.UserBucket);
                         needDelete = true;
                     }
                     if (needDelete)
@@ -310,10 +310,10 @@ namespace RankingListNew
                         userCount += current.PreviousCount[i];
                     }
                 }
-                UserBlock userBlock = current.UserBlock;
-                int userIndexInBlock = userBlock.IndexOf(user);
-                Debug.Assert(userIndexInBlock >= 0, "用户不存在");
-                return userCount + userIndexInBlock;
+                UserBucket userBucket = current.UserBucket;
+                int userIndexInBucket = userBucket.IndexOf(user);
+                Debug.Assert(userIndexInBucket >= 0, "用户不存在");
+                return userCount + userIndexInBucket;
             }
 
             public User[] GetTopN(int topN)
@@ -325,8 +325,8 @@ namespace RankingListNew
                 while (userCount < topN)
                 {
                     Debug.Assert(current != null);
-                    int n = Math.Min(current.UserBlock.UserCount, topN - userCount);
-                    Array.Copy(current.UserBlock.Users, 0, result, userCount, n);
+                    int n = Math.Min(current.UserBucket.UserCount, topN - userCount);
+                    Array.Copy(current.UserBucket.Users, 0, result, userCount, n);
                     userCount += n;
                     current = current.Next[0];
                 }
@@ -347,10 +347,10 @@ namespace RankingListNew
                         rankCount += current.PreviousCount[i];
                     }
                 }
-                UserBlock userBlock = current.UserBlock;
-                int userIndexInBlock = userBlock.IndexOf(user);
-                Debug.Assert(userIndexInBlock >= 0, "用户不存在");
-                rankCount += userIndexInBlock;
+                UserBucket userBucket = current.UserBucket;
+                int userIndexInBucket = userBucket.IndexOf(user);
+                Debug.Assert(userIndexInBucket >= 0, "用户不存在");
+                rankCount += userIndexInBucket;
 
                 // 2. 准备结果
                 int offset = 0; // 结果数组内的偏移，用于处理用户排名过靠前，存在数据空位的情况
@@ -368,30 +368,30 @@ namespace RankingListNew
                 }
                 User[] result = new User[leftNum + rightNum + 1];
 
-                // 3. 把块内的用户填充到结果数组中
+                // 3. 把桶内的用户填充到结果数组中
                 // 左边计数
-                int leftCount = Math.Min(userIndexInBlock, leftNum);
+                int leftCount = Math.Min(userIndexInBucket, leftNum);
                 // 右边计数
-                int rightCount = Math.Min(userBlock.UserCount - userIndexInBlock - 1, rightNum);
-                Array.Copy(userBlock.Users, userIndexInBlock - leftCount, result, aroundN - leftCount + offset,
+                int rightCount = Math.Min(userBucket.UserCount - userIndexInBucket - 1, rightNum);
+                Array.Copy(userBucket.Users, userIndexInBucket - leftCount, result, aroundN - leftCount + offset,
                     leftCount + rightCount + 1);
 
                 // 4. 获取缺少的用户
                 SkipListNode tNode = current.Previous[0]!;
                 while (leftCount < leftNum)
                 {
-                    userBlock = tNode.UserBlock!;
-                    int n = Math.Min(userBlock.UserCount, leftNum - leftCount);
-                    Array.Copy(userBlock.Users, userBlock.UserCount - n, result, aroundN - leftCount - n + offset, n);
+                    userBucket = tNode.UserBucket!;
+                    int n = Math.Min(userBucket.UserCount, leftNum - leftCount);
+                    Array.Copy(userBucket.Users, userBucket.UserCount - n, result, aroundN - leftCount - n + offset, n);
                     leftCount += n;
                     tNode = tNode.Previous[0];
                 }
                 tNode = current.Next[0]!;
                 while (rightCount < rightNum)
                 {
-                    userBlock = tNode.UserBlock!;
-                    int n = Math.Min(userBlock.UserCount, rightNum - rightCount);
-                    Array.Copy(userBlock.Users, 0, result, aroundN + rightCount + 1 + offset, n);
+                    userBucket = tNode.UserBucket!;
+                    int n = Math.Min(userBucket.UserCount, rightNum - rightCount);
+                    Array.Copy(userBucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
                     rightCount += n;
                     tNode = tNode.Next[0];
                 }
@@ -425,7 +425,7 @@ namespace RankingListNew
                 int[] userCount = new int[MaxLevel];
                 for (int i = 0; i < _level; i++)
                 {
-                    userCount[i] += Head.UserBlock.UserCount;
+                    userCount[i] += Head.UserBucket.UserCount;
                 }
                 SkipListNode? current = Head.Next[0];
                 int nodeCount = 1;
@@ -443,7 +443,7 @@ namespace RankingListNew
 
                     for (int i = 0; i < _level; i++)
                     {
-                        userCount[i] += current.UserBlock.UserCount;
+                        userCount[i] += current.UserBucket.UserCount;
                     }
 
                     current = current.Next[0];
@@ -455,30 +455,30 @@ namespace RankingListNew
 
         class SkipListNode
         {
-            public UserBlock UserBlock;
+            public UserBucket UserBucket;
             public SkipListNode?[] Next;
             public SkipListNode?[] Previous;
             // 每一层到前一个节点的用户数量（不包含本节点的用户数量）
             public int[] PreviousCount;
-            public User MinUser => UserBlock.MinUser;
+            public User MinUser => UserBucket.MinUser;
 
 #if DEBUG
             public static int TotalNodeCount = 1;
             public int Id;
 #endif
-            public SkipListNode(UserBlock block, int level)
+            public SkipListNode(UserBucket bucket, int level)
             {
 #if DEBUG
                 Id = TotalNodeCount++;
 #endif
-                UserBlock = block;
+                UserBucket = bucket;
                 Next = new SkipListNode[level];
                 PreviousCount = new int[level];
                 Previous = new SkipListNode[level];
             }
         }
 
-        class UserBlock
+        class UserBucket
         {
             public User MinUser => Users[0];
             public User MaxUser => Users[UserCount - 1];
@@ -488,7 +488,7 @@ namespace RankingListNew
             public bool Empty => UserCount == 0;
             public int IndexOf(User user) => Array.BinarySearch(Users, 0, UserCount, user);
 
-            public UserBlock(User[] users, int userCount)
+            public UserBucket(User[] users, int userCount)
             {
                 Users = users;
                 UserCount = userCount;
@@ -518,12 +518,12 @@ namespace RankingListNew
             }
 
             /// <summary>
-            /// 分裂成两个块
+            /// 分裂成两个桶
             /// </summary>
             /// <param name="user"></param>
             /// <param name="userIndex"></param>
-            /// <returns>右边的新块</returns>
-            public UserBlock Split(User user, out int userIndex)
+            /// <returns>右边的新桶</returns>
+            public UserBucket Split(User user, out int userIndex)
             {
                 int mid = UserCount / 2;
                 userIndex = Array.BinarySearch(Users, 0, UserCount, user);
@@ -532,7 +532,7 @@ namespace RankingListNew
                     userIndex = ~userIndex;
                 }
 
-                User[] newUsers = new User[BlockSize];
+                User[] newUsers = new User[BucketSize];
                 int newUserCount = UserCount - mid;
                 if (userIndex >= mid)
                 {
@@ -547,13 +547,13 @@ namespace RankingListNew
                 }
 
                 UserCount = mid;
-                UserBlock newBlock = new(newUsers, newUserCount);
+                UserBucket newBucket = new(newUsers, newUserCount);
                 if (userIndex < mid)
                     Insert(user);
-                return newBlock;
+                return newBucket;
             }
 
-            public void Combine(UserBlock other)
+            public void Combine(UserBucket other)
             {
                 Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
                 UserCount += other.UserCount;
@@ -563,7 +563,7 @@ namespace RankingListNew
 }
 // 跳表单线程下也不是最优解：https://weakyon.com/2022/10/09/performance-of-skip-list.html
 /*
-测试类: BlockSkipListRankingList
+测试类: BucketSkipListRankingList
 基准测试类: BucketBRTreeRankingList
 == Test stau10w_10w ===
 用户数: 100000

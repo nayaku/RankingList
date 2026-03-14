@@ -73,20 +73,20 @@
 
 //            public Tree(List<User> users)
 //            {
-//                UserBlock[] buckets = BuildBucket(users);
+//                UserBucket[] buckets = BuildBucket(users);
 //                // 没有用户
 //                _root = users.Count == 0
 //                    ? new TreeNode()
 //                    {
-//                        UserBlock = new UserBlock(new User[BucketSize], 0),
+//                        UserBucket = new UserBucket(new User[BucketSize], 0),
 //                    }
 //                    : BuildTree(0, buckets.Length, buckets);
 //            }
-//            private static UserBlock[] BuildBucket(List<User> users)
+//            private static UserBucket[] BuildBucket(List<User> users)
 //            {
 //                // 初始化bucket
 //                int bucketNum = (int)Math.Ceiling((double)users.Count / InitialBucketSize);
-//                UserBlock[] buckets = new UserBlock[bucketNum];
+//                UserBucket[] buckets = new UserBucket[bucketNum];
 //                for (int i = 0; i < bucketNum; i++)
 //                {
 //                    int l = i * InitialBucketSize;
@@ -94,20 +94,20 @@
 //                    int userCount = r - l;
 //                    User[] bucketUsers = new User[BucketSize];
 //                    users.CopyTo(l, bucketUsers, 0, userCount);
-//                    buckets[i] = new UserBlock(bucketUsers, userCount);
+//                    buckets[i] = new UserBucket(bucketUsers, userCount);
 //                }
 
 //                return buckets;
 //            }
 
-//            private static TreeNode BuildTree(int l, int r, UserBlock[] buckets)
+//            private static TreeNode BuildTree(int l, int r, UserBucket[] buckets)
 //            {
 //                // 初始化tree
 //                TreeNode node = new();
 //                if (l + 1 == r)
 //                {
 //                    node.Count = buckets[l].UserCount;
-//                    node.UserBlock = buckets[l];
+//                    node.UserBucket = buckets[l];
 //                    node.LeftUser = buckets[l].MinUser;
 //                    node.RightUser = buckets[l].MaxUser;
 //                    return node;
@@ -125,7 +125,7 @@
 //            private static void AddUser(TreeNode node, User user, ref int rankCount)
 //            {
 //                // 叶子节点
-//                if (node.UserBlock != null)
+//                if (node.UserBucket != null)
 //                {
 //                    int userIndexInBucket;
 //                    if (node.Full)
@@ -163,7 +163,7 @@
 //            private static void RemoveUser(TreeNode node, User user)
 //            {
 //                // 叶子节点
-//                if (node.UserBlock != null)
+//                if (node.UserBucket != null)
 //                {
 //                    node.Remove(user);
 //                    return;
@@ -205,7 +205,7 @@
 //                int rankCount = 0;
 //                if (_root.Count == 0)
 //                {
-//                    UserBlock bucket = _root.UserBlock!;
+//                    UserBucket bucket = _root.UserBucket!;
 //                    bucket.Users[0] = user;
 //                    bucket.UserCount = 1;
 //                    _root.Count = 1;
@@ -234,7 +234,7 @@
 //                int rankCount = 0;
 //                TreeNode node = _root;
 
-//                while (node.UserBlock == null)
+//                while (node.UserBucket == null)
 //                {
 //                    Debug.Assert(node.Left != null && node.Right != null);
 //                    if (user.CompareTo(node.Right.LeftUser) < 0)
@@ -248,7 +248,7 @@
 //                    }
 //                }
 
-//                UserBlock bucket = node.UserBlock;
+//                UserBucket bucket = node.UserBucket;
 //                int userIndexInBucket = bucket.IndexOf(user);
 //                Debug.Assert(userIndexInBucket >= 0);
 //                rankCount += userIndexInBucket;
@@ -266,13 +266,13 @@
 
 //            private static void GetTopN(TreeNode node, int topN, ref int rankCount, ref User[] result)
 //            {
-//                if (node.UserBlock != null)
+//                if (node.UserBucket != null)
 //                {
-//                    int n = Math.Min(node.UserBlock.UserCount, topN - rankCount);
-//                    Array.Copy(node.UserBlock.Users, 0, result, rankCount, n);
-//                    //for (int i = 0; i < node.UserBlock.UserCount && rankCount < topN; i++, rankCount++)
+//                    int n = Math.Min(node.UserBucket.UserCount, topN - rankCount);
+//                    Array.Copy(node.UserBucket.Users, 0, result, rankCount, n);
+//                    //for (int i = 0; i < node.UserBucket.UserCount && rankCount < topN; i++, rankCount++)
 //                    //{
-//                    //    result.Add(node.UserBlock.Users[i]);
+//                    //    result.Add(node.UserBucket.Users[i]);
 //                    //}
 //                    return;
 //                }
@@ -289,9 +289,9 @@
 //            private static void GetAroundUserStep1(TreeNode node, User user, int aroundN, ref int rankCount,
 //                ref int leftCount, ref int rightCount, ref User[]? result)
 //            {
-//                if (node.UserBlock != null)
+//                if (node.UserBucket != null)
 //                {
-//                    UserBlock bucket = node.UserBlock;
+//                    UserBucket bucket = node.UserBucket;
 //                    int userIndexInBucket = bucket.IndexOf(user);
 //                    Debug.Assert(userIndexInBucket >= 0);
 //                    rankCount += userIndexInBucket;
@@ -329,9 +329,9 @@
 //            private static void GetAroundUserStep2(TreeNode node, int aroundN, bool isRequiredLeft, ref int obtainedCount,
 //                ref User[] result)
 //            {
-//                if (node.UserBlock != null)
+//                if (node.UserBucket != null)
 //                {
-//                    UserBlock bucket = node.UserBlock;
+//                    UserBucket bucket = node.UserBucket;
 //                    int n = Math.Min(bucket.UserCount, aroundN - obtainedCount);
 //                    if (isRequiredLeft)
 //                    {
@@ -398,9 +398,9 @@
 
 //        private void DebugPrint(TreeNode node, int depth, ref List<(int depth, int count)> results)
 //        {
-//            if (node.UserBlock != null)
+//            if (node.UserBucket != null)
 //            {
-//                results.Add((depth, node.UserBlock.UserCount));
+//                results.Add((depth, node.UserBucket.UserCount));
 //                return;
 //            }
 
@@ -416,7 +416,7 @@
 //            public User RightUser;
 //            public TreeNode? Left;
 //            public TreeNode? Right;
-//            public UserBlock? UserBlock;
+//            public UserBucket? UserBucket;
 //            public bool Full => Count >= BucketSize;
 //            public bool Empty => Count == 0;
 
@@ -427,18 +427,18 @@
 //                RightUser = other.RightUser;
 //                Left = other.Left;
 //                Right = other.Right;
-//                UserBlock = other.UserBlock;
+//                UserBucket = other.UserBucket;
 //            }
 
 //            public int Insert(User user)
 //            {
-//                Debug.Assert(UserBlock != null);
-//                int userIndexInBucket = UserBlock.Insert(user);
+//                Debug.Assert(UserBucket != null);
+//                int userIndexInBucket = UserBucket.Insert(user);
 //                if (userIndexInBucket == 0)
 //                {
 //                    LeftUser = user;
 //                }
-//                else if (userIndexInBucket == UserBlock.UserCount - 1)
+//                else if (userIndexInBucket == UserBucket.UserCount - 1)
 //                {
 //                    RightUser = user;
 //                }
@@ -449,20 +449,20 @@
 
 //            public void Remove(User user)
 //            {
-//                Debug.Assert(UserBlock != null);
-//                int userIndexInBucket = UserBlock.Remove(user);
-//                if (UserBlock.Empty)
+//                Debug.Assert(UserBucket != null);
+//                int userIndexInBucket = UserBucket.Remove(user);
+//                if (UserBucket.Empty)
 //                {
 //                    // LeftUser = null;
 //                    // RightUser = null;
 //                }
 //                else if (userIndexInBucket == 0)
 //                {
-//                    LeftUser = UserBlock.MinUser;
+//                    LeftUser = UserBucket.MinUser;
 //                }
-//                else if (userIndexInBucket == UserBlock.UserCount)
+//                else if (userIndexInBucket == UserBucket.UserCount)
 //                {
-//                    RightUser = UserBlock.MaxUser;
+//                    RightUser = UserBucket.MaxUser;
 //                }
 
 //                Count--;
@@ -470,45 +470,45 @@
 
 //            public void Split(User user, out int userIndexInBucket)
 //            {
-//                Debug.Assert(UserBlock != null);
-//                UserBlock newBucket = UserBlock.Split(user, out userIndexInBucket);
+//                Debug.Assert(UserBucket != null);
+//                UserBucket newBucket = UserBucket.Split(user, out userIndexInBucket);
 //                Left = new TreeNode()
 //                {
-//                    UserBlock = UserBlock,
-//                    Count = UserBlock.UserCount,
-//                    LeftUser = UserBlock.MinUser,
-//                    RightUser = UserBlock.MaxUser
+//                    UserBucket = UserBucket,
+//                    Count = UserBucket.UserCount,
+//                    LeftUser = UserBucket.MinUser,
+//                    RightUser = UserBucket.MaxUser
 //                };
 //                Right = new TreeNode()
 //                {
-//                    UserBlock = newBucket,
+//                    UserBucket = newBucket,
 //                    Count = newBucket.UserCount,
 //                    LeftUser = newBucket.MinUser,
 //                    RightUser = newBucket.MaxUser
 //                };
-//                UserBlock = null;
+//                UserBucket = null;
 //                Count = Left.Count + Right.Count;
 //            }
 
 //            public void CombineChild()
 //            {
 //                Debug.Assert(Left != null && Right != null);
-//                if (Left.UserBlock == null)
+//                if (Left.UserBucket == null)
 //                {
 //                    Left.CombineChild();
 //                }
 
-//                if (Right.UserBlock == null)
+//                if (Right.UserBucket == null)
 //                {
 //                    Right.CombineChild();
 //                }
 
-//                Debug.Assert(Left.UserBlock != null && Right.UserBlock != null);
-//                UserBlock = Left.UserBlock;
-//                UserBlock.Combine(Right.UserBlock);
-//                Debug.Assert(UserBlock.UserCount == Count);
-//                Debug.Assert(UserBlock.MinUser == LeftUser);
-//                Debug.Assert(UserBlock.MaxUser == RightUser);
+//                Debug.Assert(Left.UserBucket != null && Right.UserBucket != null);
+//                UserBucket = Left.UserBucket;
+//                UserBucket.Combine(Right.UserBucket);
+//                Debug.Assert(UserBucket.UserCount == Count);
+//                Debug.Assert(UserBucket.MinUser == LeftUser);
+//                Debug.Assert(UserBucket.MaxUser == RightUser);
 //                Left = null;
 //                Right = null;
 //            }
@@ -517,7 +517,7 @@
 //        /// <summary>
 //        /// 每个桶
 //        /// </summary>
-//        class UserBlock
+//        class UserBucket
 //        {
 //            public User MinUser => Users[0];
 //            public User MaxUser => Users[UserCount - 1];
@@ -527,7 +527,7 @@
 //            public bool Empty => UserCount == 0;
 //            public int IndexOf(User user) => Array.BinarySearch(Users, 0, UserCount, user);
 
-//            public UserBlock(User[] users, int userCount)
+//            public UserBucket(User[] users, int userCount)
 //            {
 //                Users = users;
 //                UserCount = userCount;
@@ -563,7 +563,7 @@
 //            /// <param name="user"></param>
 //            /// <param name="userIndex"></param>
 //            /// <returns>右边的新桶</returns>
-//            public UserBlock Split(User user, out int userIndex)
+//            public UserBucket Split(User user, out int userIndex)
 //            {
 //                int mid = UserCount / 2;
 //                userIndex = Array.BinarySearch(Users, 0, UserCount, user);
@@ -590,13 +590,13 @@
 //                Array.Clear(Users, mid, UserCount - mid);
 
 //                UserCount = mid;
-//                UserBlock newBucket = new(newUsers, newUserCount);
+//                UserBucket newBucket = new(newUsers, newUserCount);
 //                if (userIndex < mid)
 //                    Insert(user);
 //                return newBucket;
 //            }
 
-//            public void Combine(UserBlock other)
+//            public void Combine(UserBucket other)
 //            {
 //                Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
 //                UserCount += other.UserCount;

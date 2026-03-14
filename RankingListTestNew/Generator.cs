@@ -3,14 +3,6 @@ using System.Text.Json;
 
 namespace RankingListTestNew
 {
-    // 测试初始类
-    public class TestData
-    {
-        public List<User> Users { get; set; }
-        public List<TestOperation> Operations { get; set; }
-        public TestOperationType? LimitOperationType { get; set; }
-    }
-
     public class Generator
     {
         private static readonly DateTime InitialUserCreateTime = new(2000, 1, 1);
