@@ -61,7 +61,7 @@ namespace RankingListTestNew
                 generator.Generate();
             });
 
-            
+
             Command testCommand = new("test", "执行测试")
             {
                 new Argument<string>("rankingListClassName")
@@ -73,13 +73,23 @@ namespace RankingListTestNew
                 )
                 {
                     Description = "基准测试名，默认为null"
+                },
+                new Option<string>(
+                    "--testName","-t"
+                )
+                {
+                    Description = "测试名"
                 }
             };
             testCommand.SetAction(parseResult =>
             {
                 string rankingListClassName = parseResult.GetValue<string>("rankingListClassName")!;
                 string? baseTestName = parseResult.GetValue<string?>("--base");
-                TestOperator.TestAll(rankingListClassName, baseTestName);
+                string? testName = parseResult.GetValue<string>("--testName");
+                if (testName != null)
+                    TestOperator.Test(rankingListClassName, testName, baseTestName);
+                else
+                    TestOperator.TestAll(rankingListClassName, baseTestName);
             });
 
             Command displayCommand = new("display", "显示测试结果")

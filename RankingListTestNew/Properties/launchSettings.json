@@ -2,7 +2,12 @@
   "profiles": {
     "RankingListTestNew": {
       "commandName": "Project",
-      "commandLineArgs": "test BucketSkipListRankingList --base  BucketBRTreeRankingList"
+      "commandLineArgs": "test BucketBRTreeRankingList",
+      "remoteDebugEnabled": false
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
     }
   }
 }

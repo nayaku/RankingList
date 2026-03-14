@@ -1,7 +1,7 @@
-﻿using System.Diagnostics;
+﻿using RankingListNew;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text.Json;
-using RankingListNew;
 using Console = Colorful.Console;
 
 namespace RankingListTestNew
@@ -330,6 +330,12 @@ namespace RankingListTestNew
             return bytes / (1024.0 * 1024.0);
         }
 
+        public static void Test(string rankingListClassName, string testName, string? baseTestName = null)
+        {
+            TestOperator testOperator = new(rankingListClassName, testName, baseTestName);
+            testOperator.Test();
+        }
+
         public static void TestAll(string rankingListClassName, string? baseTestName = null)
         {
             Console.WriteLine($"测试类: {rankingListClassName}");
@@ -342,8 +348,7 @@ namespace RankingListTestNew
             foreach (string test in testList)
             {
                 string testName = Path.GetFileNameWithoutExtension(test);
-                TestOperator testOperator = new(rankingListClassName, testName, baseTestName);
-                testOperator.Test();
+                Test(rankingListClassName, testName, baseTestName);
                 GC.Collect();
             }
         }

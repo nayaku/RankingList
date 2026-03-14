@@ -707,4 +707,11 @@ namespace RankingListNew
 内存峰值: 22.98 MB vs 22.95 MB (+0.14%)
 == Test tu1w_50w End ===
 
+AMDuProf测试显示：
+test BucketBRTreeListRankingList -t 02-t100w_100 L1_DC_MISS_RATIO 0.009
+test BucketSkipListRankingList3 -t 02-t100w_100 L1_DC_MISS_RATIO 0.017
+L1数据缓冲占所有L1缓存访问的比例，数值越小表示内存局部性越好。
+BucketSkipListRankingList3的L1数据缓冲命中率较低，可能是因为跳表节点的内存分布较为分散，导致CPU缓存效率较低。
+相比之下，BucketBRTreeListRankingList的内存布局可能更有利于缓存，从而表现出更好的性能。
+
 */
