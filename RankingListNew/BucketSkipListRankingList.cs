@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
-    public class BucketSkipListRankingList4 : IRankingList
+    public class BucketSkipListRankingList : IRankingList
     {
         private static readonly int MaxLevel = 16; // 跳表的最大层数
         private static readonly double P = 0.5; // 跳表的概率
@@ -13,7 +13,7 @@ namespace RankingListNew
         private SkipList _userList;
         private Dictionary<int, User> _userMap;
 
-        public BucketSkipListRankingList4(Span<User> users)
+        public BucketSkipListRankingList(Span<User> users)
         {
             users.Sort();
             _userList = new SkipList(users);
@@ -25,7 +25,7 @@ namespace RankingListNew
             }
         }
 
-        public BucketSkipListRankingList4(List<User> users) :
+        public BucketSkipListRankingList(List<User> users) :
             this(CollectionsMarshal.AsSpan(users))
         {
         }

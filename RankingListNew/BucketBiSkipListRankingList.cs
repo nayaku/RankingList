@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
-    public class BucketSkipListRankingList3 : IRankingList
+    public class BucketBiSkipListRankingList : IRankingList
     {
         private static readonly int MaxLevel = 16; // 跳表的最大层数
         private static readonly double P = 0.5; // 跳表的概率
@@ -13,7 +13,7 @@ namespace RankingListNew
         private SkipList _userList;
         private Dictionary<int, User> _userMap;
 
-        public BucketSkipListRankingList3(Span<User> users)
+        public BucketBiSkipListRankingList(Span<User> users)
         {
             users.Sort();
             _userList = new SkipList(users);
@@ -25,7 +25,7 @@ namespace RankingListNew
             }
         }
 
-        public BucketSkipListRankingList3(List<User> users) :
+        public BucketBiSkipListRankingList(List<User> users) :
             this(CollectionsMarshal.AsSpan(users))
         {
         }
@@ -603,7 +603,7 @@ namespace RankingListNew
 }
 // 内存集中申请以后，性能有所提升
 /*
-测试类: BucketSkipListRankingList3
+测试类: BucketBiSkipListRankingList
 基准测试类: BucketSkipListRankingList2
 == Test t1w_100w ===
 用户数: 10000
@@ -710,7 +710,7 @@ namespace RankingListNew
 
 AMDuProf测试显示：
 test BucketBRTreeListRankingList -t 02-t100w_100 L1_DC_MISS_RATIO 0.009
-test BucketSkipListRankingList3 -t 02-t100w_100 L1_DC_MISS_RATIO 0.017
+test BucketBiSkipListRankingList -t 02-t100w_100 L1_DC_MISS_RATIO 0.017
 L1数据缓冲占所有L1缓存访问的比例，数值越小表示内存局部性越好。
 BucketSkipListRankingList3的L1数据缓冲命中率较低，可能是因为跳表节点的内存分布较为分散，导致CPU缓存效率较低。
 相比之下，BucketBRTreeListRankingList的内存布局可能更有利于缓存，从而表现出更好的性能。
