@@ -272,7 +272,6 @@ namespace RankingListNew
                 int i;
                 int[] previousCount = new int[_level];
                 SkipListNode[] update = new SkipListNode[_level];
-                SkipListNode? previous = null;
                 SkipListNode current = Head;
                 if (user.CompareTo(Head.UserBucket.MaxUser) > 0) // 特判头节点
                 {
@@ -288,14 +287,12 @@ namespace RankingListNew
                         }
                         update[i] = current;
                     }
-                    previous = current;
                     current = current.Level[0].Next!;
                 }
 
                 UserBucket userBucket = current.UserBucket;
                 int userIndexInBucket = userBucket.Remove(user);
 
-                bool needDelete = false;
                 if (Count > 1)
                 {
                     if (!userBucket.Empty)
@@ -310,17 +307,6 @@ namespace RankingListNew
                         }
                     }
                     if (userBucket.Empty)
-                    {
-                        needDelete = true;
-                    }
-                    else if (current.UserBucket.UserCount < BucketSize / 4 && previous != null
-                        && previous.UserBucket.UserCount < BucketSize / 4)
-                    {
-                        previous.UserBucket.Combine(current.UserBucket);
-                        previous.MaxUser = previous.UserBucket.MaxUser;
-                        needDelete = true;
-                    }
-                    if (needDelete)
                     {
                         for (i = 0; i < current.Level.Length; i++)
                         {
@@ -639,8 +625,12 @@ namespace RankingListNew
             {
                 int index = Array.BinarySearch(Users, 0, UserCount, user);
                 Debug.Assert(index >= 0, "用户不存在");
-                Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
                 UserCount--;
+                if (index < UserCount)
+                {
+                    Array.Copy(Users, index + 1, Users, index, UserCount - index);
+                }
+
                 return index;
             }
 
@@ -678,12 +668,6 @@ namespace RankingListNew
                 if (userIndex < mid)
                     Insert(user);
                 return newBucket;
-            }
-
-            public void Combine(UserBucket other)
-            {
-                Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
-                UserCount += other.UserCount;
             }
         }
     }

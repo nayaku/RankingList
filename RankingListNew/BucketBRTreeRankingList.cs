@@ -358,19 +358,6 @@ namespace RankingListNew
                     CheckTree();
 #endif
                 }
-                else if (siblingNode.UserBucket != null && parent.Count < BucketSize / 4)
-                {
-                    parent.CombineChild();
-                    parent.Color = ColorEnum.Black;
-                    if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
-                    {
-                        // 合并以后就会少了一个黑，需要调整
-                        FixAfterDel(parent);
-                    }
-#if DEBUG
-                    CheckTree();
-#endif
-                }
             }
 
             private void FixAfterDel(TreeNode node)
@@ -879,29 +866,6 @@ namespace RankingListNew
 
                 Debug.Assert(Count == Left.Count + Right.Count);
             }
-
-            public void CombineChild()
-            {
-                Debug.Assert(Left != null && Right != null);
-                // if (Left.UserBucket == null)
-                // {
-                //     Left.CombineChild();
-                // }
-
-                // if (Right.UserBucket == null)
-                // {
-                //     Right.CombineChild();
-                // }
-
-                Debug.Assert(Left.UserBucket != null && Right.UserBucket != null);
-                UserBucket = Left.UserBucket;
-                UserBucket.Combine(Right.UserBucket);
-                Debug.Assert(UserBucket.UserCount == Count);
-                Debug.Assert(UserBucket.MinUser.CompareTo(LeftUser) == 0);
-                Debug.Assert(UserBucket.MaxUser.CompareTo(RightUser) == 0);
-                Left = null;
-                Right = null;
-            }
         }
 
         /// <summary>
@@ -940,8 +904,13 @@ namespace RankingListNew
             public int Remove(User user)
             {
                 int index = Array.BinarySearch(Users, 0, UserCount, user);
-                Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
+                Debug.Assert(index >= 0, "用户不存在");
                 UserCount--;
+                if (index < UserCount)
+                {
+                    Array.Copy(Users, index + 1, Users, index, UserCount - index);
+                }
+
                 return index;
             }
 
@@ -979,12 +948,6 @@ namespace RankingListNew
                 if (userIndex < mid)
                     Insert(user);
                 return newBucket;
-            }
-
-            public void Combine(UserBucket other)
-            {
-                Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
-                UserCount += other.UserCount;
             }
         }
     }

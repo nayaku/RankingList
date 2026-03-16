@@ -11,7 +11,6 @@ namespace RankingListNew
         private Dictionary<int, User> _userDict;
 #if DEBUG
         private int _splitCount;
-        private int _combineCount;
 #endif
         public BucketListRankingList(List<User> users)
         {
@@ -100,16 +99,6 @@ namespace RankingListNew
             else if (_buckets[bucketIndex].Empty)
             {
                 _buckets.RemoveAt(bucketIndex);
-            }
-            else if (_buckets[bucketIndex].UserCount < BucketSize / 4 && bucketIndex != 0 &&
-                     _buckets[bucketIndex - 1].UserCount < BucketSize / 4)
-            {
-                // 向前合并
-                _buckets[bucketIndex - 1].Combine(_buckets[bucketIndex]);
-                _buckets.RemoveAt(bucketIndex);
-#if DEBUG
-                _combineCount++;
-#endif
             }
 
             _userCount--;
@@ -225,7 +214,6 @@ namespace RankingListNew
             }
 
             Console.WriteLine($"SplitCount: {_splitCount}");
-            Console.WriteLine($"CombineCount: {_combineCount}");
         }
 #endif
 
@@ -262,13 +250,17 @@ namespace RankingListNew
                 return index;
             }
 
-            public void Remove(User user)
+            public int Remove(User user)
             {
                 int index = Array.BinarySearch(Users, 0, UserCount, user);
-                Debug.Assert(index >= 0);
-
-                Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
+                Debug.Assert(index >= 0, "用户不存在");
                 UserCount--;
+                if (index < UserCount)
+                {
+                    Array.Copy(Users, index + 1, Users, index, UserCount - index);
+                }
+
+                return index;
             }
 
             /// <summary>
@@ -300,19 +292,11 @@ namespace RankingListNew
                     Array.Copy(Users, mid, newUsers, 0, UserCount - mid);
                 }
 
-                Array.Clear(Users, mid, UserCount - mid);
-
                 UserCount = mid;
                 UserBucket newBucket = new(newUsers, newUserCount);
                 if (userIndex < mid)
                     Insert(user);
                 return newBucket;
-            }
-
-            public void Combine(UserBucket other)
-            {
-                Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
-                UserCount += other.UserCount;
             }
         }
     }
