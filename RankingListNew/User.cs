@@ -18,12 +18,11 @@ namespace RankingListNew
 
         public int CompareTo(User other)
         {
-            if (Score != other.Score)
-                return -Score.CompareTo(other.Score);
-            else if (LastUpdateTime != other.LastUpdateTime)
-                return LastUpdateTime.CompareTo(other.LastUpdateTime);
-            else
-                return Id.CompareTo(other.Id);
+            int compareResult = -Score.CompareTo(other.Score);
+            if (compareResult != 0) return compareResult;
+            compareResult = LastUpdateTime.CompareTo(other.LastUpdateTime);
+            if (compareResult != 0) return compareResult;
+            return Id.CompareTo(other.Id);
         }
 
         public bool Equals(User other)
