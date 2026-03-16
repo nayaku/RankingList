@@ -371,7 +371,6 @@ namespace RankingListNew
             {
                 // 1. 找到对应的位置
                 int rankCount = 0;
-                SkipListNode[] update = new SkipListNode[MaxLevel];
                 SkipListNode current = Head;
                 for (int i = _level - 1; i >= 0; i--)
                 {

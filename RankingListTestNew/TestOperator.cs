@@ -153,6 +153,7 @@ namespace RankingListTestNew
             }
 
             stopwatch.Stop();
+#if DEBUG
             string testResultDir = $"TestResults/{_rankingListClassName}";
             string operationResultPath = $"{testResultDir}/{_testName}_Operations.json";
             using (FileStream fs = new(operationResultPath, FileMode.Create, FileAccess.Write))
@@ -160,6 +161,7 @@ namespace RankingListTestNew
                 JsonSerializer.Serialize(fs, operationResults,
                     new JsonSerializerOptions { WriteIndented = true, IncludeFields = true });
             }
+#endif
 #if !DEBUG
             operationResults = null;
 #endif

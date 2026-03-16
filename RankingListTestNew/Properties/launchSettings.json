@@ -2,7 +2,7 @@
   "profiles": {
     "RankingListTestNew": {
       "commandName": "Project",
-      "commandLineArgs": "test BucketBRTreeRankingList -t 02-t100w_100w",
+      "commandLineArgs": "test BucketSkipListRankingList4 --base BucketSkipListRankingList3",
       "remoteDebugEnabled": false
     },
     "WSL": {
