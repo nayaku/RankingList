@@ -707,6 +707,8 @@ namespace RankingListNew
 内存峰值: 22.98 MB vs 22.95 MB (+0.14%)
 == Test tu1w_50w End ===
 
+虽然比较次数较BucketBRTreeListRankingLis少，但是内存局部性较差，导致性能不如BucketBRTreeListRankingList。
+
 AMDuProf测试显示：
 test BucketBRTreeListRankingList -t 02-t100w_100 L1_DC_MISS_RATIO 0.009
 test BucketSkipListRankingList3 -t 02-t100w_100 L1_DC_MISS_RATIO 0.017

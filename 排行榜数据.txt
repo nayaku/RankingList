@@ -127,3 +127,6 @@
 内存峰值: 271.20 MB
 测试日期: 2026/2/27 18:16:58
 == Test t1w_100w End ===
+
+This file contains the native methods that support the Array class
+https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/arraynative.inl
