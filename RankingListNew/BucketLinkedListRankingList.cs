@@ -11,7 +11,6 @@ namespace RankingListNew
         private Dictionary<int, User> _userDict;
 #if DEBUG
         private int _splitCount;
-        private int _combineCount;
 #endif
         public BucketLinkedListRankingList(List<User> users)
         {
@@ -59,10 +58,10 @@ namespace RankingListNew
                     bucketNode = bucketNode.Next!;
                 }
 
-                if (bucketNode.Value.Full)
+                UserBucket bucket = bucketNode.Value;
+                if (bucket.Full)
                 {
-                    // 分裂bucket
-                    UserBucket newBucket = bucketNode.Value.Split(user, out userIndexInBucket);
+                    UserBucket newBucket = bucket.Split(user, out userIndexInBucket);
                     _buckets.AddAfter(bucketNode, newBucket);
 #if DEBUG
                     _splitCount++;
@@ -70,8 +69,7 @@ namespace RankingListNew
                 }
                 else
                 {
-                    // 加入bucket
-                    userIndexInBucket = bucketNode.Value.Insert(user);
+                    userIndexInBucket = bucket.Insert(user);
                 }
                 rankCount += userIndexInBucket;
             }
@@ -95,21 +93,13 @@ namespace RankingListNew
             }
 
             Debug.Assert(bucketNode != null, "用户不存在");
-            if (_userCount == 1)
-            { }
-            else if (bucketNode.Value.Empty)
+            if (_userCount > 1)
             {
-                _buckets.Remove(bucketNode);
-            }
-            else if (bucketNode.Value.UserCount < BucketSize / 4 && bucketNode.Previous != null &&
-                     bucketNode.Previous.Value.UserCount < BucketSize / 4)
-            {
-                // 向前合并
-                bucketNode.Previous.Value.Combine(bucketNode.Value);
-                _buckets.Remove(bucketNode);
-#if DEBUG
-                _combineCount++;
-#endif
+                UserBucket bucket = bucketNode.Value;
+                if (bucket.Empty)
+                {
+                    _buckets.Remove(bucketNode);
+                }
             }
 
             _userCount--;
@@ -126,8 +116,10 @@ namespace RankingListNew
         {
             int rankCount = 0;
             User user = _userDict[userId];
-            foreach (UserBucket bucket in _buckets)
+            LinkedListNode<UserBucket>? bucketNode = _buckets.First;
+            while (bucketNode != null)
             {
+                UserBucket bucket = bucketNode.Value;
                 if (user.CompareTo(bucket.MaxUser) <= 0)
                 {
                     int rankInBucket = bucket.IndexOf(user);
@@ -137,6 +129,7 @@ namespace RankingListNew
                 }
 
                 rankCount += bucket.UserCount;
+                bucketNode = bucketNode.Next;
             }
 
             return rankCount;
@@ -144,13 +137,13 @@ namespace RankingListNew
 
         public User[] GetTopN(int topN)
         {
-            int rankCount = 0;
             topN = Math.Min(topN, _userCount);
             User[] result = new User[topN];
+            int rankCount = 0;
             LinkedListNode<UserBucket>? bucketNode = _buckets.First;
             while (rankCount < topN)
             {
-                UserBucket bucket = bucketNode.Value;
+                UserBucket bucket = bucketNode!.Value;
                 int n = Math.Min(bucket.UserCount, topN - rankCount);
                 Array.Copy(bucket.Users, 0, result, rankCount, n);
                 rankCount += n;
@@ -166,17 +159,20 @@ namespace RankingListNew
             User user = _userDict[userId];
 
             LinkedListNode<UserBucket> bucketNode = _buckets.First!;
+            UserBucket bucket;
             while (bucketNode != null)
             {
-                if (user.CompareTo(bucketNode.Value.MaxUser) <= 0)
+                bucket = bucketNode.Value;
+                if (user.CompareTo(bucket.MaxUser) <= 0)
                 {
                     break;
                 }
-                rankCount += bucketNode.Value.UserCount;
-                bucketNode = bucketNode.Next;
+                rankCount += bucket.UserCount;
+                bucketNode = bucketNode.Next!;
             }
             Debug.Assert(bucketNode != null);
-            int inBucketIndex = bucketNode.Value.IndexOf(user);
+            bucket = bucketNode.Value;
+            int inBucketIndex = bucket.IndexOf(user);
             Debug.Assert(inBucketIndex != -1);
             int resultRank = rankCount + inBucketIndex;
             int startRank = Math.Max(0, resultRank - aroundN);
@@ -191,9 +187,10 @@ namespace RankingListNew
 
             inBucketIndex = startRank - rankCount;
             User[] result = new User[count];
-            for (int resultIndex = 0; resultIndex < count;)
+            int resultIndex = 0;
+            while (resultIndex < count)
             {
-                UserBucket bucket = bucketNode.Value;
+                bucket = bucketNode.Value;
                 int n = Math.Min(bucket.UserCount - inBucketIndex, count - resultIndex);
                 Array.Copy(bucket.Users, inBucketIndex, result, resultIndex, n);
                 resultIndex += n;
@@ -228,7 +225,6 @@ namespace RankingListNew
             }
 
             Console.WriteLine($"SplitCount: {_splitCount}");
-            Console.WriteLine($"CombineCount: {_combineCount}");
         }
 #endif
 
@@ -303,19 +299,11 @@ namespace RankingListNew
                     Array.Copy(Users, mid, newUsers, 0, UserCount - mid);
                 }
 
-                Array.Clear(Users, mid, UserCount - mid);
-
                 UserCount = mid;
                 UserBucket newBucket = new(newUsers, newUserCount);
                 if (userIndex < mid)
                     Insert(user);
                 return newBucket;
-            }
-
-            public void Combine(UserBucket other)
-            {
-                Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
-                UserCount += other.UserCount;
             }
         }
     }
