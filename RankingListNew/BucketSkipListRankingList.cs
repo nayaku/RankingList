@@ -7,8 +7,6 @@ namespace RankingListNew
     {
         private static readonly int MaxLevel = 16; // 跳表的最大层数
         private static readonly double P = 0.5; // 跳表的概率
-        private static readonly int BucketSize = 256; // 每个bucket的用户数量
-        private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
 
         private SkipList _userList;
         private Dictionary<int, User> _userMap;
@@ -105,7 +103,7 @@ namespace RankingListNew
                 if (buckets.Length == 0)
                 {
                     // 没有用户
-                    UserBucket userBucket = new(new User[BucketSize], 0);
+                    UserBucket userBucket = new(new User[UserBucket.BucketSize], 0);
                     Head = new SkipListNode(userBucket, MaxLevel);
                     return;
                 }
@@ -120,14 +118,14 @@ namespace RankingListNew
             private static UserBucket[] BuildBucket(Span<User> users)
             {
                 // 初始化Bucket
-                int bucketNum = (int)Math.Ceiling((double)users.Length / InitialBucketSize);
+                int bucketNum = (int)Math.Ceiling((double)users.Length / UserBucket.InitialBucketSize);
                 UserBucket[] buckets = new UserBucket[bucketNum];
                 for (int i = 0; i < bucketNum; i++)
                 {
-                    int l = i * InitialBucketSize;
-                    int r = Math.Min((i + 1) * InitialBucketSize, users.Length);
+                    int l = i * UserBucket.InitialBucketSize;
+                    int r = Math.Min((i + 1) * UserBucket.InitialBucketSize, users.Length);
                     int userCount = r - l;
-                    User[] bucketUsers = new User[BucketSize];
+                    User[] bucketUsers = new User[UserBucket.BucketSize];
                     users.Slice(l, userCount).CopyTo(bucketUsers);
                     buckets[i] = new UserBucket(bucketUsers, userCount);
                 }
@@ -186,13 +184,14 @@ namespace RankingListNew
 #if DEBUG
                 _addCount++;
 #endif
-                int count = 0;
+                int rankCount = 0;
                 int[] userCount = new int[MaxLevel];
                 SkipListNode[] update = new SkipListNode[MaxLevel];
                 SkipListNode current = Head;
                 for (int i = _level - 1; i >= 0; i--)
                 {
-                    while (current.Level[i].Next != null && current.Level[i].Next.MinUser.CompareTo(user) <= 0)
+                    while (current.Level[i].Next != null
+                        && current.Level[i].Next.MinUser.CompareTo(user) <= 0)
                     {
                         current = current.Level[i].Next;
                         userCount[i] += current.Level[i].PreviousCount;
@@ -200,7 +199,7 @@ namespace RankingListNew
                         _addCompareCount++;
 #endif
                     }
-                    count += userCount[i];
+                    rankCount += userCount[i];
                     // 增加区间用户数量
                     if (current.Level[i].Next != null)
                     {
@@ -261,7 +260,7 @@ namespace RankingListNew
                 Check();
 #endif
 
-                return count + userIndexInBucket;
+                return rankCount + userIndexInBucket;
             }
 
             public void RemoveUser(User user)
@@ -269,17 +268,17 @@ namespace RankingListNew
 #if DEBUG
                 _removeCount++;
 #endif
-                int i;
                 int[] previousCount = new int[_level];
                 SkipListNode[] update = new SkipListNode[_level];
                 SkipListNode current = Head;
                 if (user.CompareTo(Head.UserBucket.MaxUser) > 0) // 特判头节点
                 {
-                    for (i = _level - 1; i >= 0; i--)
+                    for (int i = _level - 1; i >= 0; i--)
                     {
-                        while (current.Level[i].Next != null && current.Level[i].Next.MaxUser.CompareTo(user) < 0)
+                        while (current.Level[i].Next != null
+                            && current.Level[i].Next!.MaxUser.CompareTo(user) < 0)
                         {
-                            current = current.Level[i].Next;
+                            current = current.Level[i].Next!;
                             previousCount[i] += current.Level[i].PreviousCount;
 #if DEBUG
                             _removeCompareCount++;
@@ -293,27 +292,28 @@ namespace RankingListNew
                 UserBucket userBucket = current.UserBucket;
                 int userIndexInBucket = userBucket.Remove(user);
 
-                if (Count > 1)
+                if (!userBucket.Empty)
                 {
-                    if (!userBucket.Empty)
+                    if (userIndexInBucket == 0)
                     {
-                        if (userIndexInBucket == 0)
-                        {
-                            current.MinUser = userBucket.MinUser;
-                        }
-                        if (userIndexInBucket == userBucket.UserCount)
-                        {
-                            current.MaxUser = userBucket.MaxUser;
-                        }
+                        current.MinUser = userBucket.MinUser;
                     }
-                    if (userBucket.Empty)
+                    if (userIndexInBucket == userBucket.UserCount)
                     {
-                        for (i = 0; i < current.Level.Length; i++)
+                        current.MaxUser = userBucket.MaxUser;
+                    }
+                }
+                else
+                {
+                    // Head节点不删除，保留一个空的桶
+                    if (current != Head)
+                    {
+                        for (int i = 0; i < current.Level.Length; i++)
                         {
                             update[i].Level[i].Next = current.Level[i].Next;
                             if (current.Level[i].Next != null)
                             {
-                                current.Level[i].Next.Level[i].PreviousCount += current.Level[i].PreviousCount - 1;
+                                current.Level[i].Next!.Level[i].PreviousCount += current.Level[i].PreviousCount;
                             }
                         }
                         while (_level > 1 && Head.Level[_level - 1].Next == null)
@@ -321,30 +321,20 @@ namespace RankingListNew
                             _level--;
                         }
                     }
-                    else
+                }
+                // 更新区间
+                for (int i = 0; i < current.Level.Length; i++)
+                {
+                    if (current.Level[i].Next != null)
                     {
-                        for (i = 0; i < current.Level.Length; i++)
-                        {
-                            if (current.Level[i].Next != null)
-                            {
-                                current.Level[i].Next.Level[i].PreviousCount--;
-                            }
-                        }
+                        current.Level[i].Next!.Level[i].PreviousCount--;
                     }
-                    // 更新区间用户数量
-                    //for (; i < current.Level.Length; i++)
-                    //{
-                    //    if (current.Level[i].Next != null)
-                    //    {
-                    //        current.Level[i].Next.Level[i].PreviousCount--;
-                    //    }
-                    //}
-                    for (; i < _level; i++)
+                }
+                for (int i = current.Level.Length; i < _level; i++)
+                {
+                    if (update[i].Level[i].Next != null)
                     {
-                        if (update[i].Level[i].Next != null)
-                        {
-                            update[i].Level[i].Next.Level[i].PreviousCount--;
-                        }
+                        update[i].Level[i].Next!.Level[i].PreviousCount--;
                     }
                 }
 
@@ -359,14 +349,15 @@ namespace RankingListNew
 #if DEBUG
                 _getRankCount++;
 #endif
-                int userCount = 0;
+                int rankCount = 0;
                 SkipListNode current = Head;
                 for (int i = _level - 1; i >= 0; i--)
                 {
-                    while (current.Level[i].Next != null && current.Level[i].Next.MinUser.CompareTo(user) <= 0)
+                    while (current.Level[i].Next != null
+                        && current.Level[i].Next!.MinUser.CompareTo(user) <= 0)
                     {
-                        current = current.Level[i].Next;
-                        userCount += current.Level[i].PreviousCount;
+                        current = current.Level[i].Next!;
+                        rankCount += current.Level[i].PreviousCount;
 #if DEBUG
                         _getRankCompareCount++;
 #endif
@@ -375,21 +366,21 @@ namespace RankingListNew
                 UserBucket userBucket = current.UserBucket;
                 int userIndexInBucket = userBucket.IndexOf(user);
                 Debug.Assert(userIndexInBucket >= 0, "用户不存在");
-                return userCount + userIndexInBucket;
+                return rankCount + userIndexInBucket;
             }
 
             public User[] GetTopN(int topN)
             {
                 topN = Math.Min(topN, Count);
                 User[] result = new User[topN];
-                SkipListNode current = Head;
-                int userCount = 0;
-                while (userCount < topN)
+                SkipListNode? current = Head;
+                int rankCount = 0;
+                while (rankCount < topN)
                 {
                     Debug.Assert(current != null);
-                    int n = Math.Min(current.UserBucket.UserCount, topN - userCount);
-                    Array.Copy(current.UserBucket.Users, 0, result, userCount, n);
-                    userCount += n;
+                    int n = Math.Min(current.UserBucket.UserCount, topN - rankCount);
+                    Array.Copy(current.UserBucket.Users, 0, result, rankCount, n);
+                    rankCount += n;
                     current = current.Level[0].Next;
                 }
                 return result;
@@ -405,9 +396,10 @@ namespace RankingListNew
                 SkipListNode current = Head;
                 for (int i = _level - 1; i >= 0; i--)
                 {
-                    while (current.Level[i].Next != null && current.Level[i].Next.MinUser.CompareTo(user) <= 0)
+                    while (current.Level[i].Next != null
+                        && current.Level[i].Next!.MinUser.CompareTo(user) <= 0)
                     {
-                        current = current.Level[i].Next;
+                        current = current.Level[i].Next!;
                         previousCount[i] += current.Level[i].PreviousCount;
                     }
                     update[i] = current;
@@ -444,11 +436,13 @@ namespace RankingListNew
 
                 // 4. 获取缺少的用户
                 SkipListNode tNode;
-                // 左边缺少，左边的比较复杂
+                // 左边缺少，左边的比较复杂。通过update数组回溯爬塔，直到找到比最左端还靠左的桶。然后再层层查找找到包含最左端的桶。
                 if (leftCount < leftNum)
                 {
                     int tLevel = 1;
                     int startRankCount = rankCount - leftNum;
+
+                    // 回溯爬塔
                     int tRankCount = rankCount - userIndexInBucket - previousCount[0];
                     while (tRankCount > startRankCount)
                     {
@@ -457,20 +451,23 @@ namespace RankingListNew
                     }
                     tNode = update[tLevel];
                     tLevel--;
+                    // 查找包含最左端的桶
                     for (; tLevel >= 0; tLevel--)
                     {
-                        while (tRankCount + tNode.Level[tLevel].Next.Level[tLevel].PreviousCount <= startRankCount)
+                        Debug.Assert(tNode.Level[tLevel].Next != null);
+                        while (tRankCount + tNode.Level[tLevel].Next!.Level[tLevel].PreviousCount <= startRankCount)
                         {
-                            tNode = tNode.Level[tLevel].Next;
+                            tNode = tNode.Level[tLevel].Next!;
                             tRankCount += tNode.Level[tLevel].PreviousCount;
                         }
                     }
-                    // 最左端的桶内，右侧部分
+                    // 包含最左端的桶内，复制桶内剩余右侧部分
                     userBucket = tNode.UserBucket!;
                     int skipNum = startRankCount - tRankCount;
                     int n = userBucket.UserCount - skipNum;
                     Array.Copy(userBucket.Users, skipNum, result, 0, n);
                     tRankCount += userBucket.UserCount;
+                    // 剩余的左侧部分，直接往右遍历桶即可
                     tNode = tNode.Level[0].Next!;
                     while (tRankCount + tNode.UserBucket.UserCount <= rankCount - userIndexInBucket)
                     {
@@ -481,6 +478,7 @@ namespace RankingListNew
                     }
                 }
 
+                // 右边缺少，直接往右遍历桶即可
                 if (rightCount < rightNum)
                 {
                     tNode = current.Level[0].Next!;
@@ -588,86 +586,6 @@ namespace RankingListNew
                 MinUser = bucket.MinUser;
                 if (bucket.UserCount > 0)
                     MaxUser = bucket.MaxUser;
-            }
-        }
-
-        class UserBucket
-        {
-            public User MinUser => Users[0];
-            public User MaxUser => Users[UserCount - 1];
-            public User[] Users;
-            public int UserCount;
-            public bool Full => UserCount >= Users.Length;
-            public bool Empty => UserCount == 0;
-            public int IndexOf(User user) => Array.BinarySearch(Users, 0, UserCount, user);
-
-            public UserBucket(User[] users, int userCount)
-            {
-                Users = users;
-                UserCount = userCount;
-            }
-
-            public int Insert(User user)
-            {
-                int index = Array.BinarySearch(Users, 0, UserCount, user);
-                if (index < 0)
-                {
-                    index = ~index;
-                }
-
-                Array.Copy(Users, index, Users, index + 1, UserCount - index);
-                Users[index] = user;
-                UserCount++;
-                return index;
-            }
-
-            public int Remove(User user)
-            {
-                int index = Array.BinarySearch(Users, 0, UserCount, user);
-                Debug.Assert(index >= 0, "用户不存在");
-                UserCount--;
-                if (index < UserCount)
-                {
-                    Array.Copy(Users, index + 1, Users, index, UserCount - index);
-                }
-
-                return index;
-            }
-
-            /// <summary>
-            /// 分裂成两个桶
-            /// </summary>
-            /// <param name="user"></param>
-            /// <param name="userIndex"></param>
-            /// <returns>右边的新桶</returns>
-            public UserBucket Split(User user, out int userIndex)
-            {
-                int mid = UserCount / 2;
-                userIndex = Array.BinarySearch(Users, 0, UserCount, user);
-                if (userIndex < 0)
-                {
-                    userIndex = ~userIndex;
-                }
-
-                User[] newUsers = new User[BucketSize];
-                int newUserCount = UserCount - mid;
-                if (userIndex >= mid)
-                {
-                    Array.Copy(Users, mid, newUsers, 0, userIndex - mid);
-                    newUsers[userIndex - mid] = user;
-                    Array.Copy(Users, userIndex, newUsers, userIndex - mid + 1, UserCount - userIndex);
-                    newUserCount++;
-                }
-                else
-                {
-                    Array.Copy(Users, mid, newUsers, 0, UserCount - mid);
-                }
-
-                UserCount = mid;
-                UserBucket newBucket = new(newUsers, newUserCount);
-                if (userIndex < mid)
-                    Insert(user);
-                return newBucket;
             }
         }
     }

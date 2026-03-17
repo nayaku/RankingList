@@ -7,8 +7,8 @@ namespace RankingListNew
     /// </summary>
     public class UserBucket
     {
-        private static readonly int BucketSize = 256; // 每个bucket的用户数量
-        private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
+        public const int BucketSize = 256; // 每个bucket的用户数量
+        public const int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
 
         public User MinUser => Users[0];
         public User MaxUser => Users[UserCount - 1];

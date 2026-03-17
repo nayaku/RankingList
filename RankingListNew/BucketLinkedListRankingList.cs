@@ -4,8 +4,6 @@ namespace RankingListNew
 {
     public class BucketLinkedListRankingList : IRankingList
     {
-        private const int BucketSize = 256; // 每个桶包含的玩家数
-        private const int InitialBucketSize = BucketSize / 2; // 初始桶大小
         private int _userCount;
         private LinkedList<UserBucket> _buckets;
         private Dictionary<int, User> _userDict;
@@ -15,21 +13,21 @@ namespace RankingListNew
         public BucketLinkedListRankingList(List<User> users)
         {
             users.Sort();
-            int bucketNum = (int)Math.Ceiling((double)users.Count / InitialBucketSize);
+            int bucketNum = (int)Math.Ceiling((double)users.Count / UserBucket.InitialBucketSize);
             // 初始化每个桶
             _buckets = new();
             for (int i = 0; i < bucketNum; i++)
             {
-                int l = i * InitialBucketSize;
-                int r = Math.Min((i + 1) * InitialBucketSize, users.Count);
+                int l = i * UserBucket.InitialBucketSize;
+                int r = Math.Min((i + 1) * UserBucket.InitialBucketSize, users.Count);
                 int userCount = r - l;
-                User[] bucketUsers = new User[BucketSize];
+                User[] bucketUsers = new User[UserBucket.BucketSize];
                 users.CopyTo(l, bucketUsers, 0, userCount);
                 _buckets.AddLast(new UserBucket(bucketUsers, userCount));
             }
             if (users.Count == 0)
             {
-                User[] bucketUsers = new User[BucketSize];
+                User[] bucketUsers = new User[UserBucket.BucketSize];
                 _buckets.AddLast(new UserBucket(bucketUsers, 0));
             }
             _userDict = users.ToDictionary(u => u.Id, u => u);
@@ -62,6 +60,7 @@ namespace RankingListNew
                 if (bucket.Full)
                 {
                     UserBucket newBucket = bucket.Split(user, out userIndexInBucket);
+                    // 分裂bucket
                     _buckets.AddAfter(bucketNode, newBucket);
 #if DEBUG
                     _splitCount++;
@@ -227,85 +226,6 @@ namespace RankingListNew
             Console.WriteLine($"SplitCount: {_splitCount}");
         }
 #endif
-
-        /// <summary>
-        /// 每个桶
-        /// </summary>
-        class UserBucket
-        {
-            public User MinUser => Users[0];
-            public User MaxUser => Users[UserCount - 1];
-            public User[] Users;
-            public int UserCount;
-            public bool Full => UserCount >= Users.Length;
-            public bool Empty => UserCount == 0;
-            public int IndexOf(User user) => Array.BinarySearch(Users, 0, UserCount, user);
-
-            public UserBucket(User[] users, int userCount)
-            {
-                Users = users;
-                UserCount = userCount;
-            }
-
-            public int Insert(User user)
-            {
-                int index = Array.BinarySearch(Users, 0, UserCount, user);
-                if (index < 0)
-                {
-                    index = ~index;
-                }
-
-                Array.Copy(Users, index, Users, index + 1, UserCount - index);
-                Users[index] = user;
-                UserCount++;
-                return index;
-            }
-
-            public void Remove(User user)
-            {
-                int index = Array.BinarySearch(Users, 0, UserCount, user);
-                Debug.Assert(index >= 0);
-
-                Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
-                UserCount--;
-            }
-
-            /// <summary>
-            /// 分裂成两个桶
-            /// </summary>
-            /// <param name="user"></param>
-            /// <param name="userIndex"></param>
-            /// <returns>右边的新桶</returns>
-            public UserBucket Split(User user, out int userIndex)
-            {
-                int mid = UserCount / 2;
-                userIndex = Array.BinarySearch(Users, 0, UserCount, user);
-                if (userIndex < 0)
-                {
-                    userIndex = ~userIndex;
-                }
-
-                User[] newUsers = new User[BucketSize];
-                int newUserCount = UserCount - mid;
-                if (userIndex >= mid)
-                {
-                    Array.Copy(Users, mid, newUsers, 0, userIndex - mid);
-                    newUsers[userIndex - mid] = user;
-                    Array.Copy(Users, userIndex, newUsers, userIndex - mid + 1, UserCount - userIndex);
-                    newUserCount++;
-                }
-                else
-                {
-                    Array.Copy(Users, mid, newUsers, 0, UserCount - mid);
-                }
-
-                UserCount = mid;
-                UserBucket newBucket = new(newUsers, newUserCount);
-                if (userIndex < mid)
-                    Insert(user);
-                return newBucket;
-            }
-        }
     }
 }
 /*

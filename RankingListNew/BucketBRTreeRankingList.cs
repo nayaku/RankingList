@@ -5,9 +5,6 @@ namespace RankingListNew
 {
     public class BucketBRTreeRankingList : IRankingList
     {
-        private static readonly int BucketSize = 256; // 每个bucket的用户数量
-        private static readonly int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
-
         private Tree _tree;
         private Dictionary<int, User> _userMap;
 
@@ -97,7 +94,7 @@ namespace RankingListNew
                 _root = users.Length == 0
                     ? new TreeNode()
                     {
-                        UserBucket = new UserBucket(new User[BucketSize], 0),
+                        UserBucket = new UserBucket(new User[UserBucket.BucketSize], 0),
                     }
                     : BuildTree(0, buckets.Length, 1, maxDepth, buckets);
                 _root.Color = ColorEnum.Black;
@@ -110,14 +107,14 @@ namespace RankingListNew
             private static UserBucket[] BuildBucket(Span<User> users)
             {
                 // 初始化bucket
-                int bucketNum = (int)Math.Ceiling((double)users.Length / InitialBucketSize);
+                int bucketNum = (int)Math.Ceiling((double)users.Length / UserBucket.InitialBucketSize);
                 UserBucket[] buckets = new UserBucket[bucketNum];
                 for (int i = 0; i < bucketNum; i++)
                 {
-                    int l = i * InitialBucketSize;
-                    int r = Math.Min((i + 1) * InitialBucketSize, users.Length);
+                    int l = i * UserBucket.InitialBucketSize;
+                    int r = Math.Min((i + 1) * UserBucket.InitialBucketSize, users.Length);
                     int userCount = r - l;
-                    User[] bucketUsers = new User[BucketSize];
+                    User[] bucketUsers = new User[UserBucket.BucketSize];
                     users.Slice(l, userCount).CopyTo(bucketUsers);
                     buckets[i] = new UserBucket(bucketUsers, userCount);
                 }
@@ -739,7 +736,7 @@ namespace RankingListNew
             public TreeNode? Right;
             public TreeNode? Parent;
             public UserBucket? UserBucket;
-            public bool Full => Count >= BucketSize;
+            public bool Full => Count >= UserBucket.BucketSize;
             public bool Empty => Count == 0;
             public ColorEnum Color = ColorEnum.Red;
 
@@ -865,89 +862,6 @@ namespace RankingListNew
                 }
 
                 Debug.Assert(Count == Left.Count + Right.Count);
-            }
-        }
-
-        /// <summary>
-        /// 每个桶
-        /// </summary>
-        class UserBucket
-        {
-            public User MinUser => Users[0];
-            public User MaxUser => Users[UserCount - 1];
-            public User[] Users;
-            public int UserCount;
-            public bool Full => UserCount >= Users.Length;
-            public bool Empty => UserCount == 0;
-            public int IndexOf(User user) => Array.BinarySearch(Users, 0, UserCount, user);
-
-            public UserBucket(User[] users, int userCount)
-            {
-                Users = users;
-                UserCount = userCount;
-            }
-
-            public int Insert(User user)
-            {
-                int index = Array.BinarySearch(Users, 0, UserCount, user);
-                if (index < 0)
-                {
-                    index = ~index;
-                }
-
-                Array.Copy(Users, index, Users, index + 1, UserCount - index);
-                Users[index] = user;
-                UserCount++;
-                return index;
-            }
-
-            public int Remove(User user)
-            {
-                int index = Array.BinarySearch(Users, 0, UserCount, user);
-                Debug.Assert(index >= 0, "用户不存在");
-                UserCount--;
-                if (index < UserCount)
-                {
-                    Array.Copy(Users, index + 1, Users, index, UserCount - index);
-                }
-
-                return index;
-            }
-
-            /// <summary>
-            /// 分裂成两个桶
-            /// </summary>
-            /// <param name="user"></param>
-            /// <param name="userIndex"></param>
-            /// <returns>右边的新桶</returns>
-            public UserBucket Split(User user, out int userIndex)
-            {
-                int mid = UserCount / 2;
-                userIndex = Array.BinarySearch(Users, 0, UserCount, user);
-                if (userIndex < 0)
-                {
-                    userIndex = ~userIndex;
-                }
-
-                User[] newUsers = new User[BucketSize];
-                int newUserCount = UserCount - mid;
-                if (userIndex >= mid)
-                {
-                    Array.Copy(Users, mid, newUsers, 0, userIndex - mid);
-                    newUsers[userIndex - mid] = user;
-                    Array.Copy(Users, userIndex, newUsers, userIndex - mid + 1, UserCount - userIndex);
-                    newUserCount++;
-                }
-                else
-                {
-                    Array.Copy(Users, mid, newUsers, 0, UserCount - mid);
-                }
-
-                UserCount = mid;
-                UserBucket newBucket = new(newUsers, newUserCount);
-                if (userIndex < mid)
-                    Insert(user);
-                return newBucket;
             }
         }
     }
