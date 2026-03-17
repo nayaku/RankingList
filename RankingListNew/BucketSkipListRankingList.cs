@@ -191,9 +191,9 @@ namespace RankingListNew
                 for (int i = _level - 1; i >= 0; i--)
                 {
                     while (current.Level[i].Next != null
-                        && current.Level[i].Next.MinUser.CompareTo(user) <= 0)
+                        && current.Level[i].Next!.MinUser.CompareTo(user) <= 0)
                     {
-                        current = current.Level[i].Next;
+                        current = current.Level[i].Next!;
                         userCount[i] += current.Level[i].PreviousCount;
 #if DEBUG
                         _addCompareCount++;
@@ -203,7 +203,7 @@ namespace RankingListNew
                     // 增加区间用户数量
                     if (current.Level[i].Next != null)
                     {
-                        current.Level[i].Next.Level[i].PreviousCount++;
+                        current.Level[i].Next!.Level[i].PreviousCount++;
                     }
                     update[i] = current;
                 }
@@ -249,7 +249,7 @@ namespace RankingListNew
                         newNode.Level[i].PreviousCount = previousCount;
                         if (newNode.Level[i].Next != null)
                         {
-                            newNode.Level[i].Next.Level[i].PreviousCount -= previousCount;
+                            newNode.Level[i].Next!.Level[i].PreviousCount -= previousCount;
                         }
                         previousCount += userCount[i];
                     }
@@ -319,6 +319,14 @@ namespace RankingListNew
                         while (_level > 1 && Head.Level[_level - 1].Next == null)
                         {
                             _level--;
+                        }
+                    }
+                    else
+                    {
+                        // Head为空且有后继节点时，把后继节点的数据搬到Head节点，并删除后继节点
+                        if (Head.Level[0].Ne)
+                        {
+
                         }
                     }
                 }
