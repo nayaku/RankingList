@@ -271,7 +271,7 @@ namespace RankingListNew
                 int[] previousCount = new int[_level];
                 SkipListNode[] update = new SkipListNode[_level];
                 SkipListNode current = Head;
-                if (user.CompareTo(Head.UserBucket.MaxUser) > 0) // 特判头节点
+                if (Head.UserBucket.Empty || user.CompareTo(Head.UserBucket.MaxUser) > 0) // 特判头节点
                 {
                     for (int i = _level - 1; i >= 0; i--)
                     {
@@ -321,14 +321,6 @@ namespace RankingListNew
                             _level--;
                         }
                     }
-                    else
-                    {
-                        // Head为空且有后继节点时，把后继节点的数据搬到Head节点，并删除后继节点
-                        if (Head.Level[0].Ne)
-                        {
-
-                        }
-                    }
                 }
                 // 更新区间
                 for (int i = 0; i < current.Level.Length; i++)
@@ -345,6 +337,19 @@ namespace RankingListNew
                         update[i].Level[i].Next!.Level[i].PreviousCount--;
                     }
                 }
+                //if (current == Head && userBucket.Empty && Head.Level[0].Next != null)
+                //{
+                //    // Head为空且有后继节点时，把后继节点的数据搬到Head节点，并删除后继节点
+                //    SkipListNode nextNode = Head.Level[0].Next!;
+                //    userBucket = nextNode.UserBucket;
+                //    Head.UserBucket = userBucket;
+                //    Head.MinUser = userBucket.MinUser;
+                //    Head.MaxUser = userBucket.MaxUser;
+                //    for (int i = 0; i < nextNode.Level.Length; i++)
+                //    {
+                //        Head.Level[i].Next = nextNode.Level[i].Next;
+                //    }
+                //}
 
                 Count--;
 #if DEBUG
@@ -535,7 +540,7 @@ namespace RankingListNew
                 {
                     userCount[i] += Head.UserBucket.UserCount;
                 }
-                if (Count > 0)
+                if (!Head.UserBucket.Empty)
                 {
                     Debug.Assert(Head.MinUser.CompareTo(Head.UserBucket.MinUser) == 0, "头节点最小用户错误");
                     Debug.Assert(Head.MaxUser.CompareTo(Head.UserBucket.MaxUser) == 0, "头节点最大用户错误");

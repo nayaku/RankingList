@@ -7,7 +7,7 @@ namespace RankingListNew
     /// </summary>
     internal class UserBucket
     {
-        public const int BucketSize = 8; // 每个bucket的用户数量
+        public const int BucketSize = 256; // 每个bucket的用户数量
         public const int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
 
         public User MinUser => Users[0];

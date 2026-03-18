@@ -192,9 +192,9 @@ namespace RankingListNew
                 for (int i = _level - 1; i >= 0; i--)
                 {
                     while (current.Level[i].Next != null &&
-                        current.Level[i].Next.MinUser.CompareTo(user) <= 0)
+                        current.Level[i].Next!.MinUser.CompareTo(user) <= 0)
                     {
-                        current = current.Level[i].Next;
+                        current = current.Level[i].Next!;
                         userCount[i] += current.Level[i].PreviousCount;
 #if DEBUG
                         _addCompareCount++;
