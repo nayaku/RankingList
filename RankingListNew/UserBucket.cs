@@ -154,13 +154,14 @@ namespace RankingListNew
                 Insert(user);
             return newBucket;
         }
-        
+
         /// <summary>
-        /// 合并桶
+        /// 将另一个桶的玩家合并到当前桶
         /// </summary>
-        /// <param name="other"></param>
+        /// <param name="other">要合并的桶</param>
         public void Combine(UserBucket other)
         {
+            // 将 other 的玩家复制到当前桶的末尾
             Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
             UserCount += other.UserCount;
         }

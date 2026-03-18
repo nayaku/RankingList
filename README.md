@@ -25,70 +25,103 @@
 **方案一：有序数组**
 
 直接按分数排序，支持二分查找排名。
-
+<font color="#27ae60">
 优点：
-- ✅ 取排名 O(log n)，二分查找
-- ✅ 取范围用户高效
-- ✅ 内存连续，缓存友好
 
+- √ 取排名 O(log n)，二分查找
+- √ 取范围用户高效
+- √ 内存连续，缓存友好
+</font>
+<font color="#c0392b">
 缺点：
-- ❌ 插入/删除操作 O(n)，需要移动大量元素
-- ❌ 不适合大量用户的场景（如百万级用户）
+
+- × 插入/删除操作 O(n)，需要移动大量元素
+- × 不适合大量用户的场景（如百万级用户）
+</font>
 
 **方案二：分桶**
 
 将玩家按分数范围分桶，每个桶内维护一个有序数组。桶存放在数组中。
 
-- ✅ 插入/更新 O(M + log K + K)，M为桶数，K为桶内元素
-- ✅ 查找排名 O(M + log K)，M为玩家数，K为桶数
-- ✅ 保持了桶内内存连续，缓存友好
-
-缺点：
-- ❌ 分桶数K增加，分裂桶和合并桶的时候，需要移动大量桶引用。
-- ❌ 分桶数K增加，查找排名操作时间复杂度增加。
-
-**方案三：分桶 + 跳表**
-
+<font color="#27ae60">
 优点：
-- 保持了分桶的优势
-- 分裂桶和合并桶的时候，不需要移动大量的桶引用。
+
+- √ 插入/更新 O(M + log K + K)，M为桶数，K为桶内元素
+- √ 查找排名 O(M + log K)，M为玩家数，K为桶数
+- √ 保持了桶内内存连续，缓存友好
+</font>
+
+<font color="#c0392b">
+缺点：
+
+- × 桶数M增加，分裂桶的时候，需要移动大量桶引用。
+- × 桶数M增加，查找排名操作时间复杂度增加。
+</font>
+
+**方案三：分桶 + 链表**
+
+<font color="#27ae60">
+优点：
+
+- √ 保持了分桶的优势
+- √ 分裂桶的时候，不需要移动大量的桶引用。
+</font>
+
+<font color="#c0392b">
+缺点：
+
+- × 桶数M增加，查找排名操作时间复杂度增加。
+</font>
+
+**方案四：分桶 + 跳表**
+
+<font color="#27ae60">
+优点：
+
+- √ 插入/更新 O(log M + log K + K)，M为桶数，K为桶内元素
+- √ 查找排名 O(log M + log K)，M为玩家数，K为桶数
+</font>
+
+<font color="#c0392b">
+缺点：
+
+- × 内存局部性差。跳表节点分散在堆上，不连续，不容易缓存命中。
+</font>
 
 
-**方案四：纯红黑树**
-- ✅ 所有操作 O(log n)
-- ✅ 自动平衡，性能稳定
-- ❌ 内存局部性差（节点分散在堆上）
-- ❌ 批量操作效率低（需要逐个遍历）
-- ❌ 缓存命中率低（随机访问模式）
+**方案五：纯红黑树**
 
+<font color="#27ae60">
+优点：
 
-### 核心矛盾
+- √ 插入/更新 O(log N)，N为玩家数
+- √ 查找排名 O(log N)，N为玩家数
+</font>
 
-通过上述分析，排行榜系统面临的核心矛盾可以归纳为：
+<font color="#c0392b">
+缺点：
 
-1. **单点操作 vs 批量操作**
-   - 单点操作：添加玩家、更新分数、查询排名，需要快速定位
-   - 批量操作：获取前N名、获取周围玩家，需要高效遍历
-   - 矛盾点：优化单点操作的数据结构（如红黑树）往往批量操作效率低
+- × 内存局部性差。节点分散在堆上，不连续，不容易缓存命中。
+- × 范围操作效率低。需要大量遍历红黑树节点。
+</font>
 
-2. **实时性 vs 吞吐量**
-   - 实时性：玩家操作需要毫秒级响应
-   - 吞吐量：系统需要处理每秒百万级请求
-   - 矛盾点：追求极致实时性可能牺牲整体吞吐量
+**方案六：分桶 + 红黑树**
 
-3. **内存效率 vs 访问效率**
-   - 内存效率：服务器资源有限，需要节省内存
-   - 访问效率：高频访问需要快速响应
-   - 矛盾点：紧凑的内存布局（如数组）更新效率低，灵活的结构（如树）内存占用高
+<font color="#27ae60">
+优点：
 
-4. **CPU 缓存友好 vs 数据结构灵活性**
-   - 缓存友好：连续内存访问，缓存命中率高
-   - 结构灵活：支持高效的插入、删除、查找
-   - 矛盾点：链式结构灵活但缓存不友好，数组缓存友好但更新效率低
+- √ 保持了分桶的优势
+- √ 插入/更新 O(log M + log K + K)，M为桶数，K为桶内元素
+- √ 查找排名 O(log M + log K)，M为玩家数，K为桶数
+</font>
+<font color="#c0392b">
+</font>
 
-## 1.3 解决方案
+方案六也是本文采用方案。比较有争议的是方案五（分桶 + 跳表）和方案六（分桶 + 红黑树）。尽管分桶 + 红黑树在插入/更新操作后有概率需要调整树平衡，且节点对比次数大于分桶 + 跳表，但是由于树节点较小且较为集中，反而容易命中CPU缓冲。最终方案六在实际场景中综合耗时更短。具体的分析可以参考第x章。
 
-本文设计了一个由 **区间红黑树 + 分桶** 混合数据结构实现的高性能排行榜：
+## 1.3 数据结构设计
+
+本文设计了一个由 **分桶 + 红黑树** 混合数据结构实现的高性能排行榜：
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -121,8 +154,6 @@
 
 ## 2.1 核心设计理念
 
-本文采用 **区间红黑树 + 分桶** 的混合数据结构，结合两者的优势，形成互补：
-
 ### 分桶（Bucket）
 将所有玩家按分数范围划分为多个桶，每个桶内部存储少量有序玩家。插入、删除操作和查询在单桶内进行。
 
@@ -138,70 +169,6 @@
 - 桶定位时间复杂度 O(log M)，M 为桶数量
 - 自动平衡，保证树高度稳定
 - 支持快速排名计算（利用节点计数）
-
-<!-- ## 2.2 为什么选择这种设计？
-
-### 为什么不直接用纯红黑树？
-
-**问题一：内存局部性差**
-
-红黑树节点分散在堆上，查询区间用户（排行榜前N名玩家、查询用户排名周围玩家）时，CPU 缓存命中率低，随机访问导致性能下降。
-
-```
-纯红黑树的内存布局：
-节点1 ──→ 节点2 ──→ 节点3 ──→ ...
-  ↓         ↓         ↓
-[用户]    [用户]    [用户]
-（分散在堆上，缓存未命中率高）
-
-桶+红黑树的内存布局：
-叶子节点 ──→ 桶 ──→ [用户1, 用户2, 用户3, ...]
-（桶内用户连续存储，缓存命中率高）
-```
-
-**问题二：批量操作效率低**
-
-获取前 N 名玩家时，纯红黑树需要逐个遍历叶子节点，无法利用批量复制的优势。
-
-**问题三：频繁的树调整**
-
-每次插入/删除都可能触发树的旋转，需要随机访问和读写大量节点。
-
-**问题四：实际测试数据**
-TODO
-
-### 为什么不直接用桶列表？
-
-**问题一：查找性能差**
-
-桶列表采用线性查找，时间复杂度为 O(M)。在大规模排行榜场景下，线性查找需要遍历大量桶才能找到目标桶。
-
-
-**问题二：实际测试数据**
-
-在 100 万玩家、100 万次混合操作的测试中：
-- 桶列表版本耗时：**9103 ms**
-- 红黑树版本耗时：**560 ms**
-- 性能差距：**1525%** -->
-<!-- 
-TODO CHECK
-具体到各项操作：
-| 操作类型 | 桶列表 | 红黑树+桶 | 性能差距 |
-|---------|--------|----------|---------|
-| AddUser | 242 ms | 31 ms | 慢 680% |
-| GetUserRank | 186 ms | 28 ms | 慢 564% |
-| UpdateUser | 249 ms | 43 ms | 慢 479% |
-| GetAroundUser | 348 ms | 85 ms | 慢 309% |
-| GetTopN | 70 ms | 30 ms | 慢 133% |
-
-**问题三：排名计算效率低**
-
-桶列表在计算用户排名时需要逐个累加桶大小，无法利用树结构的节点计数优化。 -->
-
-
-## 2.3 设计总结
-
-**区间红黑树 + 分桶** 的混合结构在高并发、实时排行榜场景下，兼顾了更新、查询与硬件友好性，是权衡后的最优解：
 
 # 三、数据结构设计
 
@@ -301,42 +268,18 @@ public readonly struct User : IComparable<User>
     /// </summary>
     public int CompareTo(User other)
     {
-        // 分数降序：分数高的排前面，所以取负数比较
-        if (Score != other.Score)
-            return -Score.CompareTo(other.Score);
-        // 更新时间升序：先达到该分数的排前面
-        else if (LastUpdateTime != other.LastUpdateTime)
-            return LastUpdateTime.CompareTo(other.LastUpdateTime);
-        // ID升序：确保排序唯一性
-        else
-            return Id.CompareTo(other.Id);
+        int compareResult = -Score.CompareTo(other.Score);
+        if (compareResult != 0) 
+            return compareResult;
+        compareResult = LastUpdateTime.CompareTo(other.LastUpdateTime);
+        if (compareResult != 0) 
+            return compareResult;
+        return Id.CompareTo(other.Id);
     }
 }
 ```
 
-### 为什么使用结构体？
-
-1. **避免堆内存分配**：结构体在栈上分配，减少 GC 压力
-2. **内存连续**：结构体数组在内存中连续存储，提高缓存命中率
-3. **值语义**：玩家信息不会改变，使用值类型更安全
-
-### 排序示例
-
-假设有以下玩家数据：
-```
-玩家A：分数=1000，时间=10:00，ID=1
-玩家B：分数=1000，时间=09:00，ID=2
-玩家C：分数=900，时间=08:00，ID=3
-玩家D：分数=1000，时间=10:00，ID=4
-```
-
-排序结果：
-```
-排名0：玩家B（分数1000，时间09:00，ID=2）- 先达到1000分
-排名1：玩家A（分数1000，时间10:00，ID=1）- ID较小
-排名2：玩家D（分数1000，时间10:00，ID=4）- ID较大
-排名3：玩家C（分数900，时间08:00，ID=3）- 分数最低
-```
+用户数据结构采用结构体（struct）而非类（class），避免频繁的堆内存分配。结构体数组在内存中连续存储，提高缓存命中率；玩家信息不会改变，使用值类型更安全。
 
 ## 3.3 用户桶
 
@@ -351,6 +294,11 @@ public readonly struct User : IComparable<User>
 /// </summary>
 class UserBucket
 {
+    public const int BucketSize = 256; // 每个bucket的用户数量
+
+    public const int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
+    
+    public const int CombineBucketSize = BucketSize / 8; // 当小于这个数值的时候，合并桶
     /// <summary>
     /// 桶内分数最小的玩家（排名最高的玩家）
     /// </summary>
@@ -425,16 +373,6 @@ public int Insert(User user)
 }
 ```
 
-
-**示例**：
-```
-插入前：[100, 90, 80, 70, 60]  UserCount=5
-插入 85：
-1. 二分查找找到位置 2
-2. 移动元素：[100, 90, _, 80, 70, 60]
-3. 插入：[100, 90, 85, 80, 70, 60]
-```
-
 #### 删除玩家 (Remove)
 
 删除操作同样需要保持数组的连续性：
@@ -451,15 +389,15 @@ public int Remove(User user)
     int index = Array.BinarySearch(Users, 0, UserCount, user);
 
     // 步骤2：移动元素，填补空缺
-    // 将 [index+1, UserCount-1] 的元素向前移动一位
-    Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
+    if (index < UserCount)
+    {
+        Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
+    }
 
     UserCount--;
     return index;
 }
 ```
-
-**时间复杂度**：O(log K + K)
 
 #### 分裂桶 (Split)
 
@@ -492,7 +430,7 @@ public UserBucket Split(User user, out int userIndex)
     // 步骤4：根据新玩家位置决定如何分裂
     if (userIndex >= mid)
     {
-        // 新玩家应该在新桶中
+        // 新玩家在新桶中
         // 复制 [mid, userIndex-1] 到新桶
         Array.Copy(Users, mid, newUsers, 0, userIndex - mid);
         // 插入新玩家
@@ -503,7 +441,7 @@ public UserBucket Split(User user, out int userIndex)
     }
     else
     {
-        // 新玩家应该在原桶中
+        // 新玩家在原桶中
         // 复制 [mid, UserCount-1] 到新桶
         Array.Copy(Users, mid, newUsers, 0, UserCount - mid);
     }
@@ -519,21 +457,6 @@ public UserBucket Split(User user, out int userIndex)
     return newBucket;
 }
 ```
-
-**分裂示例**：
-```
-分裂前：[100, 95, 90, 85, 80, 75, 70, 65]  UserCount=8, mid=4
-插入 82：
-
-方案1：新玩家在新桶（userIndex=5 >= mid=4）
-原桶：[100, 95, 90, 85]  UserCount=4
-新桶：[80, 82, 75, 70, 65]  UserCount=5
-
-方案2：新玩家在原桶（userIndex=2 < mid=4）
-原桶：[100, 95, 90, 82, 80]  UserCount=5
-新桶：[75, 70, 65]  UserCount=3
-```
-
 #### 合并桶 (Combine)
 
 当桶内玩家过少时，需要与相邻桶合并：
@@ -548,6 +471,174 @@ public void Combine(UserBucket other)
     // 将 other 的玩家复制到当前桶的末尾
     Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
     UserCount += other.UserCount;
+}
+```
+
+#### 完整代码：
+
+```csharp
+/// <summary>
+/// 用户桶
+/// 桶内玩家按分数有序排列，使用有序数组实现
+/// </summary>
+internal class UserBucket
+{
+    public const int BucketSize = 256; // 每个bucket的用户数量
+    public const int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
+
+    /// <summary>
+    /// 桶内分数最小的玩家（排名最高的玩家）
+    /// </summary>
+    public User MinUser => Users[0];
+
+    /// <summary>
+    /// 桶内分数最大的玩家（排名最低的玩家）
+    /// </summary>
+    public User MaxUser => Users[UserCount - 1];
+
+    /// <summary>
+    /// 存储玩家的有序数组
+    /// 数组大小固定为 BucketSize
+    /// </summary>
+    public User[] Users;
+
+    /// <summary>
+    /// 当前桶内的玩家数量
+    /// </summary>
+    public int UserCount;
+
+    /// <summary>
+    /// 桶是否已满
+    /// </summary>
+    public bool Full => UserCount >= Users.Length;
+
+    /// <summary>
+    /// 桶是否为空
+    /// </summary>
+    public bool Empty => UserCount == 0;
+
+    /// <summary>
+    /// 使用二分查找定位玩家在桶内的位置
+    /// </summary>
+    /// <param name="user">要查找的玩家</param>
+    /// <returns>玩家索引，如果不存在返回负数</returns>
+    public int IndexOf(User user) => Array.BinarySearch(Users, 0, UserCount, user);
+
+    public UserBucket(User[] users, int userCount)
+    {
+        Users = users;
+        UserCount = userCount;
+    }
+
+    /// <summary>
+    /// 向桶内插入一个玩家，保持数组有序性
+    /// </summary>
+    /// <param name="user">要插入的玩家</param>
+    /// <returns>玩家在桶内的索引位置</returns>
+
+    public int Insert(User user)
+    {
+        // 步骤1：使用二分查找找到插入位置
+        // Array.BinarySearch 返回负数表示未找到，取反后得到插入位置
+        int index = Array.BinarySearch(Users, 0, UserCount, user);
+        if (index < 0)
+        {
+            index = ~index;  // 取反得到正确的插入位置
+        }
+
+        // 步骤2：移动元素，为新玩家腾出空间
+        // 将 [index, UserCount-1] 的元素向后移动一位
+        if (index < Users.Length)
+        {
+            Array.Copy(Users, index, Users, index + 1, UserCount - index);
+        }
+
+        // 步骤3：插入新玩家
+        Users[index] = user;
+        UserCount++;
+
+        return index;
+    }
+
+    /// <summary>
+    /// 从桶内删除指定玩家
+    /// </summary>
+    /// <param name="user">要删除的玩家</param>
+    /// <returns>被删除玩家的原索引位置</returns>
+    public int Remove(User user)
+    {
+        // 步骤1：使用二分查找定位玩家
+        int index = Array.BinarySearch(Users, 0, UserCount, user);
+        Debug.Assert(index >= 0);
+
+        // 步骤2：移动元素，填补空缺
+        if (index < UserCount)
+        {
+            Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
+        }
+
+        UserCount--;
+        return index;
+    }
+
+    /// <summary>
+    /// 将桶分裂为两个桶，同时插入新玩家
+    /// 分裂策略：将后半部分玩家移到新桶
+    /// </summary>
+    /// <param name="user">要插入的新玩家</param>
+    /// <param name="userIndex">输出参数，玩家在分裂后的索引</param>
+    /// <returns>新创建的桶（包含后半部分玩家）</returns>
+    public UserBucket Split(User user, out int userIndex)
+    {
+        // 步骤1：计算分裂点（中间位置）
+        int mid = UserCount / 2;
+
+        // 步骤2：确定新玩家的插入位置
+        userIndex = Array.BinarySearch(Users, 0, UserCount, user);
+        if (userIndex < 0)
+        {
+            userIndex = ~userIndex;
+        }
+
+        // 步骤3：创建新桶
+        User[] newUsers = new User[BucketSize];
+        int newUserCount = UserCount - mid;
+
+        // 步骤4：根据新玩家位置决定如何分裂
+        if (userIndex >= mid)
+        {
+            // 新玩家在新桶中
+            Array.Copy(Users, mid, newUsers, 0, userIndex - mid);
+            newUsers[userIndex - mid] = user;
+            Array.Copy(Users, userIndex, newUsers, userIndex - mid + 1, UserCount - userIndex);
+            newUserCount++;
+        }
+        else
+        {
+            // 新玩家在原桶中
+            Array.Copy(Users, mid, newUsers, 0, UserCount - mid);
+        }
+
+        // 步骤5：更新原桶
+        UserCount = mid;
+        UserBucket newBucket = new(newUsers, newUserCount);
+
+        // 如果新玩家在原桶中，执行插入
+        if (userIndex < mid)
+            Insert(user);
+        return newBucket;
+    }
+    
+    /// <summary>
+    /// 将另一个桶的玩家合并到当前桶
+    /// </summary>
+    /// <param name="other">要合并的桶</param>
+    public void Combine(UserBucket other)
+    {
+        // 将 other 的玩家复制到当前桶的末尾
+        Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
+        UserCount += other.UserCount;
+    }
 }
 ```
 
@@ -578,7 +669,6 @@ List 内部虽然也是数组，但多了一层封装。对于固定大小的桶
 ```csharp
 /// <summary>
 /// 红黑树颜色枚举
-/// 使用 byte 类型节省内存
 /// </summary>
 enum ColorEnum : byte
 {
@@ -872,9 +962,6 @@ public void Split(User user, out int userIndexInBucket)
 /// </summary>
 public void CombineChild()
 {
-    Debug.Assert(Left != null && Right != null);
-    Debug.Assert(Left.UserBucket != null && Right.UserBucket != null);
-
     // 步骤1：将右子节点的桶合并到左子节点的桶
     UserBucket = Left.UserBucket;
     UserBucket.Combine(Right.UserBucket);
@@ -905,21 +992,173 @@ public void MoveFromChild(TreeNode child)
     child.Left?.Parent = this;
     child.Right?.Parent = this;
     UserBucket = child.UserBucket;
-
-#if DEBUG
-    // 清除子节点的引用（仅调试模式）
-    child.UserBucket = null;
-    child.Count = 0;
-    child.Left = null;
-    child.Right = null;
-    child.Parent = null;
-#endif
 }
 ```
 
-## 3.5 排行榜核心设计
+#### 完整代码
 
-排行榜的核心是一个红黑树，每个叶子节点关联一个用户桶。通过红黑树的平衡特性，保证所有操作的时间复杂度为 O(log M)。
+```csharp
+enum ColorEnum : byte
+{
+    Red = 0,
+    Black = 1,
+}
+
+class TreeNode
+{
+    public int Count;
+    public User LeftUser;
+    public User RightUser;
+    public TreeNode? Left;
+    public TreeNode? Right;
+    public TreeNode? Parent;
+    public UserBucket? UserBucket;
+    public bool Full => Count >= UserBucket.BucketSize;
+    public bool Empty => Count == 0;
+    public ColorEnum Color = ColorEnum.Red;
+
+    public void MoveFromChild(TreeNode child)
+    {
+        Debug.Assert(child.Count == Count);
+        Left = child.Left;
+        Right = child.Right;
+        child.Left?.Parent = this;
+        child.Right?.Parent = this;
+        UserBucket = child.UserBucket;
+#if DEBUG
+        child.UserBucket = null;
+        child.Count = 0;
+        child.Left = null;
+        child.Right = null;
+        child.Parent = null;
+#endif
+    }
+
+    private static void UpdateLeftUser(TreeNode node)
+    {
+        while (node.Parent != null && node == node.Parent.Left)
+        {
+            node.Parent.LeftUser = node.LeftUser;
+            node = node.Parent;
+        }
+    }
+
+    private static void UpdateRightUser(TreeNode node)
+    {
+        while (node.Parent != null && node == node.Parent.Right)
+        {
+            node.Parent.RightUser = node.RightUser;
+            node = node.Parent;
+        }
+    }
+
+    public int Insert(User user)
+    {
+        Debug.Assert(UserBucket != null);
+        int userIndexInBucket = UserBucket.Insert(user);
+        if (userIndexInBucket == 0)
+        {
+            LeftUser = user;
+            UpdateLeftUser(this);
+        }
+        else if (userIndexInBucket == UserBucket.UserCount - 1)
+        {
+            RightUser = user;
+            UpdateRightUser(this);
+        }
+
+        Count++;
+        return userIndexInBucket;
+    }
+
+    public void Remove(User user)
+    {
+        Debug.Assert(UserBucket != null);
+        int userIndexInBucket = UserBucket.Remove(user);
+        if (UserBucket.Empty)
+        {
+            // LeftUser = null;
+            // RightUser = null;
+            if (Parent != null)
+            {
+                if (this == Parent.Left)
+                {
+                    Parent.LeftUser = Parent.Right!.LeftUser;
+                    UpdateLeftUser(Parent);
+                }
+                else
+                {
+                    Parent.RightUser = Parent.Left!.RightUser;
+                    UpdateRightUser(Parent);
+                }
+            }
+        }
+        else if (userIndexInBucket == 0)
+        {
+            LeftUser = UserBucket.MinUser;
+            UpdateLeftUser(this);
+        }
+        else if (userIndexInBucket == UserBucket.UserCount)
+        {
+            RightUser = UserBucket.MaxUser;
+            UpdateRightUser(this);
+        }
+
+        Count--;
+    }
+
+    public void Split(User user, out int userIndexInBucket)
+    {
+        Debug.Assert(UserBucket != null);
+        UserBucket newBucket = UserBucket.Split(user, out userIndexInBucket);
+        Left = new TreeNode()
+        {
+            UserBucket = UserBucket,
+            Count = UserBucket.UserCount,
+            LeftUser = UserBucket.MinUser,
+            RightUser = UserBucket.MaxUser,
+            Parent = this
+        };
+        Right = new TreeNode()
+        {
+            UserBucket = newBucket,
+            Count = newBucket.UserCount,
+            LeftUser = newBucket.MinUser,
+            RightUser = newBucket.MaxUser,
+            Parent = this
+        };
+        UserBucket = null;
+        Count++;
+        if (userIndexInBucket == 0)
+        {
+            UpdateLeftUser(Left);
+        }
+        else if (userIndexInBucket == Count - 1)
+        {
+            UpdateRightUser(Right);
+        }
+
+        Debug.Assert(Count == Left.Count + Right.Count);
+    }
+
+    public void CombineChild()
+    {
+        Debug.Assert(Left != null && Right != null);
+        Debug.Assert(Left.UserBucket != null && Right.UserBucket != null);
+        UserBucket = Left.UserBucket;
+        UserBucket.Combine(Right.UserBucket);
+        Debug.Assert(UserBucket.UserCount == Count);
+        Debug.Assert(UserBucket.MinUser.CompareTo(LeftUser) == 0);
+        Debug.Assert(UserBucket.MaxUser.CompareTo(RightUser) == 0);
+        Left = null;
+        Right = null;
+    }
+}
+```
+
+## 3.5 红黑树设计
+
+<!-- 排行榜的核心是一个红黑树，每个叶子节点关联一个用户桶。通过红黑树的平衡特性，保证所有操作的时间复杂度为 O(log M)。
 
 ### 3.5.1 整体架构
 
@@ -931,18 +1170,6 @@ public void MoveFromChild(TreeNode child)
 public class BucketBRTreeRankingList : IRankingList
 {
     /// <summary>
-    /// 每个桶的最大用户数量
-    /// 256大小是一个经验数值
-    /// </summary>
-    private static readonly int BucketSize = 256;
-
-    /// <summary>
-    /// 初始每个桶的用户数量（用于批量初始化）
-    /// 设为 BucketSize / 2，预留空间用于后续插入
-    /// </summary>
-    private static readonly int InitialBucketSize = BucketSize / 2;
-
-    /// <summary>
     /// 红黑树，管理所有桶
     /// </summary>
     private Tree _tree;
@@ -952,6 +1179,14 @@ public class BucketBRTreeRankingList : IRankingList
     /// 用于快速查找用户数据（O(1) 时间复杂度）
     /// </summary>
     private Dictionary<int, User> _userMap;
+}
+``` -->
+### 3.5.1 数据结构定义
+
+```csharp
+class Tree
+{
+    private TreeNode _root;
 }
 ```
 
@@ -974,13 +1209,87 @@ public class BucketBRTreeRankingList : IRankingList
 
 ### 3.5.3 核心操作详解
 
+#### 1. 初始化
+
+**算法流程**：
+1. 用户分桶
+2. 构建红黑树
+
+构建一个桶数组
+```csharp
+private static UserBucket[] BuildBucket(Span<User> users)
+{
+    // 初始化bucket
+    int bucketNum = (int)Math.Ceiling((double)users.Length / UserBucket.InitialBucketSize);
+    UserBucket[] buckets = new UserBucket[bucketNum];
+    for (int i = 0; i < bucketNum; i++)
+    {
+        int l = i * UserBucket.InitialBucketSize;
+        int r = Math.Min((i + 1) * UserBucket.InitialBucketSize, users.Length);
+        int userCount = r - l;
+        User[] bucketUsers = new User[UserBucket.BucketSize];
+        users.Slice(l, userCount).CopyTo(bucketUsers);
+        buckets[i] = new UserBucket(bucketUsers, userCount);
+    }
+
+    return buckets;
+}
+```
+
+构建红黑树。最底层的节点染色为红色。每层颜色交替。
+```csharp
+private static TreeNode BuildTree(int l, int r, int depth, int maxDepth, UserBucket[] buckets)
+{
+    // 初始化tree
+    TreeNode node = new()
+    {
+        Color = (maxDepth - depth) % 2 == 0 ? ColorEnum.Red : ColorEnum.Black
+    };
+    if (l + 1 == r)
+    {
+        node.Count = buckets[l].UserCount;
+        node.UserBucket = buckets[l];
+        node.LeftUser = buckets[l].MinUser;
+        node.RightUser = buckets[l].MaxUser;
+        return node;
+    }
+
+    int mid = (l + r) >> 1;
+    node.Left = BuildTree(l, mid, depth + 1, maxDepth, buckets);
+    node.Left.Parent = node;
+    node.LeftUser = node.Left.LeftUser;
+    node.Right = BuildTree(mid, r, depth + 1, maxDepth, buckets);
+    node.Right.Parent = node;
+    node.RightUser = node.Right.RightUser;
+    node.Count = node.Left.Count + node.Right.Count;
+    return node;
+}
+```
+构造函数
+```csharp
+public BucketBRTreeRankingList(Span<User> users)
+{
+    UserBucket[] buckets = BuildBucket(users);
+    int maxDepth = (int)Math.Ceiling(Math.Log(buckets.Length - 1, 2)) + 1;
+    // 没有用户
+    _root = users.Length == 0
+        ? new TreeNode()
+        {
+            UserBucket = new UserBucket(new User[UserBucket.BucketSize], 0),
+        }
+        : BuildTree(0, buckets.Length, 1, maxDepth, buckets);
+    _root.Color = ColorEnum.Black;
+}
+```
+没有用户的时候，生成一个空节点。
+
 #### 1. 添加玩家 (AddUser)
 
 添加玩家是最复杂的操作，涉及树的遍历、桶的插入、桶的分裂和红黑树的调整。
 
 **算法流程**：
 ```
-1. 如果树为空，直接创建根节点
+1. 如果树为空，直接添加到根节点
 2. 遍历红黑树，找到目标叶子节点（桶）
    - 同时更新路径上每个节点的计数
    - 累加左子树的用户数，计算排名
@@ -1001,7 +1310,7 @@ public class BucketBRTreeRankingList : IRankingList
 /// <returns>玩家的排名（从0开始）</returns>
 public int AddUser(User user)
 {
-    // 特殊情况：树为空
+    // 如果树为空，直接添加
     if (_root.Count == 0)
     {
         UserBucket bucket = _root.UserBucket!;
@@ -1015,39 +1324,29 @@ public int AddUser(User user)
 
     int rankCount = 0;
     TreeNode node = _root;
-
     // 步骤1：遍历红黑树，找到目标叶子节点
-    // 同时更新路径上每个节点的计数，累加排名
-    while (node.Right != null)  // 判断是否为叶子节点
+    while (node.Right != null) // 判断是否为叶子节点
     {
-        node.Count++;  // 更新路径上每个节点的计数
-
-        // 根据区间判断应该进入哪个子树
+        node.Count++;
         if (user.CompareTo(node.Right!.LeftUser) < 0)
         {
-            // 用户分数小于右子树最小值，进入左子树
             node = node.Left!;
         }
         else
         {
-            // 用户分数大于等于右子树最小值，进入右子树
-            // 累加左子树的用户数（这些用户排名都在目标用户之前）
             rankCount += node.Left!.Count;
             node = node.Right!;
         }
     }
 
-    // 步骤2：到达叶子节点，判断桶是否已满
+    // 叶子节点
     int userIndexInBucket;
-    if (node.Full)  // 桶已满，需要分裂
+    if (node.Full)
     {
-        // 步骤3a：分裂TreeNode
+        // 分裂TreeNode
         node.Split(user, out userIndexInBucket);
         rankCount += userIndexInBucket;
-
-        // 步骤4：如果当前节点为红色，需要调整红黑树
-        // 分裂后，当前节点变为非叶子节点，有两个红色子节点
-        // 如果当前节点本身是红色，就会出现"红色节点的子节点也是红色"的情况，违反规则4
+        // 调节树
         if (node.Color == ColorEnum.Red)
         {
             // 红色必定不是根节点，因此父节点必定存在
@@ -1055,30 +1354,82 @@ public int AddUser(User user)
             TreeNode siblingNode = parentNode.Left == node
                 ? parentNode.Right!
                 : parentNode.Left!;
-
-            // 兄弟必定为红色，否则违反规则5（兄弟会多出一个黑节点）
+            // 兄弟必定为红色
+            Debug.Assert(siblingNode.Color == ColorEnum.Red);
             node.Color = ColorEnum.Black;
             siblingNode.Color = ColorEnum.Black;
             parentNode.Color = ColorEnum.Red;
-            FixAfterAdd(parentNode);  // 红黑树平衡调整
+            FixAfterAdd(parentNode);
         }
     }
     else
     {
-        // 步骤3b：桶未满，直接插入
+        // 加入bucket
         userIndexInBucket = node.Insert(user);
         rankCount += userIndexInBucket;
     }
 
     return rankCount;
 }
-```
 
-**时间复杂度分析**：
-- 树遍历：O(log M)，M 为桶的数量
-- 桶内插入：O(log K + K)，K 为桶的大小
-- 红黑树调整：O(log M)
-- **总时间复杂度**：O(log M + K)
+private void FixAfterAdd(TreeNode node)
+{
+    while (node != _root && node.Parent!.Color == ColorEnum.Red)
+    {
+        TreeNode parentNode = node.Parent!;
+        // 父亲为红
+        TreeNode grandParentNode = parentNode.Parent!;
+        TreeNode uncleNode = grandParentNode.Left == parentNode
+            ? grandParentNode.Right!
+            : grandParentNode.Left!;
+        if (uncleNode.Color == ColorEnum.Red)
+        {
+            // 叔叔为红
+            parentNode.Color = ColorEnum.Black;
+            uncleNode.Color = ColorEnum.Black;
+            grandParentNode.Color = ColorEnum.Red;
+            node = grandParentNode;
+        }
+        else
+        {
+            // 叔叔为黑
+            if (parentNode == grandParentNode.Left)
+            {
+                if (node == parentNode.Right)
+                {
+                    // 左旋转
+                    parentNode = RotateLeft(parentNode);
+                    // node不需要多余赋值
+                }
+
+                // 变色
+                parentNode.Color = ColorEnum.Black;
+                grandParentNode.Color = ColorEnum.Red;
+                // 右旋转
+                RotateRight(grandParentNode);
+            }
+            else
+            {
+                if (node == parentNode.Left)
+                {
+                    // 右旋转
+                    parentNode = RotateRight(parentNode);
+                }
+
+                // 变色
+                parentNode.Color = ColorEnum.Black;
+                grandParentNode.Color = ColorEnum.Red;
+                // 左旋转
+                RotateLeft(grandParentNode);
+            }
+
+            break;
+        }
+    }
+
+    _root.Color = ColorEnum.Black;
+}
+```
 
 #### 2. 删除玩家 (RemoveUser)
 
@@ -1097,56 +1448,147 @@ public int AddUser(User user)
 **代码实现**：
 
 ```csharp
-/// <summary>
-/// 从排行榜中删除玩家
-/// </summary>
-/// <param name="user">要删除的玩家</param>
-private void RemoveUser(User user)
+public void RemoveUser(User user)
 {
-    TreeNode node = _root;
-
     // 步骤1：遍历红黑树，找到目标叶子节点
-    // 同时更新路径上每个节点的计数
+    TreeNode node = _root;
     while (node.Right != null)
     {
-        node.Count--;  // 更新路径上每个节点的计数
+        node.Count--; // 同步更新路径上每个节点的计数
         node = user.CompareTo(node.Right!.LeftUser) < 0 ? node.Left! : node.Right!;
     }
 
     // 步骤2：从桶中删除玩家
     node.Remove(user);
-    if (node == _root)  // 如果为根节点，直接返回
+    if (node == _root) // 如果为根节点，直接返回
         return;
 
-    // 步骤3：处理桶空或桶过小的情况
     TreeNode parent = node.Parent!;
     ColorEnum parentColor = parent.Color;
     TreeNode siblingNode = parent.Left == node ? parent.Right! : parent.Left!;
     ColorEnum siblingColor = siblingNode.Color;
-
-    if (node.Empty)  // 桶空了，需要合并
+    bool needDelete = false;
+    if(node.Empty)// 桶空了，需要合并
     {
         // 用兄弟节点替换父节点
         parent.MoveFromChild(siblingNode);
+        needDelete = true;
+    }
+    else if (siblingNode.UserBucket != null
+            && node.Count < UserBucket.CombineBucketSize
+            && siblingNode.Count < UserBucket.CombineBucketSize)
+    {
+        // 桶太小，需要合并
+        parent.CombineChild();
+    }
+    
+    if(needDelete)
+    {
         parent.Color = ColorEnum.Black;
 
         // 如果父节点和兄弟节点都是黑色，合并后会少一个黑节点
         if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
         {
-            FixAfterDel(parent);  // 调整红黑树平衡
-        }
-    }
-    else if (siblingNode.UserBucket != null && parent.Count < BucketSize / 4)
-    {
-        // 桶太小（少于 BucketSize/4），需要合并
-        parent.CombineChild();
-        parent.Color = ColorEnum.Black;
-
-        if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
-        {
+            // 调整红黑树平衡
             FixAfterDel(parent);
         }
+#if DEBUG
+        CheckTree();
+#endif
     }
+}
+
+private void FixAfterDel(TreeNode node)
+{
+    while (node != _root && node.Color == ColorEnum.Black)
+    {
+        TreeNode parentNode = node.Parent!;
+        if (node == parentNode.Left)
+        {
+            TreeNode siblingNode = parentNode.Right!;
+            // 兄弟节点为红
+            if (siblingNode.Color == ColorEnum.Red)
+            {
+                // 变色
+                siblingNode.Color = ColorEnum.Black;
+                parentNode.Color = ColorEnum.Red;
+                // 左旋转
+                RotateLeft(parentNode);
+                siblingNode = parentNode.Right!;
+            }
+
+            // 兄弟节点为黑
+            if (siblingNode.Left!.Color == ColorEnum.Black && siblingNode.Right!.Color == ColorEnum.Black)
+            {
+                // 变色
+                siblingNode.Color = ColorEnum.Red;
+                node = parentNode;
+            }
+            else
+            {
+                if (siblingNode.Right!.Color == ColorEnum.Black)
+                {
+                    // 变色
+                    siblingNode.Left!.Color = ColorEnum.Black;
+                    siblingNode.Color = ColorEnum.Red;
+                    // 右旋转
+                    siblingNode = RotateRight(siblingNode);
+                }
+
+                // 变色
+                siblingNode.Color = parentNode.Color;
+                parentNode.Color = ColorEnum.Black;
+                siblingNode.Right!.Color = ColorEnum.Black;
+                // 左旋转
+                RotateLeft(parentNode);
+                node = _root;
+            }
+        }
+        else
+        {
+            TreeNode siblingNode = parentNode.Left!;
+            // 兄弟节点为红
+            if (siblingNode.Color == ColorEnum.Red)
+            {
+                // 变色
+                siblingNode.Color = ColorEnum.Black;
+                parentNode.Color = ColorEnum.Red;
+                // 右旋转
+                RotateRight(parentNode);
+                siblingNode = parentNode.Left!;
+            }
+
+            // 兄弟节点为黑
+            if (siblingNode.Left!.Color == ColorEnum.Black && siblingNode.Right!.Color == ColorEnum.Black)
+            {
+                // 变色
+                siblingNode.Color = ColorEnum.Red;
+                node = parentNode;
+            }
+            else
+            {
+                if (siblingNode.Left!.Color == ColorEnum.Black)
+                {
+                    // 变色
+                    siblingNode.Right!.Color = ColorEnum.Black;
+                    siblingNode.Color = ColorEnum.Red;
+                    // 左旋转
+                    siblingNode = RotateLeft(siblingNode);
+                }
+
+                // 变色
+                siblingNode.Color = parentNode.Color;
+                parentNode.Color = ColorEnum.Black;
+                siblingNode.Left!.Color = ColorEnum.Black;
+                // 右旋转
+                RotateRight(parentNode);
+                node = _root;
+            }
+        }
+    }
+
+    // 根节点
+    node.Color = ColorEnum.Black;
 }
 ```
 

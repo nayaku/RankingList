@@ -323,47 +323,49 @@ namespace RankingListNew
 #if DEBUG
                 _removeCount++;
 #endif
+                // 步骤1：遍历红黑树，找到目标叶子节点
                 TreeNode node = _root;
                 while (node.Right != null)
                 {
-                    node.Count--;
+                    node.Count--; // 同步更新路径上每个节点的计数
                     node = user.CompareTo(node.Right!.LeftUser) < 0 ? node.Left! : node.Right!;
 #if DEBUG
                     _removeCompareCount++;
 #endif
                 }
 
-                // 叶子节点
+                // 步骤2：从桶中删除玩家
                 node.Remove(user);
-                if (node == _root)
+                if (node == _root) // 如果为根节点，直接返回
                     return;
 
                 TreeNode parent = node.Parent!;
                 ColorEnum parentColor = parent.Color;
                 TreeNode siblingNode = parent.Left == node ? parent.Right! : parent.Left!;
                 ColorEnum siblingColor = siblingNode.Color;
-                if (node.Empty)
+                bool needDelete = false;
+                if (node.Empty)// 桶空了，需要合并
                 {
+                    // 用兄弟节点替换父节点
                     parent.MoveFromChild(siblingNode);
-                    parent.Color = ColorEnum.Black;
-                    if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
-                    {
-                        // 合并以后就会少了一个黑，需要调整
-                        FixAfterDel(parent);
-                    }
-#if DEBUG
-                    CheckTree();
-#endif
+                    needDelete = true;
                 }
                 else if (siblingNode.UserBucket != null
                          && node.Count < UserBucket.CombineBucketSize
                          && siblingNode.Count < UserBucket.CombineBucketSize)
                 {
+                    // 桶太小，需要合并
                     parent.CombineChild();
+                }
+
+                if (needDelete)
+                {
                     parent.Color = ColorEnum.Black;
+
+                    // 如果父节点和兄弟节点都是黑色，合并后会少一个黑节点
                     if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
                     {
-                        // 合并以后就会少了一个黑，需要调整
+                        // 调整红黑树平衡
                         FixAfterDel(parent);
                     }
 #if DEBUG
