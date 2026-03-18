@@ -3,13 +3,14 @@
 namespace RankingListNew
 {
     /// <summary>
-    /// 用户桶，存储一组连续排名的玩家
+    /// 用户桶
     /// 桶内玩家按分数有序排列，使用有序数组实现
     /// </summary>
     internal class UserBucket
     {
         public const int BucketSize = 256; // 每个bucket的用户数量
         public const int InitialBucketSize = BucketSize / 2; // 初始每个bucket的用户数量
+        public const int CombineBucketSize = BucketSize / 8; // 当小于这个数值的时候，合并桶
 
         /// <summary>
         /// 桶内分数最小的玩家（排名最高的玩家）
@@ -56,7 +57,7 @@ namespace RankingListNew
         }
 
         /// <summary>
-        /// 向桶内插入一个玩家，保持有序性
+        /// 向桶内插入一个玩家，保持数组有序性
         /// </summary>
         /// <param name="user">要插入的玩家</param>
         /// <returns>玩家在桶内的索引位置</returns>
@@ -86,7 +87,7 @@ namespace RankingListNew
         }
 
         /// <summary>
-        /// 从桶内删除一个玩家
+        /// 从桶内删除指定玩家
         /// </summary>
         /// <param name="user">要删除的玩家</param>
         /// <returns>被删除玩家的原索引位置</returns>
@@ -94,9 +95,9 @@ namespace RankingListNew
         {
             // 步骤1：使用二分查找定位玩家
             int index = Array.BinarySearch(Users, 0, UserCount, user);
+            Debug.Assert(index >= 0);
 
             // 步骤2：移动元素，填补空缺
-            // 将 [index+1, UserCount-1] 的元素向前移动一位
             if (index < UserCount)
             {
                 Array.Copy(Users, index + 1, Users, index, UserCount - index - 1);
@@ -152,6 +153,16 @@ namespace RankingListNew
             if (userIndex < mid)
                 Insert(user);
             return newBucket;
+        }
+        
+        /// <summary>
+        /// 合并桶
+        /// </summary>
+        /// <param name="other"></param>
+        public void Combine(UserBucket other)
+        {
+            Array.Copy(other.Users, 0, Users, UserCount, other.UserCount);
+            UserCount += other.UserCount;
         }
     }
 }

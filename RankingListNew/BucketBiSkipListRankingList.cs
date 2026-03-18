@@ -288,7 +288,18 @@ namespace RankingListNew
 
                 UserBucket userBucket = current.UserBucket;
                 int userIndexInBucket = userBucket.Remove(user);
-                if (!userBucket.Empty)
+                bool needDelete = false;
+                if (userBucket.Empty)
+                {
+                    needDelete = true;
+                }
+                else if (current.UserBucket.UserCount < UserBucket.CombineBucketSize
+                         && current.Level[0].Previous?.UserBucket.UserCount < UserBucket.CombineBucketSize)
+                {
+                    current.Level[0].Previous!.UserBucket.Combine(current.UserBucket);
+                    needDelete = true;
+                }
+                if (!needDelete)
                 {
                     if (userIndexInBucket == 0)
                     {
@@ -471,6 +482,7 @@ namespace RankingListNew
                 {
                     for (int i = 0; i < current.Level.Length; i++)
                     {
+                        Debug.Assert(Head.MinUser.CompareTo(Head.UserBucket.MinUser) == 0, "节点最小用户错误");
                         Debug.Assert(current.Level[i].PreviousCount == userCount[i], "用户数量统计错误");
                         userCount[i] = 0;
 

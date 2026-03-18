@@ -9,6 +9,7 @@ namespace RankingListNew
         private Dictionary<int, User> _userDict;
 #if DEBUG
         private int _splitCount;
+        private int _combineCount;
 #endif
         public BucketListRankingList(List<User> users)
         {
@@ -25,11 +26,13 @@ namespace RankingListNew
                 users.CopyTo(l, bucketUsers, 0, userCount);
                 _buckets.Add(new UserBucket(bucketUsers, userCount));
             }
+
             if (users.Count == 0)
             {
                 User[] bucketUsers = new User[UserBucket.BucketSize];
                 _buckets.Add(new UserBucket(bucketUsers, 0));
             }
+
             _userDict = users.ToDictionary(u => u.Id, u => u);
             _userCount = users.Count;
         }
@@ -46,12 +49,13 @@ namespace RankingListNew
                 int bucketIndex;
                 int userIndexInBucket;
                 for (bucketIndex = 0; bucketIndex < _buckets.Count - 1; bucketIndex++)
-                // 找不到就选择最后一个bucket
+                    // 找不到就选择最后一个bucket
                 {
                     if (user.CompareTo(_buckets[bucketIndex].MaxUser) <= 0)
                     {
                         break;
                     }
+
                     rankCount += _buckets[bucketIndex].UserCount;
                 }
 
@@ -69,8 +73,10 @@ namespace RankingListNew
                     // 加入bucket
                     userIndexInBucket = _buckets[bucketIndex].Insert(user);
                 }
+
                 rankCount += userIndexInBucket;
             }
+
             _userDict[user.Id] = user;
             _userCount++;
             return rankCount;
@@ -90,11 +96,23 @@ namespace RankingListNew
             }
 
             Debug.Assert(bucketIndex < _buckets.Count, "用户不存在");
-            if (_userCount == 1)
-            { }
-            else if (_buckets[bucketIndex].Empty)
+            if (_userCount > 1)
             {
-                _buckets.RemoveAt(bucketIndex);
+                if (_buckets[bucketIndex].Empty)
+                {
+                    _buckets.RemoveAt(bucketIndex);
+                }
+                else if (bucketIndex != 0
+                         && _buckets[bucketIndex].UserCount < UserBucket.CombineBucketSize
+                         && _buckets[bucketIndex - 1].UserCount < UserBucket.CombineBucketSize)
+                {
+                    // 向前合并
+                    _buckets[bucketIndex - 1].Combine(_buckets[bucketIndex]);
+                    _buckets.RemoveAt(bucketIndex);
+#if DEBUG
+                    _combineCount++;
+#endif
+                }
             }
 
             _userCount--;
@@ -210,6 +228,7 @@ namespace RankingListNew
             }
 
             Console.WriteLine($"SplitCount: {_splitCount}");
+            Console.WriteLine($"CombineCount: {_combineCount}");
         }
 #endif
     }

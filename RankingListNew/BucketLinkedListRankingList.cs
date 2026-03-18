@@ -9,6 +9,7 @@ namespace RankingListNew
         private Dictionary<int, User> _userDict;
 #if DEBUG
         private int _splitCount;
+        private int _combineCount;
 #endif
         public BucketLinkedListRankingList(List<User> users)
         {
@@ -25,11 +26,13 @@ namespace RankingListNew
                 users.CopyTo(l, bucketUsers, 0, userCount);
                 _buckets.AddLast(new UserBucket(bucketUsers, userCount));
             }
+
             if (users.Count == 0)
             {
                 User[] bucketUsers = new User[UserBucket.BucketSize];
                 _buckets.AddLast(new UserBucket(bucketUsers, 0));
             }
+
             _userDict = users.ToDictionary(u => u.Id, u => u);
             _userCount = users.Count;
         }
@@ -46,12 +49,13 @@ namespace RankingListNew
                 LinkedListNode<UserBucket> bucketNode = _buckets.First!;
                 int userIndexInBucket;
                 while (bucketNode.Next != null)
-                // 找不到就选择最后一个bucket
+                    // 找不到就选择最后一个bucket
                 {
                     if (user.CompareTo(bucketNode.Value.MaxUser) <= 0)
                     {
                         break;
                     }
+
                     rankCount += bucketNode.Value.UserCount;
                     bucketNode = bucketNode.Next!;
                 }
@@ -68,10 +72,13 @@ namespace RankingListNew
                 }
                 else
                 {
+                    // 加入bucket
                     userIndexInBucket = bucket.Insert(user);
                 }
+
                 rankCount += userIndexInBucket;
             }
+
             _userDict[user.Id] = user;
             _userCount++;
             return rankCount;
@@ -88,6 +95,7 @@ namespace RankingListNew
                     bucket.Remove(user);
                     break;
                 }
+
                 bucketNode = bucketNode.Next!;
             }
 
@@ -98,6 +106,17 @@ namespace RankingListNew
                 if (bucket.Empty)
                 {
                     _buckets.Remove(bucketNode);
+                }
+                else if (bucketNode.Previous != null
+                         && bucketNode.Value.UserCount < UserBucket.CombineBucketSize
+                         && bucketNode.Previous.Value.UserCount < UserBucket.CombineBucketSize)
+                {
+                    // 向前合并
+                    bucketNode.Previous.Value.Combine(bucketNode.Value);
+                    _buckets.Remove(bucketNode);
+#if DEBUG
+                    _combineCount++;
+#endif
                 }
             }
 
@@ -166,9 +185,11 @@ namespace RankingListNew
                 {
                     break;
                 }
+
                 rankCount += bucket.UserCount;
                 bucketNode = bucketNode.Next!;
             }
+
             Debug.Assert(bucketNode != null);
             bucket = bucketNode.Value;
             int inBucketIndex = bucket.IndexOf(user);
@@ -210,20 +231,25 @@ namespace RankingListNew
         {
             Console.WriteLine($"UserCount: {_userCount}");
             Console.Write("Each Bucket Number of Users: ");
-            for (LinkedListNode<UserBucket>? bucketNode = _buckets.First; bucketNode != null; bucketNode = bucketNode.Next)
+            for (LinkedListNode<UserBucket>? bucketNode = _buckets.First;
+                 bucketNode != null;
+                 bucketNode = bucketNode.Next)
             {
                 Console.Write($"{bucketNode.Value.UserCount} ");
             }
 
             Console.WriteLine();
             Console.WriteLine("Each Bucket Score Range:");
-            for (LinkedListNode<UserBucket>? bucketNode = _buckets.First; bucketNode != null; bucketNode = bucketNode.Next)
+            for (LinkedListNode<UserBucket>? bucketNode = _buckets.First;
+                 bucketNode != null;
+                 bucketNode = bucketNode.Next)
             {
                 Console.WriteLine(
                     $"Bucket {(bucketNode.Value.MinUser).Score} - {(bucketNode.Value.MaxUser).Score}");
             }
 
             Console.WriteLine($"SplitCount: {_splitCount}");
+            Console.WriteLine($"CombineCount: {_combineCount}");
         }
 #endif
     }

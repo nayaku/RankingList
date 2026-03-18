@@ -77,7 +77,7 @@ namespace RankingListNew
         class Tree
         {
             private TreeNode _root;
-#if DEBUG 
+#if DEBUG
             private int _addCount;
             private int _addCompareCount = 0;
             private int _removeCount = 0;
@@ -345,6 +345,21 @@ namespace RankingListNew
                 if (node.Empty)
                 {
                     parent.MoveFromChild(siblingNode);
+                    parent.Color = ColorEnum.Black;
+                    if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
+                    {
+                        // 合并以后就会少了一个黑，需要调整
+                        FixAfterDel(parent);
+                    }
+#if DEBUG
+                    CheckTree();
+#endif
+                }
+                else if (siblingNode.UserBucket != null
+                         && node.Count < UserBucket.CombineBucketSize
+                         && siblingNode.Count < UserBucket.CombineBucketSize)
+                {
+                    parent.CombineChild();
                     parent.Color = ColorEnum.Black;
                     if (parentColor == ColorEnum.Black && siblingColor == ColorEnum.Black)
                     {
@@ -702,9 +717,13 @@ namespace RankingListNew
                 {
                     Console.Write($"{results[i].depth}-{results[i].count}  ");
                 }
-                Console.WriteLine($"AddUser调用次数：{_addCount}，比较次数：{_addCompareCount}，平均比较次数：{(double)_addCompareCount / _addCount}");
-                Console.WriteLine($"RemoveUser调用次数：{_removeCount}，比较次数：{_removeCompareCount}，平均比较次数：{(double)_removeCompareCount / _removeCount}");
-                Console.WriteLine($"GetUserRank调用次数：{_getRankCount}，比较次数：{_getRankCompareCount}，平均比较次数：{(double)_getRankCompareCount / _getRankCount}");
+
+                Console.WriteLine(
+                    $"AddUser调用次数：{_addCount}，比较次数：{_addCompareCount}，平均比较次数：{(double)_addCompareCount / _addCount}");
+                Console.WriteLine(
+                    $"RemoveUser调用次数：{_removeCount}，比较次数：{_removeCompareCount}，平均比较次数：{(double)_removeCompareCount / _removeCount}");
+                Console.WriteLine(
+                    $"GetUserRank调用次数：{_getRankCount}，比较次数：{_getRankCompareCount}，平均比较次数：{(double)_getRankCompareCount / _getRankCount}");
             }
 
             private void DebugPrint(TreeNode node, int depth, ref List<(int depth, int count)> results)
@@ -862,6 +881,29 @@ namespace RankingListNew
                 }
 
                 Debug.Assert(Count == Left.Count + Right.Count);
+            }
+
+            public void CombineChild()
+            {
+                Debug.Assert(Left != null && Right != null);
+                // if (Left.UserBucket == null)
+                // {
+                //     Left.CombineChild();
+                // }
+
+                // if (Right.UserBucket == null)
+                // {
+                //     Right.CombineChild();
+                // }
+
+                Debug.Assert(Left.UserBucket != null && Right.UserBucket != null);
+                UserBucket = Left.UserBucket;
+                UserBucket.Combine(Right.UserBucket);
+                Debug.Assert(UserBucket.UserCount == Count);
+                Debug.Assert(UserBucket.MinUser.CompareTo(LeftUser) == 0);
+                Debug.Assert(UserBucket.MaxUser.CompareTo(RightUser) == 0);
+                Left = null;
+                Right = null;
             }
         }
     }
