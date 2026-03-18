@@ -5,8 +5,8 @@ namespace RankingListNew
 {
     public class BucketSkipListRankingList : IRankingList
     {
-        private static readonly int MaxLevel = 16; // 跳表的最大层数
-        private static readonly double P = 0.5; // 跳表的概率
+        private const int MaxLevel = 32; // 跳表的最大层数
+        private const double P = 0.25; // 跳表的概率
 
         private SkipList _userList;
         private Dictionary<int, User> _userMap;
