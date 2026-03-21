@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
+    [Serializable]
     public class BucketBRTreeRankingList : IRankingList
     {
         private Tree _tree;
@@ -74,6 +75,7 @@ namespace RankingListNew
 #endif
         }
 
+        [Serializable]
         class Tree
         {
             private TreeNode _root;
@@ -186,6 +188,11 @@ namespace RankingListNew
 
             // 参考：https://www.cnblogs.com/crazymakercircle/p/16320430.html
             // 参考：https://blog.csdn.net/u014454538/article/details/120120216
+            /// <summary>
+            /// 添加玩家到排行榜
+            /// </summary>
+            /// <param name="user">要添加的玩家</param>
+            /// <returns>玩家的排名（从0开始）</returns>
             public int AddUser(User user)
             {
 #if DEBUG
@@ -318,6 +325,10 @@ namespace RankingListNew
             }
 
             // 参考： https://zhuanlan.zhihu.com/p/91960960
+            /// <summary>
+            /// 从排行榜中删除玩家
+            /// </summary>
+            /// <param name="user">要删除的玩家</param>
             public void RemoveUser(User user)
             {
 #if DEBUG
@@ -533,6 +544,11 @@ namespace RankingListNew
                 return y;
             }
 
+            /// <summary>
+            /// 获取玩家的当前排名
+            /// </summary>
+            /// <param name="user">目标玩家</param>
+            /// <returns>玩家排名（从0开始）</returns>
             public int GetUserRank(User user)
             {
 #if DEBUG
@@ -541,15 +557,19 @@ namespace RankingListNew
                 int rankCount = 0;
                 TreeNode node = _root;
 
+                // 步骤1：遍历红黑树，累加排名
                 while (node.Right != null)
                 {
                     Debug.Assert(node.Left != null && node.Right != null);
+                    // 根据区间判断应该进入哪个子树
                     if (user.CompareTo(node.Right.LeftUser) < 0)
                     {
+                        // 用户在左子树，不累加排名
                         node = node.Left;
                     }
                     else
                     {
+                        // 用户在右子树，累加左子树的用户数
                         rankCount += node.Left.Count;
                         node = node.Right;
                     }
@@ -558,6 +578,7 @@ namespace RankingListNew
 #endif
                 }
 
+                // 步骤2：在桶内找到用户索引
                 UserBucket bucket = node.UserBucket!;
                 int userIndexInBucket = bucket.IndexOf(user);
                 Debug.Assert(userIndexInBucket >= 0);
@@ -565,40 +586,51 @@ namespace RankingListNew
                 return rankCount;
             }
 
+            /// <summary>
+            /// 获取排行榜前N名玩家
+            /// </summary>
+            /// <param name="topN">要获取的玩家数量</param>
+            /// <returns>按排名排序的玩家数组</returns>
             public User[] GetTopN(int topN)
             {
                 TreeNode node = _root;
 
-                // 获取排名靠前的叶子节点
+                // 步骤1：找到最左边的叶子节点（排名最小的用户）
                 while (node.Left != null)
                 {
                     node = node.Left;
                 }
 
+                // 步骤2：准备结果数组
                 UserBucket bucket = node.UserBucket!;
                 topN = Math.Min(topN, _root.Count);
                 User[] result = new User[topN];
                 int rankCount = 0;
 
+                // 步骤3：复制第一个桶的用户
                 int n = Math.Min(bucket.UserCount, topN - rankCount);
                 Array.Copy(bucket.Users, 0, result, rankCount, n);
                 rankCount += n;
 
-                // 缺少的用户数
+                // 步骤4：继续获取后续桶的用户
                 while (rankCount < topN)
                 {
-                    // 查找tNode的右区间的叶子节点
+                    // 步骤4a：向上查找，直到当前节点是父节点的左子节点
                     while (node != node.Parent!.Left)
                     {
                         node = node.Parent;
                     }
 
+                    // 步骤4b：跳转到父节点的右子树
                     node = node.Parent!.Right!;
+
+                    // 步骤4c：在右子树中找到最左边的叶子节点
                     while (node.Left != null)
                     {
                         node = node.Left;
                     }
 
+                    // 步骤4d：复制桶内用户
                     bucket = node.UserBucket!;
                     n = Math.Min(bucket.UserCount, topN - rankCount);
                     Array.Copy(bucket.Users, 0, result, rankCount, n);
@@ -608,6 +640,12 @@ namespace RankingListNew
                 return result;
             }
 
+            /// <summary>
+            /// 获取目标玩家周围的排名
+            /// </summary>
+            /// <param name="user">目标玩家</param>
+            /// <param name="aroundN">左右各获取的玩家数量</param>
+            /// <returns>玩家数组和目标玩家的排名</returns>
             public (User[], int) GetAroundUser(User user, int aroundN)
             {
                 int rankCount = 0;
@@ -636,6 +674,8 @@ namespace RankingListNew
                 // 2. 准备结果
                 int offset = 0; // 结果数组内的偏移，用于处理用户排名过靠前，存在数据空位的情况
                 int leftNum = aroundN, rightNum = aroundN; // 需求数目
+
+                // 处理边界情况
                 if (rankCount < aroundN)
                 {
                     // 用户排名过靠前，无法获取足够的左边用户
@@ -668,34 +708,36 @@ namespace RankingListNew
                     {
                         tNode = tNode.Parent;
                     }
-
+                    // 跳转到父节点的左子树
                     tNode = tNode.Parent!.Left!;
+                    // 找到左子树的最右节点
                     while (tNode.Right != null)
                     {
                         tNode = tNode.Right;
                     }
-
+                    // 复制桶内用户（从末尾开始
                     bucket = tNode.UserBucket!;
                     int n = Math.Min(bucket.UserCount, leftNum - leftCount);
                     Array.Copy(bucket.Users, bucket.UserCount - n, result, aroundN - leftCount - n + offset, n);
                     leftCount += n;
                 }
 
+                // 步骤5：获取右边缺少的用户
                 tNode = node;
                 while (rightCount < rightNum)
                 {
-                    // 查找tNode的右区间的叶子节点
+                    // 向上查找，直到当前节点是父节点的左子节点
                     while (tNode != tNode.Parent!.Left)
                     {
                         tNode = tNode.Parent;
                     }
-
+                    // 跳转到父节点的右子树
                     tNode = tNode.Parent!.Right!;
                     while (tNode.Left != null)
                     {
                         tNode = tNode.Left;
                     }
-
+                    // 复制桶内用户（从开头开始）
                     bucket = tNode.UserBucket!;
                     int n = Math.Min(bucket.UserCount, rightNum - rightCount);
                     Array.Copy(bucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
@@ -748,6 +790,7 @@ namespace RankingListNew
             Black = 1,
         }
 
+        [Serializable]
         class TreeNode
         {
             public int Count;

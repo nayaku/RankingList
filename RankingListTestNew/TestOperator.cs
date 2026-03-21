@@ -1,6 +1,7 @@
 ﻿using RankingListNew;
 using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
 using Console = Colorful.Console;
 
@@ -32,16 +33,14 @@ namespace RankingListTestNew
 
             // 准备测试
             Console.WriteLine($"== Test {_testName} ===");
-            TestData testData = LoadTestData();
-            int initialUserNum = testData.Users.Count;
-            List<User> users = testData.Users;
-            List<TestOperation> operations = testData.Operations;
+            (List<User> users, List<TestOperation> operations, TestOperationType? limitOperationType) = LoadTestData();
+            int initialUserNum = users.Count;
             int operationCount = operations.Count;
-            TestOperationType? limitOperationType = testData.LimitOperationType;
-            testData = null; // 释放测试数据内存
             // 创建排行榜实例
             IRankingList rankingList = RankingListHelper.NewRankingList(_rankingListClassName, users);
             users = null; // 释放测试数据内存
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
             GC.Collect();
             // 开始内存监控
             long initialMemoryUsage = GC.GetTotalMemory(true);
@@ -52,10 +51,25 @@ namespace RankingListTestNew
 
             // 运行测试
             (List<OperationResult> operationResults, Stopwatch stopwatch) = RunTest(rankingList, operations);
+            operations = null; // 释放测试数据内存
+
             // 停止内存监控
             Thread.Sleep(100); // 等待内存监控线程更新峰值
             _cancellationTokenSource.Cancel();
             memoryMonitorThread.Join();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            long finalMemoryUsage = GC.GetTotalMemory(true);
+
+            // 计算排行榜的内存大小
+            MemoryStream ms = new MemoryStream();
+#pragma warning disable SYSLIB0011 // 类型或成员已过时
+            BinaryFormatter formatter = new();
+#pragma warning restore SYSLIB0011 // 类型或成员已过时
+            formatter.Serialize(ms, rankingList);
+            long rankingListMemoryUsage = ms.Length;
 
             // 计算测试结果
             TestResult testResultObj = new()
@@ -67,9 +81,10 @@ namespace RankingListTestNew
                 OperationNum = operationCount,
                 RankingListUserNum = rankingList.GetRankingCount(),
                 TotalTimeMs = stopwatch.ElapsedMilliseconds,
-                AverageTimeMs = stopwatch.ElapsedMilliseconds / (double)operations.Count,
-                MemoryUsageBytes = GC.GetTotalMemory(true) - initialMemoryUsage,
-                PeakMemoryUsageBytes = _peakMemoryUsage - initialMemoryUsage,
+                AverageTimeMs = stopwatch.ElapsedMilliseconds / (double)operationCount,
+                MemoryUsage = finalMemoryUsage - initialMemoryUsage,
+                PeakMemoryUsage = _peakMemoryUsage - initialMemoryUsage,
+                RankingListMemoryUsage = rankingListMemoryUsage,
                 TestDate = DateTime.Now,
             };
 
@@ -97,7 +112,7 @@ namespace RankingListTestNew
             Console.WriteLine($"== Test {_testName} End ===\n");
         }
 
-        private TestData LoadTestData()
+        private (List<User>, List<TestOperation>, TestOperationType?) LoadTestData()
         {
             string testTargetDir = "Test";
             string testDataPath = $"{testTargetDir}/{_testName}.json";
@@ -105,12 +120,14 @@ namespace RankingListTestNew
             TestData testData =
                 JsonSerializer.Deserialize<TestData>(fs, new JsonSerializerOptions { IncludeFields = true }) ??
                 throw new Exception($"无法加载测试数据 {testDataPath}");
-            return testData;
+            return (testData.Users, testData.Operations, testData.LimitOperationType);
         }
 
         private (List<OperationResult>, Stopwatch) RunTest(IRankingList rankingList, List<TestOperation> Operations)
         {
+#if DEBUG
             List<OperationResult> operationResults = new(Operations.Count + 1);
+#endif
             Stopwatch stopwatch = new();
             stopwatch.Start();
             foreach (TestOperation testOperation in Operations)
@@ -148,8 +165,9 @@ namespace RankingListTestNew
                             rankingList.GetAroundUser(testOperation.UserId, testOperation.ScoreOrN);
                         break;
                 }
-
+#if DEBUG
                 operationResults.Add(operationResult);
+#endif
             }
 
             stopwatch.Stop();
@@ -162,10 +180,11 @@ namespace RankingListTestNew
                     new JsonSerializerOptions { WriteIndented = true, IncludeFields = true });
             }
 #endif
-#if !DEBUG
-            operationResults = null;
-#endif
+#if DEBUG
             return (operationResults, stopwatch);
+#else
+            return (null!, stopwatch);
+#endif
         }
 
         /// <summary>
@@ -282,11 +301,14 @@ namespace RankingListTestNew
                 $"平均耗时: {1000 * testResult.AverageTimeMs:0.00} ms/1k操作 vs {1000 * baseTestResult.AverageTimeMs:0.00} ms/1k操作 " +
                 $"({CalculateDifference(1000 * testResult.AverageTimeMs, 1000 * baseTestResult.AverageTimeMs):+0.00;-0.00;0.00}%)");
             Console.WriteLine(
-                $"内存占用: {BytesToMB(testResult.MemoryUsageBytes):0.00} MB vs {BytesToMB(baseTestResult.MemoryUsageBytes):0.00} MB " +
-                $"({CalculateDifference(testResult.MemoryUsageBytes, baseTestResult.MemoryUsageBytes):+0.00;-0.00;0.00}%)");
+                $"内存占用: {BytesToMB(testResult.MemoryUsage):0.00} MB vs {BytesToMB(baseTestResult.MemoryUsage):0.00} MB " +
+                $"({CalculateDifference(testResult.MemoryUsage, baseTestResult.MemoryUsage):+0.00;-0.00;0.00}%)");
             Console.WriteLine(
-                $"内存峰值: {BytesToMB(testResult.PeakMemoryUsageBytes):0.00} MB vs {BytesToMB(baseTestResult.PeakMemoryUsageBytes):0.00} MB " +
-                $"({CalculateDifference(testResult.PeakMemoryUsageBytes, baseTestResult.PeakMemoryUsageBytes):+0.00;-0.00;0.00}%)");
+                $"内存峰值: {BytesToMB(testResult.PeakMemoryUsage):0.00} MB vs {BytesToMB(baseTestResult.PeakMemoryUsage):0.00} MB " +
+                $"({CalculateDifference(testResult.PeakMemoryUsage, baseTestResult.PeakMemoryUsage):+0.00;-0.00;0.00}%)");
+            Console.WriteLine(
+                $"排行榜二进制大小: {BytesToMB(testResult.RankingListMemoryUsage):0.00} MB vs {BytesToMB(baseTestResult.RankingListMemoryUsage):0.00} MB " +
+                $"({CalculateDifference(testResult.RankingListMemoryUsage, baseTestResult.RankingListMemoryUsage):+0.00;-0.00;0.00}%)");
             Console.WriteLine($"测试日期: {testResult.TestDate} vs {baseTestResult.TestDate}");
         }
 
@@ -314,8 +336,9 @@ namespace RankingListTestNew
             Console.WriteLine($"排名列表用户数: {result.RankingListUserNum}");
             Console.WriteLine($"总耗时: {result.TotalTimeMs} ms");
             Console.WriteLine($"平均耗时: {1000 * result.AverageTimeMs:0.00} ms/1000操作");
-            Console.WriteLine($"内存占用: {BytesToMB(result.MemoryUsageBytes):0.00} MB");
-            Console.WriteLine($"内存峰值: {BytesToMB(result.PeakMemoryUsageBytes):0.00} MB");
+            Console.WriteLine($"内存占用: {BytesToMB(result.MemoryUsage):0.00} MB");
+            Console.WriteLine($"内存峰值: {BytesToMB(result.PeakMemoryUsage):0.00} MB");
+            Console.WriteLine($"排行榜二进制大小: {BytesToMB(result.RankingListMemoryUsage):0.00} MB");
             Console.WriteLine($"测试日期: {result.TestDate}");
         }
 

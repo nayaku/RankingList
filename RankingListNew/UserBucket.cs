@@ -6,6 +6,7 @@ namespace RankingListNew
     /// 用户桶
     /// 桶内玩家按分数有序排列，使用有序数组实现
     /// </summary>
+    [Serializable]
     internal class UserBucket
     {
         public const int BucketSize = 256; // 每个bucket的用户数量
