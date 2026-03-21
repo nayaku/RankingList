@@ -36,9 +36,8 @@ namespace RankingListTestNew
             (List<User> users, List<TestOperation> operations, TestOperationType? limitOperationType) = LoadTestData();
             int initialUserNum = users.Count;
             int operationCount = operations.Count;
-            // 创建排行榜实例
-            IRankingList rankingList = RankingListHelper.NewRankingList(_rankingListClassName, users);
-            users = null; // 释放测试数据内存
+
+            // 清理内存
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
@@ -48,6 +47,10 @@ namespace RankingListTestNew
             _cancellationTokenSource = new CancellationTokenSource();
             Thread memoryMonitorThread = new(MonitorMemoryUsage) { IsBackground = true };
             memoryMonitorThread.Start();
+
+            // 创建排行榜实例
+            IRankingList rankingList = RankingListHelper.NewRankingList(_rankingListClassName, users);
+            users = null; // 释放测试数据内存
 
             // 运行测试
             (List<OperationResult> operationResults, Stopwatch stopwatch) = RunTest(rankingList, operations);
@@ -183,7 +186,7 @@ namespace RankingListTestNew
 #if DEBUG
             return (operationResults, stopwatch);
 #else
-            return (null!, stopwatch);
+            return (null, stopwatch);
 #endif
         }
 
@@ -329,7 +332,7 @@ namespace RankingListTestNew
         // 显示测试结果
         private static void DisplayTestResult(TestResult result)
         {
-            Console.WriteLine($"测试: {result.RankingListName} {result.TestName}"); 
+            Console.WriteLine($"测试: {result.TestName}"); 
             Console.WriteLine($"初始用户数: {result.InitUserNum}");
             Console.WriteLine($"限制操作类型: {result.LimitOperationType}");
             Console.WriteLine($"操作数: {result.OperationNum}");
@@ -399,6 +402,7 @@ namespace RankingListTestNew
                 {
                     DisplayTestResult(testResult);
                 }
+                Console.WriteLine("\n");
             }
         }
     }

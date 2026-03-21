@@ -109,13 +109,14 @@ namespace RankingListTestNew
             {
                 string rankingListClassName = parseResult.GetValue<string>("rankingListClassName")!;
                 string? baseTestName = parseResult.GetValue<string?>("--base");
-                TestOperator.TestAll(rankingListClassName, baseTestName);
+                TestOperator.CompareAllWithBase(rankingListClassName, baseTestName);
             });
 
             RootCommand rootCommand = new()
             {
                 generatorCommand,
-                testCommand
+                testCommand,
+                displayCommand,
             };
             ParseResult parseResult = rootCommand.Parse(args);
             return parseResult.Invoke();
