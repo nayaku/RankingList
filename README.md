@@ -2656,6 +2656,8 @@ public class BucketBRTreeRankingList : IRankingList
 ```
 
 ## 3.6 双向跳表设计
+双向跳表是一种结合了链表和二分查找优点的数据结构，通过在链表节点中维护多层索引，实现了高效的查找、插入和删除操作。本设计采用分桶技术与双向跳表相结合的方式，进一步优化了空间利用率和操作性能。
+
 ```csharp
 public class BucketBiSkipListRankingList : IRankingList
 {
@@ -2724,6 +2726,47 @@ public class BucketBiSkipListRankingList : IRankingList
     // 参考：https://cloud.tencent.com/developer/article/2512982（不正确，level不对）
     // 参考：https://www.baeldung-cn.com/java-skiplist
     // 源码：https://github.com/tedcy/algorithm_test/blob/master/order_set/t_zset.h
+
+    /// <summary>
+    /// 3.6.1 跳表节点：数据定义
+    /// BiSkipListNode是双向跳表的基本构成单元，每个节点包含以下核心组件：
+    /// 1. SkipListLevel结构：定义了节点在每一层的连接信息
+    ///    - Next：指向下一个节点的引用
+    ///    - Previous：指向前一个节点的引用
+    ///    - PreviousCount：到前一个节点的用户数量
+    /// 2. UserBucket：存储该节点管理的用户数据桶
+    /// 3. Level数组：维护节点在各层的连接信息
+    /// 4. MinUser：冗余存储桶内最小用户，优化查询性能
+    /// </summary>
+    class BiSkipListNode
+    {
+        public struct SkipListLevel
+        {
+            public BiSkipListNode? Next;
+            public BiSkipListNode? Previous;
+            public int PreviousCount; // 到前一个节点的用户数量（不包含本节点的用户数量）
+        }
+        public UserBucket UserBucket;
+        public SkipListLevel[] Level;
+        // 优化内存局部性，冗余存储每个节点的最小用户，避免访问UserBucket时的指针跳转
+        public User MinUser;
+        public BiSkipListNode(UserBucket bucket, int level)
+        {
+            UserBucket = bucket;
+            Level = new SkipListLevel[level];
+            MinUser = bucket.MinUser;
+        }
+    }
+
+    /// <summary>
+    /// 3.6.2 跳表设计：
+    /// BiSkipList是双向跳表的核心实现类，负责管理跳表的节点结构和提供各种操作方法。
+    /// 主要特性包括：
+    /// 1. 支持双向遍历，可从任意节点向前或向后查找
+    /// 2. 采用分桶技术存储用户数据，减少节点数量
+    /// 3. 维护多层索引，实现O(log n)时间复杂度的查找、插入和删除
+    /// 4. 支持动态扩容和缩容，根据实际数据量调整结构
+    /// </summary>
     class BiSkipList
     {
         private const int MaxLevel = 32; // 跳表的最大层数
@@ -2751,6 +2794,15 @@ public class BucketBiSkipListRankingList : IRankingList
             Count = initialUsers.Length;
         }
 
+        /// <summary>
+        /// 将初始用户数据构建为多个用户桶
+        /// </summary>
+        /// <param name="users">排序后的用户数据</param>
+        /// <returns>构建好的用户桶数组</returns>
+        /// <remarks>
+        /// 该方法将排序后的用户数据划分为多个大小均匀的桶，每个桶的初始大小由UserBucket.InitialBucketSize决定。
+        /// 这样可以减少跳表节点的数量，提高内存利用率和查询效率。
+        /// </remarks>
         private static UserBucket[] BuildBucket(Span<User> users)
         {
             // 初始化Bucket
@@ -2769,6 +2821,18 @@ public class BucketBiSkipListRankingList : IRankingList
             return buckets;
         }
 
+        /// <summary>
+        /// 根据用户桶构建跳表结构
+        /// </summary>
+        /// <param name="buckets">用户桶数组</param>
+        /// <remarks>
+        /// 该方法负责构建跳表的多层索引结构：
+        /// 1. 为每个桶创建一个跳表节点
+        /// 2. 随机生成每个节点的层数
+        /// 3. 建立各层节点之间的前后连接关系
+        /// 4. 维护每个节点到前一个节点的用户数量
+        /// 5. 调整跳表的实际层数
+        /// </remarks>
         private void BuildSkipList(Span<UserBucket> buckets)
         {
             // 构建跳表
@@ -2803,6 +2867,14 @@ public class BucketBiSkipListRankingList : IRankingList
             }
         }
 
+        /// <summary>
+        /// 随机生成节点的层数
+        /// </summary>
+        /// <returns>节点的随机层数</returns>
+        /// <remarks>
+        /// 该方法使用几何分布随机生成节点的层数，概率参数为P=0.25。
+        /// 这样可以确保跳表的结构平衡，维持O(log n)的时间复杂度。
+        /// </remarks>
         private int RandomLevel()
         {
             int level = 1;
@@ -2813,6 +2885,20 @@ public class BucketBiSkipListRankingList : IRankingList
             return level;
         }
 
+        /// <summary>
+        /// 向跳表中添加一个新用户
+        /// </summary>
+        /// <param name="user">要添加的用户</param>
+        /// <returns>用户的排名</returns>
+        /// <remarks>
+        /// 该方法实现了高效的用户添加操作：
+        /// 1. 从最高层开始查找，定位到用户应该插入的位置
+        /// 2. 维护各层节点的用户数量信息
+        /// 3. 如果当前桶未满，直接将用户插入到桶中
+        /// 4. 如果当前桶已满，将桶分裂并创建新的跳表节点
+        /// 5. 为新节点随机生成层数，并更新各层的连接关系
+        /// 6. 返回用户的排名（从0开始）
+        /// </remarks>
         public int AddUser(User user)
         {
             int rankCount = 0;
@@ -2885,6 +2971,20 @@ public class BucketBiSkipListRankingList : IRankingList
             return rankCount + userIndexInBucket;
         }
 
+        /// <summary>
+        /// 从跳表中删除一个用户
+        /// </summary>
+        /// <param name="user">要删除的用户</param>
+        /// <remarks>
+        /// 该方法实现了高效的用户删除操作：
+        /// 1. 从最高层开始查找，定位到包含该用户的桶
+        /// 2. 维护各层节点的用户数量信息
+        /// 3. 从桶中删除用户
+        /// 4. 根据桶的状态决定是否需要合并或删除节点：
+        ///    - 如果桶为空，删除该节点
+        ///    - 如果桶的用户数量过少且前一个桶也不满，合并两个桶并删除当前节点
+        /// 5. 更新跳表的层数和连接关系
+        /// </remarks>
         public void RemoveUser(User user)
         {
             int[] userCount = new int[_level];
@@ -2947,6 +3047,18 @@ public class BucketBiSkipListRankingList : IRankingList
             Count--;
         }
 
+        /// <summary>
+        /// 获取指定用户的排名
+        /// </summary>
+        /// <param name="user">要查询的用户</param>
+        /// <returns>用户的排名（从0开始）</returns>
+        /// <remarks>
+        /// 该方法通过多层索引快速定位用户位置：
+        /// 1. 从最高层开始查找，跳过不可能包含该用户的区间
+        /// 2. 累计经过的用户数量，计算排名
+        /// 3. 在找到的桶中精确定位用户位置
+        /// 4. 返回总排名 = 前面所有桶的用户数量 + 桶内排名
+        /// </remarks>
         public int GetUserRank(User user)
         {
             int rankCount = 0;
@@ -2966,6 +3078,18 @@ public class BucketBiSkipListRankingList : IRankingList
             return rankCount + userIndexInBucket;
         }
 
+        /// <summary>
+        /// 获取排行榜前N名用户
+        /// </summary>
+        /// <param name="topN">要获取的用户数量</param>
+        /// <returns>前N名用户的数组</returns>
+        /// <remarks>
+        /// 该方法高效获取排行榜顶部用户：
+        /// 1. 从跳表头部开始遍历
+        /// 2. 依次从每个桶中获取用户数据
+        /// 3. 使用数组拷贝优化性能
+        /// 4. 自动处理topN超过总用户数的情况
+        /// </remarks>
         public User[] GetTopN(int topN)
         {
             topN = Math.Min(topN, Count);
@@ -2983,6 +3107,20 @@ public class BucketBiSkipListRankingList : IRankingList
             return result;
         }
 
+        /// <summary>
+        /// 获取指定用户周围的用户列表
+        /// </summary>
+        /// <param name="user">中心用户</param>
+        /// <param name="aroundN">周围的用户数量（左边和右边各aroundN个）</param>
+        /// <returns>包含周围用户的数组和中心用户的排名</returns>
+        /// <remarks>
+        /// 该方法实现了高效的范围查询：
+        /// 1. 快速定位中心用户的位置
+        /// 2. 从中心用户所在桶开始，向左右扩展
+        /// 3. 处理边界情况（排名过前或过后）
+        /// 4. 使用双向链表的特性高效遍历前后节点
+        /// 5. 返回结果数组和中心用户的排名
+        /// </remarks>
         public (User[], int) GetAroundUser(User user, int aroundN)
         {
             // 1. 找到对应的位置
@@ -3046,26 +3184,6 @@ public class BucketBiSkipListRankingList : IRankingList
                 tNode = tNode.Level[0].Next;
             }
             return (result, rankCount);
-        }
-    }
-
-    class BiSkipListNode
-    {
-        public struct SkipListLevel
-        {
-            public BiSkipListNode? Next;
-            public BiSkipListNode? Previous;
-            public int PreviousCount; // 到前一个节点的用户数量（不包含本节点的用户数量）
-        }
-        public UserBucket UserBucket;
-        public SkipListLevel[] Level;
-        // 优化内存局部性，冗余存储每个节点的最小用户，避免访问UserBucket时的指针跳转
-        public User MinUser;
-        public BiSkipListNode(UserBucket bucket, int level)
-        {
-            UserBucket = bucket;
-            Level = new SkipListLevel[level];
-            MinUser = bucket.MinUser;
         }
     }
 }
