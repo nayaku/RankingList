@@ -376,33 +376,33 @@
 //                return _root.Count;
 //            }
 
-//        }
 //#if DEBUG
-//        public void DebugPrint()
-//        {
-//            List<(int depth, int count)> results = [];
-//            DebugPrint(_root, 0, ref results);
-//            for (int i = 0; i < results.Count; i++)
+//            public void DebugPrint()
 //            {
-//                Console.Write($"{results[i].depth}-{results[i].count}  ");
-//                // 每10个换行
-//                if ((i + 1) % 10 == 0)
+//                List<(int depth, int count)> results = [];
+//                DebugPrint(_root, 0, ref results);
+//                for (int i = 0; i < results.Count; i++)
 //                {
-//                    Console.WriteLine();
+//                    Console.Write($"{results[i].depth}-{results[i].count}  ");
+//                    // 每10个换行
+//                    if ((i + 1) % 10 == 0)
+//                    {
+//                        Console.WriteLine();
+//                    }
 //                }
 //            }
-//        }
 
-//        private void DebugPrint(TreeNode node, int depth, ref List<(int depth, int count)> results)
-//        {
-//            if (node.UserBucket != null)
+//            private void DebugPrint(TreeNode node, int depth, ref List<(int depth, int count)> results)
 //            {
-//                results.Add((depth, node.UserBucket.UserCount));
-//                return;
-//            }
+//                if (node.UserBucket != null)
+//                {
+//                    results.Add((depth, node.UserBucket.UserCount));
+//                    return;
+//                }
 
-//            DebugPrint(node.Left!, depth + 1, ref results);
-//            DebugPrint(node.Right!, depth + 1, ref results);
+//                DebugPrint(node.Left!, depth + 1, ref results);
+//                DebugPrint(node.Right!, depth + 1, ref results);
+//            }
 //        }
 //#endif
 
@@ -414,7 +414,7 @@
 //            public TreeNode? Left;
 //            public TreeNode? Right;
 //            public UserBucket? UserBucket;
-//            public bool Full => Count >= BucketSize;
+//            public bool Full => Count >= UserBucket.BucketSize;
 //            public bool Empty => Count == 0;
 
 //            public void CopyFrom(TreeNode other)
@@ -504,8 +504,8 @@
 //                UserBucket = Left.UserBucket;
 //                UserBucket.Combine(Right.UserBucket);
 //                Debug.Assert(UserBucket.UserCount == Count);
-//                Debug.Assert(UserBucket.MinUser == LeftUser);
-//                Debug.Assert(UserBucket.MaxUser == RightUser);
+//                Debug.Assert(UserBucket.MinUser.CompareTo(LeftUser) == 0);
+//                Debug.Assert(UserBucket.MaxUser.CompareTo(RightUser) == 0);
 //                Left = null;
 //                Right = null;
 //            }

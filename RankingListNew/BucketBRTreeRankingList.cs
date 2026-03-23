@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
-    [Serializable]
     public class BucketBRTreeRankingList : IRankingList
     {
         private Tree _tree;
@@ -75,7 +74,6 @@ namespace RankingListNew
 #endif
         }
 
-        [Serializable]
         class Tree
         {
             private TreeNode _root;
@@ -790,7 +788,6 @@ namespace RankingListNew
             Black = 1,
         }
 
-        [Serializable]
         class TreeNode
         {
             public int Count;

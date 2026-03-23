@@ -2,7 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace RankingListNew
 {
-    [Serializable]
     public readonly struct User : IComparable<User>
     {
         /// <summary>

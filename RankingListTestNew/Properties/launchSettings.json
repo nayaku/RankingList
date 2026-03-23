@@ -2,7 +2,7 @@
   "profiles": {
     "RankingListTestNew": {
       "commandName": "Project",
-      "commandLineArgs": "test BucketBRTreeRankingList",
+      "commandLineArgs": "test --help\r\n\r\n",
       "remoteDebugEnabled": false
     },
     "WSL": {

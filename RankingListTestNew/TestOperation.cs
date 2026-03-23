@@ -59,7 +59,7 @@ namespace RankingListTestNew
         public double AverageTimeMs { get; set; }
         public long MemoryUsage { get; set; }
         public long PeakMemoryUsage { get; set; }
-        public long RankingListMemoryUsage { get; set; }
+        //public long RankingListMemoryUsage { get; set; }
         public DateTime TestDate { get; set; }
     }
 

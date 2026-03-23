@@ -1,8 +1,8 @@
 ﻿using RankingListNew;
 using System.Diagnostics;
 using System.Drawing;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
+using static System.Net.Mime.MediaTypeNames;
 using Console = Colorful.Console;
 
 namespace RankingListTestNew
@@ -67,12 +67,12 @@ namespace RankingListTestNew
             long finalMemoryUsage = GC.GetTotalMemory(true);
 
             // 计算排行榜的内存大小
-            MemoryStream ms = new MemoryStream();
-#pragma warning disable SYSLIB0011 // 类型或成员已过时
-            BinaryFormatter formatter = new();
-#pragma warning restore SYSLIB0011 // 类型或成员已过时
-            formatter.Serialize(ms, rankingList);
-            long rankingListMemoryUsage = ms.Length;
+//            MemoryStream ms = new MemoryStream();
+//#pragma warning disable SYSLIB0011 // 类型或成员已过时
+//            BinaryFormatter formatter = new();
+//#pragma warning restore SYSLIB0011 // 类型或成员已过时
+//            formatter.Serialize(ms, rankingList);
+//            long rankingListMemoryUsage = ms.Length;
 
             // 计算测试结果
             TestResult testResultObj = new()
@@ -87,7 +87,7 @@ namespace RankingListTestNew
                 AverageTimeMs = stopwatch.ElapsedMilliseconds / (double)operationCount,
                 MemoryUsage = finalMemoryUsage - initialMemoryUsage,
                 PeakMemoryUsage = _peakMemoryUsage - initialMemoryUsage,
-                RankingListMemoryUsage = rankingListMemoryUsage,
+                //RankingListMemoryUsage = rankingListMemoryUsage,
                 TestDate = DateTime.Now,
             };
 
@@ -309,9 +309,9 @@ namespace RankingListTestNew
             Console.WriteLine(
                 $"内存峰值: {BytesToMB(testResult.PeakMemoryUsage):0.00} MB vs {BytesToMB(baseTestResult.PeakMemoryUsage):0.00} MB " +
                 $"({CalculateDifference(testResult.PeakMemoryUsage, baseTestResult.PeakMemoryUsage):+0.00;-0.00;0.00}%)");
-            Console.WriteLine(
-                $"排行榜二进制大小: {BytesToMB(testResult.RankingListMemoryUsage):0.00} MB vs {BytesToMB(baseTestResult.RankingListMemoryUsage):0.00} MB " +
-                $"({CalculateDifference(testResult.RankingListMemoryUsage, baseTestResult.RankingListMemoryUsage):+0.00;-0.00;0.00}%)");
+            //Console.WriteLine(
+            //    $"排行榜二进制大小: {BytesToMB(testResult.RankingListMemoryUsage):0.00} MB vs {BytesToMB(baseTestResult.RankingListMemoryUsage):0.00} MB " +
+            //    $"({CalculateDifference(testResult.RankingListMemoryUsage, baseTestResult.RankingListMemoryUsage):+0.00;-0.00;0.00}%)");
             Console.WriteLine($"测试日期: {testResult.TestDate} vs {baseTestResult.TestDate}");
         }
 
@@ -341,7 +341,7 @@ namespace RankingListTestNew
             Console.WriteLine($"平均耗时: {1000 * result.AverageTimeMs:0.00} ms/1000操作");
             Console.WriteLine($"内存占用: {BytesToMB(result.MemoryUsage):0.00} MB");
             Console.WriteLine($"内存峰值: {BytesToMB(result.PeakMemoryUsage):0.00} MB");
-            Console.WriteLine($"排行榜二进制大小: {BytesToMB(result.RankingListMemoryUsage):0.00} MB");
+            //Console.WriteLine($"排行榜二进制大小: {BytesToMB(result.RankingListMemoryUsage):0.00} MB");
             Console.WriteLine($"测试日期: {result.TestDate}");
         }
 
