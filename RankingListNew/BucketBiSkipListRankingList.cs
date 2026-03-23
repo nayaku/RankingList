@@ -5,9 +5,6 @@ namespace RankingListNew
 {
     public class BucketBiSkipListRankingList : IRankingList
     {
-        private const int MaxLevel = 32; // 跳表的最大层数
-        private const double P = 0.25; // 跳表的概率
-
         private BiSkipList _userList;
         private Dictionary<int, User> _userMap;
 
@@ -82,6 +79,8 @@ namespace RankingListNew
         // 源码：https://github.com/tedcy/algorithm_test/blob/master/order_set/t_zset.h
         class BiSkipList
         {
+            private const int MaxLevel = 32; // 跳表的最大层数
+            private const double P = 0.25; // 跳表的概率
             public BiSkipListNode Head;
             public int Count;
 #if DEBUG
@@ -206,7 +205,7 @@ namespace RankingListNew
                     // 增加区间用户数量
                     if (current.Level[i].Next != null)
                     {
-                        current.Level[i].Next.Level[i].PreviousCount++;
+                        current.Level[i].Next!.Level[i].PreviousCount++;
                     }
                     update[i] = current;
                 }
@@ -248,8 +247,8 @@ namespace RankingListNew
                         newNode.Level[i].PreviousCount = previousCount;
                         if (newNode.Level[i].Next != null)
                         {
-                            newNode.Level[i].Next.Level[i].PreviousCount -= previousCount;
-                            newNode.Level[i].Next.Level[i].Previous = newNode;
+                            newNode.Level[i].Next!.Level[i].PreviousCount -= previousCount;
+                            newNode.Level[i].Next!.Level[i].Previous = newNode;
                         }
                         previousCount += userCount[i];
                     }
@@ -423,7 +422,7 @@ namespace RankingListNew
                 BiSkipListNode tNode = current.Level[0].Previous!;
                 while (leftCount < leftNum)
                 {
-                    userBucket = tNode.UserBucket!;
+                    userBucket = tNode!.UserBucket!;
                     int n = Math.Min(userBucket.UserCount, leftNum - leftCount);
                     Array.Copy(userBucket.Users, userBucket.UserCount - n, result, aroundN - leftCount - n + offset, n);
                     leftCount += n;
@@ -432,7 +431,7 @@ namespace RankingListNew
                 tNode = current.Level[0].Next!;
                 while (rightCount < rightNum)
                 {
-                    userBucket = tNode.UserBucket!;
+                    userBucket = tNode!.UserBucket!;
                     int n = Math.Min(userBucket.UserCount, rightNum - rightCount);
                     Array.Copy(userBucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
                     rightCount += n;
