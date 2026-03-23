@@ -5,12 +5,12 @@ import numpy as np
 plt.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
 
-file_path = 'initial_users.json'
+file_path = 't21_100w_100w.json'
 
 with open(file_path, 'r', encoding='utf-8') as f:
     data = json.load(f)
 
-scores = [user['Score'] for user in data]
+scores = [user['Score'] for user in data['Users']]
 
 scores = np.array(scores)
 print(f"总用户数: {len(scores)}")

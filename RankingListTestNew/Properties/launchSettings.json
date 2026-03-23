@@ -2,7 +2,7 @@
   "profiles": {
     "RankingListTestNew": {
       "commandName": "Project",
-      "commandLineArgs": "test --help\r\n\r\n",
+      "commandLineArgs": "generate t10w_100w 100000 1000000\r\n\r\n",
       "remoteDebugEnabled": false
     },
     "WSL": {

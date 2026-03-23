@@ -212,14 +212,26 @@ namespace RankingListNew
 #if DEBUG
         public void DebugPrint()
         {
+            Dictionary<int, int> bucketNumCount = new();
             Console.WriteLine($"UserCount: {_userCount}");
             Console.Write("Each Bucket Number of Users: ");
             for (int i = 0; i < _buckets.Count; i++)
             {
                 Console.Write($"{_buckets[i].UserCount} ");
+                if (!bucketNumCount.ContainsKey(_buckets[i].UserCount))
+                {
+                    bucketNumCount[_buckets[i].UserCount] = 0;
+                }
+                bucketNumCount[_buckets[i].UserCount]++;
             }
-
             Console.WriteLine();
+            for(int i = 0; i <= UserBucket.BucketSize; i++)
+            {
+                if (bucketNumCount.ContainsKey(i))
+                {
+                    Console.WriteLine($"Bucket with {i} users: {bucketNumCount[i]} buckets");
+                }
+            }
             Console.WriteLine("Each Bucket Score Range:");
             for (int i = 0; i < _buckets.Count; i++)
             {
