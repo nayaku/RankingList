@@ -84,7 +84,6 @@ namespace RankingListNew
             public BiSkipListNode Head;
             public int Count;
 #if DEBUG
-            [NonSerialized]
             private Random _random = new(2447);
             private int _addCount = 0;
             private int _addCompareCount = 0;
@@ -93,7 +92,6 @@ namespace RankingListNew
             private int _getRankCount = 0;
             private int _getRankCompareCount = 0;
 #else
-            [NonSerialized]
             private Random _random = new();
 #endif
             private int _level = 1;
