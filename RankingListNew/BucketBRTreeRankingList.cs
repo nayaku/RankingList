@@ -365,6 +365,7 @@ namespace RankingListNew
                 {
                     // 桶太小，需要合并
                     parent.CombineChild();
+                    needDelete = true;
                 }
 
                 if (needDelete)
@@ -790,6 +791,10 @@ namespace RankingListNew
 
         class TreeNode
         {
+#if DEBUG
+            private static int _idSeed;
+            private int _id = _idSeed++;
+#endif
             public int Count;
             public User LeftUser;
             public User RightUser;
