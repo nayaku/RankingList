@@ -317,6 +317,11 @@ namespace RankingListNew
                          && current.UserBucket.UserCount < UserBucket.CombineBucketSize
                          && previous.UserBucket.UserCount < UserBucket.CombineBucketSize)
                 {
+                    if(previous.UserBucket.UserCount == 0)
+                    {
+                        // 前方是空桶
+                        previous.MinUser = current.MinUser;
+                    }
                     previous.UserBucket.Combine(current.UserBucket);
                     previous.MaxUser = previous.UserBucket.MaxUser;
                     needDelete = true;

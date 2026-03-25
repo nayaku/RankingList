@@ -295,7 +295,13 @@ namespace RankingListNew
                 else if (current.UserBucket.UserCount < UserBucket.CombineBucketSize
                          && current.Level[0].Previous?.UserBucket.UserCount < UserBucket.CombineBucketSize)
                 {
+                    if (current.Level[0].Previous!.UserBucket.UserCount == 0)
+                    {
+                        // 空节点
+                        current.Level[0].Previous!.MinUser = userBucket.MinUser;
+                    }
                     current.Level[0].Previous!.UserBucket.Combine(current.UserBucket);
+
                     needDelete = true;
                 }
                 if (!needDelete)
