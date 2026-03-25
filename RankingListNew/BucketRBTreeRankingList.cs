@@ -3,12 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
-    public class BucketBRTreeRankingList : IRankingList
+    public class BucketRBTreeRankingList : IRankingList
     {
         private Tree _tree;
         private Dictionary<int, User> _userMap;
 
-        public BucketBRTreeRankingList(Span<User> users)
+        public BucketRBTreeRankingList(Span<User> users)
         {
             users.Sort();
             _tree = new Tree(users);
@@ -20,7 +20,7 @@ namespace RankingListNew
             }
         }
 
-        public BucketBRTreeRankingList(List<User> users) :
+        public BucketRBTreeRankingList(List<User> users) :
             this(CollectionsMarshal.AsSpan(users))
         {
         }
