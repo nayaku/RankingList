@@ -1,0 +1,63 @@
+digraph InsertionProcess {
+    // 节点样式设置
+    node [
+        shape=rectangle,
+        style="filled,rounded",
+        fillcolor=lightblue,
+        fontname="Microsoft YaHei",
+        fontsize=12
+    ];
+    
+    // 边样式设置
+    edge [
+        color=gray50,
+        penwidth=2
+    ];
+    
+    // // 特殊边样式 - 插入路径
+    // path_edge [
+    //     color=red,
+    //     penwidth=3,
+    //     arrowhead=dot
+    // ];
+    
+    // // 特殊节点样式 - 更新后的节点
+    // updated_node [
+    //     fillcolor=lightgreen,
+    //     fontcolor=darkgreen
+    // ];
+    
+    // 定义节点
+    root [label="根节点\nLeftUser=A(60), RightUser=H(130)\nCount=8→9"]; // Count 从8变为9
+    left_subtree [label="左子树\nLeftUser=A(60), RightUser=D(90)\nCount=4→5"]; // Count 从4变为5
+    right_subtree [label="右子树\nLeftUser=E(100), RightUser=H(130)\nCount=4"];
+    bucket1 [label="桶1\n[A(60),B(70)]\nCount=2"];
+    bucket2 [label="桶2\n[C(80), I(85), D(90)]\nCount=2→3", style="filled,rounded", fillcolor=lightgreen, fontcolor=darkgreen, penwidth=3]; // 更新后的桶2，Count从2变为3
+    bucket3 [label="桶3\n[E(100),F(110)]\nCount=2"];
+    bucket4 [label="桶4\n[G(120),H(130)]\nCount=2"];
+    
+    // 定义边关系
+    root -> left_subtree;
+    root -> right_subtree;
+    left_subtree -> bucket1;
+    left_subtree -> bucket2;
+    right_subtree -> bucket3;
+    right_subtree -> bucket4;
+    
+    // 定义插入路径（使用不同的颜色和样式）
+    root -> left_subtree [label="I(85) < E(100)(100)\n进入左子树", color=red, penwidth=3, fontcolor=red, fontsize=10, constraint=false, fontname="Microsoft YaHei"];
+    left_subtree -> bucket2 [label="I(85) > C(80)\n进入右子树\n累加计数2", color=red, penwidth=3, fontcolor=red, fontsize=10, constraint=false, fontname="Microsoft YaHei"];    
+    
+    // // 添加注释
+    // comment1 [shape=note, label="插入用户 I(85)", fontname="Microsoft YaHei", fontsize=14, fontcolor=blue];
+    // comment2 [shape=note, label="最终排名: 3 (2+1)", fontname="Microsoft YaHei", fontsize=12, fontcolor=green];
+    
+    // // 连接注释
+    // comment1 -> root [style=dashed, color=blue, constraint=false];
+    // comment2 -> bucket2 [style=dashed, color=green, constraint=false];
+    
+    // 布局设置
+    rankdir=TB;
+    nodesep=0.5;
+    ranksep=1.0;
+}

@@ -728,18 +728,18 @@ class TreeNode
 }
 ```
 
-区间信息（LeftUser/RightUser）用于快速定位目标桶：
+每个非叶子节点存储的区间信息，用于快速得出目标桶的排名。
 
 
 假设树结构如图所示：
 
-![](tree_structure.png)
+![树结构](tree_structure.png)
 
 > 其中每个节点的数值为A=60，B=70，C=80，D=90，E=100，F=110，G=120，H=130（这里采用升序排序，有助于理解）
 
 查找用户 D：
 1. 根节点：D < E（右子树最小值），进入左子树
-2. 左子树：D > C（右子树最小值），进入右子树，累加左子树计数2
+2. 左子树：D > C（右子树最小值），进入右子树，排名累加左子树计数2
 3. 到达桶2，在桶内查找 D，找到后返回桶内索引（1）
 4. 返回总排名3（2+1）
 
@@ -748,21 +748,20 @@ class TreeNode
 添加用户 I（分数=85）：
 
 1. 从根节点开始：I(85) < E(100)（右子树最小值），进入左子树
-2. 左子树：I(85) > C(80)（右子树最小值），进入右子树，累加左子树计数2
+2. 左子树：I(85) > C(80)（右子树最小值），进入右子树，排名累加左子树计数2
 3. 到达桶2，在桶内查找插入位置，I(85) 应插入到C(80) 和 D(90) 之间，桶内索引为1
 4. 桶未满，直接插入，更新桶内数组为 [C(80), I(85), D(90)]
 5. 更新桶2的 RightUser 为 D(90)（不变），无需向上更新
 6. 返回总排名3（2+1）
 
+![树结构](insertion_process.png)
+
 如果桶已满，则需要分裂桶：
 - 创建两个新子节点，将桶分裂为两个
 - 根据 I 的位置决定放入左桶还是右桶
-- 调整红黑树平衡（可能需要旋转和变色）
-- 重新计算排名
+- 调整红黑树平衡
 
-
-
-### 3.1.3 核心操作详解
+### 3.1.2 核心操作详解
 
 #### 区间更新操作
 
@@ -796,21 +795,6 @@ private static void UpdateRightUser(TreeNode node)
         node = node.Parent;
     }
 }
-```
-
-**更新示例**：
-```
-插入用户 X（分数=95）到桶1：
-原桶1：[A(100), B(90)]
-新桶1：[A(100), X(95), B(90)]
-
-X 成为新的最小值（插入位置=1，不是最小值，无需更新）
-如果插入的是 Y（分数=110）：
-新桶1：[Y(110), A(100), B(90)]
-Y 成为新的最小值，需要更新：
-  桶1.LeftUser = Y
-  左子树.LeftUser = Y
-  根节点.LeftUser = Y
 ```
 
 #### 插入玩家操作
@@ -1027,13 +1011,6 @@ class TreeNode
         child.Left?.Parent = this;
         child.Right?.Parent = this;
         UserBucket = child.UserBucket;
-#if DEBUG
-        child.UserBucket = null;
-        child.Count = 0;
-        child.Left = null;
-        child.Right = null;
-        child.Parent = null;
-#endif
     }
 
     private static void UpdateLeftUser(TreeNode node)
@@ -1188,6 +1165,7 @@ _root 是树的根节点。
 > - [一文带你彻底读懂红黑树（附详细图解） - 知乎](https://zhuanlan.zhihu.com/p/91960960)
 > - [红黑树（图解+秒懂+史上最全） - 技术自由圈 - 博客园](https://www.cnblogs.com/crazymakercircle/p/16320430.html)
 > - [红黑树详解-CSDN博客](https://blog.csdn.net/u014454538/article/details/120120216)
+> - [Java TreeMap 源码](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/TreeMap.java)
 
 ### 3.2.3 核心操作详解
 
@@ -1265,7 +1243,7 @@ public BucketRBTreeRankingList(Span<User> users)
     _root.Color = ColorEnum.Black;
 }
 ```
-没有用户的时候，生成一个空节点。
+没有用户的时候，生成一个空节点和空桶。避免当排行榜只有一个用户时，该用户更新分数的时候，频繁新建和删除节点，从而造成大量的GC操作。
 
 #### 1. 添加玩家 (AddUser)
 
@@ -1481,9 +1459,6 @@ public void RemoveUser(User user)
             // 调整红黑树平衡
             FixAfterDel(parent);
         }
-#if DEBUG
-        CheckTree();
-#endif
     }
 }
 
@@ -1585,23 +1560,10 @@ private void FixAfterDel(TreeNode node)
 
 获取玩家排名是排行榜的核心操作之一，利用红黑树的维护的区间计数，就可以快速计算玩家的排名。
 
-**排名计算原理**：
-- 红黑树按分数有序，左子树 < 右子树
+**算法流程**：
+- 红黑树按分数有序
 - 当进入右子树时，说明左子树所有用户都在目标用户之前
 - 累加所有左子树的 Count，再加上桶内索引，得到最终排名
-
-**示例**：
-```
-假设树结构如下：
-        根节点(Count=1000)
-       /              \
-   左子树(Count=400)  右子树(Count=600)
-
-查找用户 X：
-1. 如果 X 在左子树，排名 < 400
-2. 如果 X 在右子树，排名 >= 400
-   继续在右子树中递归计算
-```
 
 **代码实现**：
 
@@ -1641,11 +1603,6 @@ public int GetUserRank(User user)
     return rankCount;
 }
 ```
-
-**时间复杂度分析**：
-- 树遍历：O(log M)
-- 桶内二分查找：O(log K)
-- **总时间复杂度**：O(log M + log K)
 
 #### 4. 获取前N名玩家 (GetTopN)
 
@@ -1718,11 +1675,6 @@ public User[] GetTopN(int topN)
     return result;
 }
 ```
-
-**时间复杂度分析**：
-- 找到第一个桶：O(log M)
-- 遍历桶：O(N + 桶数量)
-- **总时间复杂度**：O(N + log M)
 
 #### 5. 获取玩家周围的排名 (GetAroundUser)
 
@@ -1843,21 +1795,12 @@ public (User[], int) GetAroundUser(User user, int aroundN)
 }
 ```
 
-**时间复杂度分析**：
-- 找到用户桶：O(log M)
-- 桶内二分查找：O(log K)
-- 遍历桶：O(aroundN)
-- **总时间复杂度**：O(log M + log K + aroundN)
-
-排行榜实现
-排行榜包含两个变量：
+## 3.3 完整代码实现
+排行榜包含两个变量，用于封装操作：
 - _tree：二叉树，用于存储玩家排名信息
 - _userMap：字典，用于存储玩家ID到玩家对象的映射
 
-这里就不详细展开了，主要是添加、更新、删除玩家时需要维护这两个数据结构。具体实现可以参考完整代码。
 
-
-#### 完整代码
 ```csharp
 public class BucketRBTreeRankingList : IRankingList
 {
@@ -2679,7 +2622,7 @@ public class BucketRBTreeRankingList : IRankingList
 
 # 四、跳表设计
 
-跳表是一种基于链表的数据结构，通过引入多层索引来加速查找操作。与红黑树相比，跳表的实现更加简单直观，同时具有相似的平均时间复杂度。本章节将详细介绍排行榜系统中使用的**双向跳表**设计，包括数据结构定义、核心操作实现和性能优化策略。
+跳表是一种基于链表的数据结构，通过引入多层索引来加速查找操作。与红黑树相比，跳表的实现更加简单直观，同时具有相似的平均时间复杂度。
 
 ## 4.1 跳表节点
 
@@ -2812,7 +2755,7 @@ public SkipList(Span<User> initialUsers)
 }
 ```
 
-如果初始用户数量为0，跳表的头节点为一个空桶。
+如果初始用户数量为0，跳表的头节点为一个空桶。原因和红黑树的头节点相同，都是为了减少GC压力。
 
 ### 4.2.4 层级随机化策略
 
@@ -2830,7 +2773,7 @@ private int RandomLevel()
 }
 ```
 
-这个算法确保（基于P=0.25的参数设置）：
+这个算法确保（P=0.25）：
 - 约75%的节点只有1层
 - 约18.75%的节点有2层
 - 约4.6875%的节点有3层
@@ -2961,6 +2904,11 @@ public void RemoveUser(User user)
     else if (current.UserBucket.UserCount < UserBucket.CombineBucketSize
              && current.Level[0].Previous?.UserBucket.UserCount < UserBucket.CombineBucketSize)
     {
+        if (current.Level[0].Previous!.UserBucket.UserCount == 0)
+        {
+            // 头部空节点特判
+            current.Level[0].Previous!.MinUser = userBucket.MinUser;
+        }
         current.Level[0].Previous!.UserBucket.Combine(current.UserBucket);
         needDelete = true;
     }
@@ -3375,6 +3323,11 @@ public class BucketBiSkipListRankingList : IRankingList
             else if (current.UserBucket.UserCount < UserBucket.CombineBucketSize
                         && current.Level[0].Previous?.UserBucket.UserCount < UserBucket.CombineBucketSize)
             {
+                if (current.Level[0].Previous!.UserBucket.UserCount == 0)
+                {
+                    // 头部空节点特判
+                    current.Level[0].Previous!.MinUser = userBucket.MinUser;
+                }
                 current.Level[0].Previous!.UserBucket.Combine(current.UserBucket);
                 needDelete = true;
             }
@@ -3532,81 +3485,19 @@ public class BucketBiSkipListRankingList : IRankingList
 }
 ```
 
-## 4.4 设计亮点与性能分析
-
-### 4.4.1 双向链表优化
-
-使用双向链表结构，支持：
-- 向前遍历（获取排名靠后的玩家）
-- 向后遍历（获取排名靠前的玩家）
-- 高效的范围查询
-
-### 4.4.2 内存局部性优化
-
-1. **桶内数组连续存储**：提高CPU缓存命中率
-2. **冗余存储MinUser**：减少指针跳转次数
-3. **层级结构紧凑**：最小化内存占用
-
-### 4.4.3 时间复杂度分析
-
-| 操作 | 时间复杂度  |
-|-----|-----------|
-| 添加用户 | O(log M + log K + K) | 
-| 更新用户 | O(log M + log K + K) | 
-| 获取排名 | O(log M + log K) | 
-| 获取前N名 | O(log M + N) | 
-| 获取周围玩家 | O(log M + log K + N) |
-
-（注：M为桶数量，K为桶大小（256），N为获取数量）
-
-### 4.4.4 性能对比
-
 与红黑树相比，跳表具有以下特点：
 - 实现更简单，代码量更少
-- 并发性能更好（更容易实现无锁版本）
-- 内存局部性略差（节点分布相对分散）
+- 并发性能更好
+- 内存局部性略差
 - 平均操作时间相似
 
-根据实测数据，跳表在GetTopN和GetAroundUser操作上表现较好，而红黑树在AddUser和RemoveUser操作上略占优势。
-
-## 4.6 应用场景
-
-双向跳表设计特别适合以下场景：
-- 需要高效的范围查询操作
-- 实现复杂度要求较低的场景
-- 并发性能要求较高的场景
-- 数据分布比较均匀的排行榜系统
-
-虽然在内存局部性上略逊于红黑树，但双向跳表凭借其简单的实现和良好的并发特性，仍然是排行榜系统的重要选择之一。
+根据实测数据，跳表和红黑树性能相近，但总体还是略慢点。
 
 ## 4.7 单向跳表
 
-与双向跳表相比，单向跳表节点仅包含`Next`指针，只能从前往后单向遍历。减少了内存占用。但是操作上复杂了许多。
+与双向跳表相比，单向跳表节点仅包含`Next`指针，只能从前往后单向遍历。虽然减少每个节点的内存占用，但是操作上反而复杂了许多，从结果来看，并不讨好。
 
-### 4.8.1 结构差异
-- **双向跳表节点**：在`SkipListLevel`结构体中同时包含`Next`和`Previous`指针，支持双向遍历
-- **单向跳表节点**：仅包含`Next`指针，只能从前往后单向遍历
-- **内存占用**：双向跳表每个层级额外存储`Previous`指针，内存占用相对较高；单向跳表内存占用较低
-
-### 4.8.2 遍历能力与操作复杂度
-- **双向跳表**：
-  - 支持从任意节点向前或向后遍历，操作直观简单
-  - `GetAroundUser`操作获取左侧用户时，可直接通过`Previous`指针高效向前遍历
-  - 代码实现简洁，可读性高，维护成本低
-
-- **单向跳表**：
-  - 仅支持正向遍历，获取左侧用户时需要复杂的"回溯爬塔"算法
-  - 通过`update`数组记录遍历路径，再逐层回溯查找目标节点
-  - 代码逻辑复杂，容易出错，维护成本高
-
-### 4.8.3 性能对比
-- **获取周围用户操作**：双向跳表性能优势明显，避免了单向跳表的复杂回溯过程
-- **内存局部性**：两者都通过冗余存储`MinUser`优化内存访问，但双向跳表的双向指针可能增加缓存失效概率
-- **整体性能**：在添加、删除和获取排名等基础操作上性能相近，但复杂查询操作双向跳表更高效
-
-### 4.8.4 适用场景
-- **双向跳表**：适合需要频繁进行范围查询、获取周围用户信息的场景，如游戏排行榜中的"查看周围玩家"功能
-- **单向跳表**：适合主要进行正向遍历（如获取前N名）、对内存占用有严格要求的场景
+**完整代码实现**：
 
 ```csharp
 public class BucketSkipListRankingList : IRankingList
@@ -3676,31 +3567,12 @@ public class BucketSkipListRankingList : IRankingList
         return _userList.Count;
     }
 
-    public void DebugPrint()
-    {
-#if DEBUG
-        _userList.DebugPrint();
-#endif
-    }
-
-    // 参考：https://cloud.tencent.com/developer/article/2512982（不正确，level不对）
-    // 参考：https://www.baeldung-cn.com/java-skiplist
     // 源码：https://github.com/tedcy/algorithm_test/blob/master/order_set/t_zset.h
     class SkipList
     {
         public SkipListNode Head;
         public int Count;
-#if DEBUG
-        private Random _random = new(2447);
-        private int _addCount = 0;
-        private int _addCompareCount = 0;
-        private int _removeCount = 0;
-        private int _removeCompareCount = 0;
-        private int _getRankCount = 0;
-        private int _getRankCompareCount = 0;
-#else
         private Random _random = new();
-#endif
         private int _level = 1;
 
         public SkipList(Span<User> initialUsers)
@@ -3774,9 +3646,6 @@ public class BucketSkipListRankingList : IRankingList
             {
                 _level--;
             }
-#if DEBUG
-            Check();
-#endif
         }
 
         private int RandomLevel()
@@ -3792,9 +3661,6 @@ public class BucketSkipListRankingList : IRankingList
 
         public int AddUser(User user)
         {
-#if DEBUG
-            _addCount++;
-#endif
             int rankCount = 0;
             int[] userCount = new int[MaxLevel];
             SkipListNode[] update = new SkipListNode[MaxLevel];
@@ -3806,9 +3672,6 @@ public class BucketSkipListRankingList : IRankingList
                 {
                     current = current.Level[i].Next!;
                     userCount[i] += current.Level[i].PreviousCount;
-#if DEBUG
-                    _addCompareCount++;
-#endif
                 }
 
                 rankCount += userCount[i];
@@ -3874,18 +3737,11 @@ public class BucketSkipListRankingList : IRankingList
             }
 
             Count++;
-#if DEBUG
-            Check();
-#endif
-
             return rankCount + userIndexInBucket;
         }
 
         public void RemoveUser(User user)
         {
-#if DEBUG
-            _removeCount++;
-#endif
             int[] previousCount = new int[_level];
             SkipListNode[] update = new SkipListNode[_level];
             SkipListNode? previous = null;
@@ -3899,9 +3755,6 @@ public class BucketSkipListRankingList : IRankingList
                     {
                         current = current.Level[i].Next!;
                         previousCount[i] += current.Level[i].PreviousCount;
-#if DEBUG
-                        _removeCompareCount++;
-#endif
                     }
 
                     update[i] = current;
@@ -3923,6 +3776,11 @@ public class BucketSkipListRankingList : IRankingList
                         && current.UserBucket.UserCount < UserBucket.CombineBucketSize
                         && previous.UserBucket.UserCount < UserBucket.CombineBucketSize)
             {
+                if(previous.UserBucket.UserCount == 0)
+                {
+                    // 头部空节点特判
+                    previous.MinUser = current.MinUser;
+                }
                 previous.UserBucket.Combine(current.UserBucket);
                 previous.MaxUser = previous.UserBucket.MaxUser;
                 needDelete = true;
@@ -3977,31 +3835,12 @@ public class BucketSkipListRankingList : IRankingList
                     update[i].Level[i].Next!.Level[i].PreviousCount--;
                 }
             }
-            //if (current == Head && userBucket.Empty && Head.Level[0].Next != null)
-            //{
-            //    // Head为空且有后继节点时，把后继节点的数据搬到Head节点，并删除后继节点
-            //    SkipListNode nextNode = Head.Level[0].Next!;
-            //    userBucket = nextNode.UserBucket;
-            //    Head.UserBucket = userBucket;
-            //    Head.MinUser = userBucket.MinUser;
-            //    Head.MaxUser = userBucket.MaxUser;
-            //    for (int i = 0; i < nextNode.Level.Length; i++)
-            //    {
-            //        Head.Level[i].Next = nextNode.Level[i].Next;
-            //    }
-            //}
 
             Count--;
-#if DEBUG
-            Check();
-#endif
         }
 
         public int GetUserRank(User user)
         {
-#if DEBUG
-            _getRankCount++;
-#endif
             int rankCount = 0;
             SkipListNode current = Head;
             for (int i = _level - 1; i >= 0; i--)
@@ -4011,9 +3850,6 @@ public class BucketSkipListRankingList : IRankingList
                 {
                     current = current.Level[i].Next!;
                     rankCount += current.Level[i].PreviousCount;
-#if DEBUG
-                    _getRankCompareCount++;
-#endif
                 }
             }
 
@@ -4155,78 +3991,6 @@ public class BucketSkipListRankingList : IRankingList
 
             return (result, rankCount);
         }
-#if DEBUG
-        public void DebugPrint()
-        {
-            int[] levelCount = new int[MaxLevel];
-            SkipListNode? current = Head;
-            while (current != null)
-            {
-                levelCount[current.Level.Length - 1]++;
-                current = current.Level[0].Next;
-            }
-
-            Console.WriteLine($"总用户数：{Count}");
-            for (int i = 0; i < MaxLevel; i++)
-            {
-                Console.Write($"L {i + 1}: {levelCount[i]}\t");
-            }
-
-            Console.WriteLine();
-            Console.WriteLine($"总节点数：{levelCount.Sum()}");
-            Console.WriteLine(
-                $"AddUser调用次数：{_addCount}，比较次数：{_addCompareCount}，平均比较次数：{(double)_addCompareCount / _addCount}");
-            Console.WriteLine(
-                $"RemoveUser调用次数：{_removeCount}，比较次数：{_removeCompareCount}，平均比较次数：{(double)_removeCompareCount / _removeCount}");
-            Console.WriteLine(
-                $"GetUserRank调用次数：{_getRankCount}，比较次数：{_getRankCompareCount}，平均比较次数：{(double)_getRankCompareCount / _getRankCount}");
-        }
-
-        private void Check()
-        {
-            SkipListNode[] update = new SkipListNode[MaxLevel];
-            for (int i = 0; i < MaxLevel; i++)
-            {
-                update[i] = Head;
-            }
-
-            int[] userCount = new int[MaxLevel];
-            for (int i = 0; i < _level; i++)
-            {
-                userCount[i] += Head.UserBucket.UserCount;
-            }
-
-            if (!Head.UserBucket.Empty)
-            {
-                Debug.Assert(Head.MinUser.CompareTo(Head.UserBucket.MinUser) == 0, "头节点最小用户错误");
-                Debug.Assert(Head.MaxUser.CompareTo(Head.UserBucket.MaxUser) == 0, "头节点最大用户错误");
-            }
-
-            SkipListNode? current = Head.Level[0].Next;
-            int nodeCount = 1;
-            while (current != null)
-            {
-                Debug.Assert(current.MinUser.CompareTo(current.UserBucket.MinUser) == 0, "节点最小用户错误");
-                Debug.Assert(current.MaxUser.CompareTo(current.UserBucket.MaxUser) == 0, "节点最大用户错误");
-                for (int i = 0; i < current.Level.Length; i++)
-                {
-                    Debug.Assert(current.Level[i].PreviousCount == userCount[i], "用户数量统计错误");
-                    userCount[i] = 0;
-
-                    Debug.Assert(update[i].Level[i].Next == current, "跳表连接错误");
-                    update[i] = current;
-                }
-
-                for (int i = 0; i < _level; i++)
-                {
-                    userCount[i] += current.UserBucket.UserCount;
-                }
-
-                current = current.Level[0].Next;
-                nodeCount++;
-            }
-        }
-#endif
     }
 
     class SkipListNode
@@ -4245,15 +4009,8 @@ public class BucketSkipListRankingList : IRankingList
         public User MinUser;
         public User MaxUser;
 
-#if DEBUG
-        public static int TotalNodeCount = 1;
-        public int Id;
-#endif
         public SkipListNode(UserBucket bucket, int level)
         {
-#if DEBUG
-            Id = TotalNodeCount++;
-#endif
             UserBucket = bucket;
             Level = new SkipListLevel[level];
             MinUser = bucket.MinUser;
@@ -4290,629 +4047,8 @@ public class BucketSkipListRankingList : IRankingList
 ## 5.3 测试数据
 
 测试数据采用幂律分布生成100万个用户，分数范围为0到1000000，越高的分数用户越少，更符合真实游戏场景中的玩家分数分布规律。用户分数分布图如下：
-![用户分数分布图](./PowerDistribution.png)
 
-测试以下几个操作，执行100万次操作：
-- **Add**：添加新用户到排行榜
-- **Update**：更新现有用户的分数
-- **GetRank**：查询指定用户的当前排名
-- **GetTopN**：获取排行榜前N名玩家
-- **GetAround**：获取指定玩家周围的排名情况
-- **混合测试（100万用户）**：模拟真实场景下的混合操作
-- **混合测试（1000万用户，执行1000万次操作）**：测试系统在大规模数据下的表现
-
-其中，用户分数更新采用在原分数基础上增加0-100分的方式，增加的分数同样符合幂律分布。混合测试的操作概率分布为：
-- Add: 10%
-- Update: 20%
-- GetRank: 30%
-- GetTopN: 20%
-- GetAround: 20%
-
-
-## 5.4 测试结果
-
-### 表格1：耗时对比
-
-| 实现 | Add | Update | GetRank | GetTopN | GetAround | 混合测试 <br />(100w用户) | 混合测试 <br />(1000w用户，1000w操作) |
-|------|---------|------------|---------|-------------|---------------|---------------------|----------------------|
-    
-    // 1. 从最高层开始遍历，定位目标桶
-    for (int i = _level - 1; i >= 0; i--)
-    {
-        while (current.Level[i].Next != null
-            && current.Level[i].Next!.MinUser.CompareTo(user) <= 0)
-        {
-            current = current.Level[i].Next!;
-            userCount[i] += current.Level[i].PreviousCount;
-        }
-        // 减少区间用户数量
-        if (current.Level[i].Next != null)
-        {
-            current.Level[i].Next!.Level[i].PreviousCount--;
-        }
-    }
-
-    UserBucket userBucket = current.UserBucket;
-    
-    // 2. 从桶中删除用户
-    int userIndexInBucket = userBucket.Remove(user);
-    bool needDelete = false;
-    
-    // 3. 判断桶状态
-    if (userBucket.Empty)
-    {
-        // 桶空了，需要删除节点
-        needDelete = true;
-    }
-    else if (current.UserBucket.UserCount < UserBucket.CombineBucketSize
-                && current.Level[0].Previous?.UserBucket.UserCount < UserBucket.CombineBucketSize)
-    {
-        // 桶太小，合并到前一个桶
-        current.Level[0].Previous!.UserBucket.Combine(current.UserBucket);
-        needDelete = true;
-    }
-    
-    // 4. 更新节点信息
-    if (!needDelete)
-    {
-        if (userIndexInBucket == 0)
-        {
-            // 更新节点的最小用户信息
-            current.MinUser = userBucket.MinUser;
-        }
-    }
-    else
-    {
-        // 5. 删除节点，更新跳表结构
-        if (current != Head)  // 头节点不删除
-        {
-            for (int i = 0; i < current.Level.Length; i++)
-            {
-                // 更新前一个节点的Next指针
-                current.Level[i].Previous!.Level[i].Next = current.Level[i].Next;
-                
-                // 更新后一个节点的Previous指针和计数
-                if (current.Level[i].Next != null)
-                {
-                    current.Level[i].Next!.Level[i].PreviousCount += current.Level[i].PreviousCount;
-                    current.Level[i].Next!.Level[i].Previous = current.Level[i].Previous;
-                }
-            }
-            
-            // 调整跳表层数
-            while (_level > 1 && Head.Level[_level - 1].Next == null)
-            {
-                _level--;
-            }
-        }
-    }
-    
-    Count--;
-}
-```
-
-**时间复杂度分析**：
-- 跳表遍历：O(log M)
-- 桶内操作：O(log K)
-- **总时间复杂度**：O(log M + log K)
-
-**关键设计点**：
-- 桶空时自动删除节点，保持跳表结构紧凑
-- 桶过小时自动合并，避免过多小桶影响性能
-- 头节点特殊处理，始终保留一个节点
-
-### 4.3.3 获取玩家排名 (GetUserRank)
-
-获取玩家排名是排行榜的核心操作之一，利用跳表的多层索引快速计算。
-
-**排名计算原理**：
-- 跳表按分数有序排列，头节点包含排名最高的用户
-- 遍历跳表时，累加经过的用户数量
-- 加上用户在桶内的索引，得到最终排名
-
-**代码实现**：
-
-```csharp
-/// <summary>
-/// 获取指定用户的排名
-/// </summary>
-/// <param name="user">要查询的用户</param>
-/// <returns>用户的排名（从0开始）</returns>
-public int GetUserRank(User user)
-{
-    int rankCount = 0;
-    BiSkipListNode current = Head;
-    
-    // 1. 从最高层开始遍历，累加经过的用户数量
-    for (int i = _level - 1; i >= 0; i--)
-    {
-        while (current.Level[i].Next != null
-            && current.Level[i].Next!.MinUser.CompareTo(user) <= 0)
-        {
-            current = current.Level[i].Next!;
-            rankCount += current.Level[i].PreviousCount;
-        }
-    }
-    
-    // 2. 在桶内精确定位用户位置
-    UserBucket userBucket = current.UserBucket;
-    int userIndexInBucket = userBucket.IndexOf(user);
-    Debug.Assert(userIndexInBucket >= 0, "用户不存在");
-    
-    // 3. 总排名 = 前面所有桶的用户数量 + 桶内排名
-    return rankCount + userIndexInBucket;
-}
-```
-
-**时间复杂度分析**：
-- 跳表遍历：O(log M)
-- 桶内二分查找：O(log K)
-- **总时间复杂度**：O(log M + log K)
-
-### 4.3.4 获取前N名玩家 (GetTopN)
-
-获取前N名玩家需要按顺序遍历桶，利用数组批量复制优化性能。
-
-**算法流程**：
-```
-1. 从跳表头部开始遍历
-2. 依次从每个桶中获取用户数据
-3. 使用Array.Copy批量复制桶内用户到结果数组
-4. 直到获取足够数量的用户或遍历完所有桶
-```
-
-**代码实现**：
-
-```csharp
-/// <summary>
-/// 获取排行榜前N名用户
-/// </summary>
-/// <param name="topN">要获取的用户数量</param>
-/// <returns>前N名用户的数组</returns>
-public User[] GetTopN(int topN)
-{
-    // 处理边界情况
-    topN = Math.Min(topN, Count);
-    User[] result = new User[topN];
-    
-    BiSkipListNode? current = Head;
-    int rankCount = 0;
-    
-    // 按顺序遍历桶，获取用户数据
-    while (rankCount < topN)
-    {
-        Debug.Assert(current != null);
-        
-        // 计算当前桶可提供的用户数量
-        int n = Math.Min(current.UserBucket.UserCount, topN - rankCount);
-        
-        // 批量复制用户数据
-        Array.Copy(current.UserBucket.Users, 0, result, rankCount, n);
-        rankCount += n;
-        
-        // 移动到下一个桶
-        current = current.Level[0].Next;
-    }
-    
-    return result;
-}
-```
-
-**时间复杂度分析**：
-- 桶遍历：O(N/K)，K为桶大小
-- 批量复制：O(N)
-- **总时间复杂度**：O(N)
-
-**设计亮点**：
-- 使用Array.Copy批量复制，利用底层SIMD指令优化性能
-- 自动处理topN超过总用户数的边界情况
-
-### 4.3.5 获取周围玩家 (GetAroundUser)
-
-获取周围玩家操作充分利用了双向跳表的双向遍历特性，高效获取目标玩家附近的排名信息。
-
-**算法流程**：
-```
-1. 定位目标用户所在的桶和排名
-2. 计算需要获取的左右用户数量，处理边界情况
-3. 从目标桶开始，向左右扩展获取用户：
-   - 先获取目标桶内的用户
-   - 向左遍历桶，获取左边缺少的用户
-   - 向右遍历桶，获取右边缺少的用户
-4. 返回包含周围用户的数组和目标用户的排名
-```
-
-**代码实现**：
-
-```csharp
-/// <summary>
-/// 获取指定用户周围的用户列表
-/// </summary>
-/// <param name="user">中心用户</param>
-/// <param name="aroundN">周围的用户数量（左边和右边各aroundN个）</param>
-/// <returns>包含周围用户的数组和中心用户的排名</returns>
-public (User[], int) GetAroundUser(User user, int aroundN)
-{
-    // 1. 定位目标用户
-    int rankCount = 0;
-    BiSkipListNode current = Head;
-    for (int i = _level - 1; i >= 0; i--)
-    {
-        while (current.Level[i].Next != null
-            && current.Level[i].Next!.MinUser.CompareTo(user) <= 0)
-        {
-            current = current.Level[i].Next!;
-            rankCount += current.Level[i].PreviousCount;
-        }
-    }
-    
-    UserBucket userBucket = current.UserBucket;
-    int userIndexInBucket = userBucket.IndexOf(user);
-    Debug.Assert(userIndexInBucket >= 0, "用户不存在");
-    rankCount += userIndexInBucket;
-
-    // 2. 处理边界情况
-    int offset = 0; // 结果数组内的偏移，处理排名过靠前的情况
-    int leftNum = aroundN, rightNum = aroundN;
-    
-    if (rankCount < aroundN)
-    {
-        // 用户排名过靠前，无法获取足够的左边用户
-        leftNum = rankCount;
-        offset = rankCount - aroundN;
-    }
-    if (rankCount + aroundN + 1 > Count)
-    {
-        // 用户排名过靠后，无法获取足够的右边用户
-        rightNum = Count - rankCount - 1;
-    }
-    
-    User[] result = new User[leftNum + rightNum + 1];
-
-    // 3. 获取目标桶内的用户
-    int leftCount = Math.Min(userIndexInBucket, leftNum);
-    int rightCount = Math.Min(userBucket.UserCount - userIndexInBucket - 1, rightNum);
-    
-    // 复制目标用户周围的桶内用户
-    Array.Copy(userBucket.Users, userIndexInBucket - leftCount, result, aroundN - leftCount + offset,
-        leftCount + rightCount + 1);
-
-    // 4. 获取左边缺少的用户
-    BiSkipListNode tNode = current.Level[0].Previous!;
-    while (leftCount < leftNum)
-    {
-        userBucket = tNode!.UserBucket!;
-        int n = Math.Min(userBucket.UserCount, leftNum - leftCount);
-        
-        // 从桶末尾开始复制用户
-        Array.Copy(userBucket.Users, userBucket.UserCount - n, result, aroundN - leftCount - n + offset, n);
-        leftCount += n;
-        
-        tNode = tNode.Level[0].Previous;
-    }
-    
-    // 5. 获取右边缺少的用户
-    tNode = current.Level[0].Next!;
-    while (rightCount < rightNum)
-    {
-        userBucket = tNode!.UserBucket!;
-        int n = Math.Min(userBucket.UserCount, rightNum - rightCount);
-        
-        // 从桶开头开始复制用户
-        Array.Copy(userBucket.Users, 0, result, aroundN + rightCount + 1 + offset, n);
-        rightCount += n;
-        
-        tNode = tNode.Level[0].Next;
-    }
-    
-    return (result, rankCount);
-}
-```
-
-**时间复杂度分析**：
-- 定位目标用户：O(log M + log K)
-- 左右遍历桶：O((aroundN)/K)
-- **总时间复杂度**：O(log M + log K + aroundN)
-
-**设计亮点**：
-- 充分利用双向跳表的前后遍历能力
-- 批量复制优化性能
-- 处理各种边界情况，确保结果的正确性
-
-## 4.4 辅助功能实现
-
-### 4.4.1 随机层数生成
-
-随机层数生成是跳表的关键技术之一，使用几何分布确保跳表的平衡结构。
-
-```csharp
-/// <summary>
-/// 随机生成节点的层数
-/// </summary>
-/// <returns>节点的随机层数</returns>
-private int RandomLevel()
-{
-    int level = 1;
-    
-    // 使用几何分布生成层数，概率为P=0.25
-    while (_random.NextDouble() < P && level < MaxLevel)
-    {
-        level++;
-    }
-    
-    return level;
-}
-```
-
-**设计亮点**：
-- 采用几何分布，确保高层节点数量呈指数级减少
-- 最大层数限制，避免极端情况下的性能问题
-
-### 4.4.2 桶构建
-
-将初始用户数据构建为多个用户桶，为跳表初始化做准备。
-
-```csharp
-/// <summary>
-/// 将初始用户数据构建为多个用户桶
-/// </summary>
-/// <param name="users">排序后的用户数据</param>
-/// <returns>构建好的用户桶数组</returns>
-private static UserBucket[] BuildBucket(Span<User> users)
-{
-    // 计算桶数量
-    int bucketNum = (int)Math.Ceiling((double)users.Length / UserBucket.InitialBucketSize);
-    UserBucket[] buckets = new UserBucket[bucketNum];
-    
-    // 分配用户到各个桶
-    for (int i = 0; i < bucketNum; i++)
-    {
-        int l = i * UserBucket.InitialBucketSize;
-        int r = Math.Min((i + 1) * UserBucket.InitialBucketSize, users.Length);
-        int userCount = r - l;
-        
-        // 创建桶并复制用户数据
-        User[] bucketUsers = new User[UserBucket.BucketSize];
-        users.Slice(l, userCount).CopyTo(bucketUsers);
-        buckets[i] = new UserBucket(bucketUsers, userCount);
-    }
-    
-    return buckets;
-}
-```
-
-### 4.4.3 跳表构建
-
-根据用户桶数组构建完整的跳表结构，包括各层索引的建立。
-
-```csharp
-/// <summary>
-/// 根据用户桶构建跳表结构
-/// </summary>
-/// <param name="buckets">用户桶数组</param>
-private void BuildSkipList(Span<UserBucket> buckets)
-{
-    int[] userCount = new int[MaxLevel];
-    BiSkipListNode[] currentLevelNodes = new BiSkipListNode[MaxLevel];
-    
-    // 初始化各层的当前节点和用户计数
-    for (int i = 0; i < MaxLevel; i++)
-    {
-        userCount[i] = Head.UserBucket.UserCount;
-        currentLevelNodes[i] = Head;
-    }
-    
-    // 为每个桶创建跳表节点
-    foreach (var bucket in buckets)
-    {
-        // 随机生成节点层数
-        int randomLevel = RandomLevel();
-        BiSkipListNode newNode = new(bucket, randomLevel);
-        
-        // 更新各层的连接关系
-        for (int i = 0; i < randomLevel; i++)
-        {
-            currentLevelNodes[i].Level[i].Next = newNode;
-            newNode.Level[i].Previous = currentLevelNodes[i];
-            newNode.Level[i].PreviousCount = userCount[i];
-            userCount[i] = 0;
-            currentLevelNodes[i] = newNode;
-        }
-        
-        // 累加各层的用户计数
-        for (int i = 0; i < MaxLevel; i++)
-        {
-            userCount[i] += bucket.UserCount;
-        }
-    }
-    
-    // 调整跳表的实际层数
-    _level = MaxLevel;
-    while (_level > 1 && Head.Level[_level - 1].Next == null)
-    {
-        _level--;
-    }
-}
-```
-
-## 4.5 排行榜实现
-
-排行榜类整合了跳表和用户映射，提供完整的排行榜功能。
-
-```csharp
-public class BucketBiSkipListRankingList : IRankingList
-{
-    private BiSkipList _userList;
-    private Dictionary<int, User> _userMap;
-    
-    /// <summary>
-    /// 构造函数，从初始用户数据构建排行榜
-    /// </summary>
-    /// <param name="users">初始用户数据</param>
-    public BucketBiSkipListRankingList(Span<User> users)
-    {
-        users.Sort();
-        _userList = new BiSkipList(users);
-        
-        // 构建用户ID到用户对象的映射
-        _userMap = new(users.Length);
-        foreach (ref readonly User u in users)
-        {
-            _userMap[u.Id] = u;
-        }
-    }
-    
-    /// <summary>
-    /// 构造函数，从用户列表构建排行榜
-    /// </summary>
-    /// <param name="users">用户列表</param>
-    public BucketBiSkipListRankingList(List<User> users) :
-        this(CollectionsMarshal.AsSpan(users))
-    {
-    }
-    
-    /// <summary>
-    /// 添加玩家到排行榜
-    /// </summary>
-    /// <param name="user">要添加的玩家</param>
-    /// <returns>玩家的排名</returns>
-    public int AddUser(User user)
-    {
-        Debug.Assert(!_userMap.ContainsKey(user.Id));
-        _userMap.Add(user.Id, user);
-        int rankCount = _userList.AddUser(user);
-        
-        return rankCount;
-    }
-    
-    /// <summary>
-    /// 更新玩家分数
-    /// </summary>
-    /// <param name="newUser">包含新分数的玩家信息</param>
-    /// <returns>玩家的新排名</returns>
-    public int UpdateUser(User newUser)
-    {
-        User oldUser = _userMap[newUser.Id];
-        _userList.RemoveUser(oldUser);
-        int rankCount = _userList.AddUser(newUser);
-        _userMap[newUser.Id] = newUser;
-        return rankCount;
-    }
-    
-    /// <summary>
-    /// 获取玩家的当前排名
-    /// </summary>
-    /// <param name="userId">玩家ID</param>
-    /// <returns>玩家排名</returns>
-    public int GetUserRank(int userId)
-    {
-        Debug.Assert(_userMap.ContainsKey(userId));
-        User user = _userMap[userId];
-        return _userList.GetUserRank(user);
-    }
-    
-    /// <summary>
-    /// 获取排行榜前N名玩家
-    /// </summary>
-    /// <param name="topN">要获取的玩家数量</param>
-    /// <returns>按排名排序的玩家数组</returns>
-    public User[] GetTopN(int topN)
-    {
-        return _userList.GetTopN(topN);
-    }
-    
-    /// <summary>
-    /// 获取目标玩家周围的排名
-    /// </summary>
-    /// <param name="userId">目标玩家ID</param>
-    /// <param name="aroundN">左右各获取的玩家数量</param>
-    /// <returns>玩家数组和目标玩家的排名</returns>
-    public (User[], int) GetAroundUser(int userId, int aroundN)
-    {
-        Debug.Assert(_userMap.ContainsKey(userId));
-        User user = _userMap[userId];
-        return _userList.GetAroundUser(user, aroundN);
-    }
-    
-    /// <summary>
-    /// 获取排行榜中的玩家总数
-    /// </summary>
-    /// <returns>玩家数量</returns>
-    public int GetRankingCount()
-    {
-        return _userList.Count;
-    }
-}
-```
-
-## 4.6 设计亮点与优化
-
-### 4.6.1 双向遍历支持
-
-双向跳表支持从任意节点向前或向后遍历，特别适合获取周围玩家和范围查询的场景，避免了单向跳表需要重新遍历的性能开销。
-
-### 4.6.2 内存局部性优化
-
-- 桶内采用连续数组存储用户，提高缓存命中率
-- 节点冗余存储最小用户信息，减少指针跳转
-- 使用Array.Copy批量复制，利用SIMD指令优化性能
-
-### 4.6.3 动态调整与自适应
-
-- 跳表层数动态调整，适应数据量变化
-- 桶自动分裂和合并，保持桶大小稳定
-- 随机层数生成，维持跳表的平衡结构
-
-### 4.6.4 边界情况处理
-
-- 空排行榜的初始化处理
-- topN超过总用户数的情况
-- 用户排名过前或过后的边界处理
-- 桶空和桶过小的特殊情况处理
-
-## 4.7 性能特点
-
-分桶+双向跳表方案的主要性能特点：
-
-| 操作 | 时间复杂度 | 实际表现（百万级用户） |
-|------|-----------|----------------------|
-| 添加用户 | O(log M + log K + K) | 约287ms/百万次 |
-| 更新用户 | O(log M + log K + K) | 约728ms/百万次 |
-| 获取排名 | O(log M + log K) | 约40ms/百万次 |
-| 获取前N名 | O(N) | 约344ms/百万次 |
-| 获取周围玩家 | O(log M + log K + aroundN) | 约521ms/百万次 |
-
-（注：M为桶数量，K为桶大小，实际表现基于测试环境）
-
-与分桶+红黑树方案相比，跳表方案在获取排名操作上略占优势，但在其他操作上性能相近。跳表的实现相对简单，代码可读性更高，适合对代码维护性要求较高的场景。
-
-# 五、性能测试
-
-## 5.1 测试环境
-
-- **CPU**: AMD Ryzen 9 9700X
-- **内存**: 64GB DDR5
-- **操作系统**: Windows 11
-- **运行时**: .NET 10.0
-- **测试数据量**: 10万用户、10万次操作（混合测试为100万用户、100万次操作）
-
-## 5.2 主要实现版本
-
-| 数据结构 | 实现方案 |
-|---------|------|
-|  有序列表 | 使用`List<User>`实现，增删改查使用二分查找 |
-| 分桶 + 列表 | 使用`List<UserBucket>`实现列表管理桶，每个桶内使用`List<User>`实现用户列表。增删改查以以桶的最大值来判断是否存在桶内，桶内采用二分查找 |
-| 分桶 + 链表 | 使用`LinkedList<UserBucket>`实现列表管理桶 |
-| 分桶 + 双向跳表 | 与红黑树方案对比的备选方案 |
-| 分桶 + 单向跳表 | 简化版的跳表实现 |
-| 纯红黑树 | 无分桶的红黑树方案 |
-| 分桶 + 红黑树 | 本文重点介绍的高性能方案 |
-
-
-## 5.3 测试数据
-
-测试数据采用幂律分布生成100万个用户，分数范围为0到1000000，越高的分数用户越少，更符合真实游戏场景中的玩家分数分布规律。用户分数分布图如下：
-![用户分数分布图](./PowerDistribution.png)
+![用户分数分布图](./score_distribution.png)
 
 测试以下几个操作，执行100万次操作：
 - **Add**：添加新用户到排行榜
@@ -4938,7 +4074,7 @@ public class BucketBiSkipListRankingList : IRankingList
 | 实现 | Add | Update | GetRank | GetTopN | GetAround | 混合测试 <br />(100w用户) | 混合测试 <br />(1000w用户，1000w操作) |
 |------|---------|------------|---------|-------------|---------------|---------------------|----------------------|
 | **有序数组** | 40474 ms <br />(+20341.41%↑) | 455636 ms <br />(+75720.63%↑) | 59 ms <br />(+22.92%↑) | 319 ms <br />(+1.59%↑) | 438 ms <br />(+6.05%↑) | 97719 ms <br />(+23390.14%↑) | - |
-| **分桶** | 23620 ms <br />(+11829.29%↑) | 14809 ms <br />(+2364.06%↑) | 43 ms <br />(-10.42%↓) | 7572 ms <br />(+2311.46%↑) | 7627 ms <br />(+1746.73%↑) | 8488 ms <br />(+1940.38%↑) | - |
+| **分桶 + 列表** | 23620 ms <br />(+11829.29%↑) | 14809 ms <br />(+2364.06%↑) | 43 ms <br />(-10.42%↓) | 7572 ms <br />(+2311.46%↑) | 7627 ms <br />(+1746.73%↑) | 8488 ms <br />(+1940.38%↑) | - |
 | **分桶 + 链表** | 56436 ms <br />(+28403.03%↑) | 22588 ms <br />(+3658.40%↑) | 41 ms <br />(-14.58%↓) | 12714 ms <br />(+3949.04%↑) | 12147 ms <br />(+2841.16%↑) | 13152 ms <br />(+3061.54%↑) | - |
 | **分桶 + 双向跳表** | 287 ms <br />(+44.95%↑) | 728 ms <br />(+21.13%↑) | **40 ms <br />(-16.67%↓)** | 344 ms <br />(+9.55%↑) | 521 ms <br />(+26.15%↑) | 514 ms <br />(+23.56%↑) | 7380 ms <br />(+5.64%↑) |
 | **分桶 + 单向跳表** | 288 ms <br />(+45.45%↑) | 760 ms <br />(+26.46%↑) | **40 ms <br />(-16.67%↓)** | 416 ms <br />(+32.48%↑) | 620 ms <br />(+50.12%↑) | 538 ms <br />(+29.33%↑) | 8293 ms <br />(+18.71%↑) |
@@ -4952,7 +4088,7 @@ public class BucketBiSkipListRankingList : IRankingList
 | 实现 | Add | Update | GetRank | GetTopN | GetAround | 混合测试 (100w用户) | 混合测试 (1000w用户) |
 |------|---------|------------|---------|-------------|---------------|---------------------|----------------------|
 | **有序数组** | **113.29 MB <br />(-22.97%↓)** | **55.17 MB <br />(-23.56%↓)** | **55.18 MB <br />(-23.54%↓)** | **55.18 MB <br />(-23.54%↓)** | **55.18 MB <br />(-23.54%↓)** | **70.43 MB <br />(-6.55%↓)** | - |
-| **分桶** | 144.57 MB <br />(-1.70%↓) | 70.92 MB <br />(-1.73%↓) | 70.91 MB <br />(-1.74%↓) | 70.92 MB <br />(-1.72%↓) | 70.92 MB <br />(-1.72%↓) | 74.05 MB <br />(-1.75%↓) | - |
+| **分桶 + 列表** | 144.57 MB <br />(-1.70%↓) | 70.92 MB <br />(-1.73%↓) | 70.91 MB <br />(-1.74%↓) | 70.92 MB <br />(-1.72%↓) | 70.92 MB <br />(-1.72%↓) | 74.05 MB <br />(-1.75%↓) | - |
 | **分桶 + 链表** | 145.15 MB <br />(-1.30%↓) | 71.22 MB <br />(-1.32%↓) | 71.21 MB <br />(-1.32%↓) | 71.22 MB <br />(-1.31%↓) | 71.22 MB <br />(-1.31%↓) | 74.32 MB <br />(-1.39%↓) | - |
 | **分桶 + 双向跳表** | 146.00 MB <br />(-0.73%↓) | 71.64 MB <br />(-0.74%↓) | 71.63 MB <br />(-0.75%↓) | 71.63 MB <br />(-0.75%↓) | 71.63 MB <br />(-0.75%↓) | 74.78 MB <br />(-0.78%↓) | **1038.63 MB** (-0.57%↓) |
 | **分桶 + 单向跳表** | 146.08 MB <br />(-0.67%↓) | 71.68 MB <br />(-0.68%↓) | 71.67 MB <br />(-0.69%↓) | 71.67 MB <br />(-0.69%↓) | 71.67 MB <br />(-0.69%↓) | 74.83 MB <br />(-0.72%↓) | **1039.07 MB <br />(-0.53%↓)** |
@@ -4971,14 +4107,7 @@ public class BucketBiSkipListRankingList : IRankingList
 通过表格一和表格二，我们可以看到分桶以后虽然增加了内存占用，但是耗时大幅度减少。
 原因在于，分桶以后，每个桶的用户数量更少，所以定位桶的时间更短。同时，每个桶的有序数组更小，所以批量复制的时间更短。
 
-## 5.5.2 分桶和链表对比
-
-以1万用户，100万操作的测试案例为例：
-
-| 实现 | Add | Update | GetRank | GetTopN | GetAround | 混合测试 |
-|------|---------|------------|---------|-------------|---------------|----------|
-| BucketListRankingList | 13058 ms | 1707 ms | 51 ms | 787 ms | 988 ms | 1688 ms |
-| BucketLinkedListRankingList | 39800 ms | 4135 ms | 49 ms | 2084 ms | 1297 ms | 2377 ms |
+## 5.5.2 分桶 + 列表 和 分桶 + 链表对比
 
 List<UserBucket> 的 连续内存结构 带来更高的 CPU 缓存命中率，所以耗时更短。
 
@@ -4995,12 +4124,17 @@ BucketSkipListRankingList3的L1数据缓冲命中率较低，可能是因为跳�
 
 ## 6.1 设计要点回顾
 
-本项目设计了一个基于**分桶 + 红黑树**混合数据结构的高性能游戏全服排行榜系统，核心设计要点包括：
+本项目设计实现了一个基于**分桶 + 红黑树**混合数据结构的高性能游戏全服排行榜系统，其核心设计理念和技术要点如下：
 
-1. **分桶策略**：将玩家按分数范围划分为固定大小的桶（默认256个玩家/桶），桶内采用有序数组存储，充分利用连续内存的缓存友好特性
-2. **红黑树管理**：使用红黑树高效管理所有桶，利用区间信息快速定位目标桶，时间复杂度稳定在O(log M)
-3. **桶的动态调整**：实现了桶的自动分裂和合并机制，当桶满时自动分裂，当桶内玩家过少时自动合并，保持系统效率
-4. **区间与计数缓存**：树节点缓存子树的区间信息和用户计数，加速排名计算和范围查询
+1. **分桶**：采用按分数范围划分的分桶机制，每个桶默认容纳256个玩家，桶内使用有序数组存储玩家数据。该设计充分利用了连续内存的缓存友好特性，显著提升了数据访问效率（测试显示分桶+列表的性能优于分桶+链表）。
+
+2. **红黑树**：使用红黑树作为桶的全局管理结构，通过树节点存储的区间信息实现目标桶的快速定位，时间复杂度稳定在O(log M)（M为桶数量）。相比双向跳表实现，红黑树具有更好的内存局部性和缓存命中率（L1数据缓存命中率达99.1%）。
+
+3. **动态桶调整**：实现了桶的分裂与合并功能。当桶内玩家数量达到阈值时分裂，保证单个桶的高效管理；当桶内玩家数量过少时自动合并，避免资源浪费，始终保持系统在高效状态运行。
+
+4. **缓存区间信息**：在红黑树节点中缓存子树的分数区间信息和用户计数，有效减少了排名计算和范围查询过程中的遍历操作，大幅提升了相关操作的响应速度。
+
+整体设计通过分桶思想将大规模数据分解为可高效管理的小批量数据，结合红黑树的有序性和动态调整能力，在保证时间效率的同时优化了空间利用，实现了百万级用户场景下的高性能排行榜系统。
 
 ## 6.2 性能表现
 
@@ -5020,24 +4154,13 @@ BucketSkipListRankingList3的L1数据缓冲命中率较低，可能是因为跳�
 
 虽然当前方案已经表现出色，但仍有一些可以进一步优化的方向：
 
-1. **自适应桶大小**：根据实际负载动态调整桶的大小，在不同压力下保持最优性能
-2. **并发支持**：当前实现为单线程版本，可以考虑添加并发控制机制，支持多线程操作
-3. **持久化方案**：实现排行榜数据的持久化存储和恢复机制，提高系统可靠性
-4. **分布式扩展**：设计分布式排行榜架构，支持超大规模用户（亿级）的场景
-5. **更多排序维度**：支持多维度排序（如分数+等级+活跃度等复合排序规则）
-
-## 6.4 适用场景
-
-本实现特别适合以下场景：
-- 游戏全服排行榜（战力榜、等级榜、竞技场榜等）
-- 社交应用排行榜（影响力榜、贡献榜等）
-- 需要高并发、低延迟的实时排名系统
-- 数据规模在百万到千万级别的应用
-
-通过分桶和红黑树的巧妙结合，本方案在内存使用效率、操作延迟和系统稳定性之间取得了良好的平衡，为高性能排行榜系统提供了一个可靠的解决方案。
+**并发支持**：当前实现为单线程版本，可以考虑添加并发控制机制，支持多线程操作
 
 # 七、参考资料
 
 - [一文带你彻底读懂红黑树 - 知乎](https://zhuanlan.zhihu.com/p/91960960)
 - [红黑树详解 - 博客园](https://www.cnblogs.com/crazymakercircle/p/16320430.html)
 - [B+树详解 - 维基百科](https://zh.wikipedia.org/wiki/B%2B%E6%A0%91)
+- [跳表详解 - 维基百科](https://zh.wikipedia.org/wiki/跳表)
+- [Java TreeMap 源码](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/TreeMap.java)
+- [C++ 跳表实现](https://github.com/tedcy/algorithm_test/blob/master/order_set/t_zset.h)

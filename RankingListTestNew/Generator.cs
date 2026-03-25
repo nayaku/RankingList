@@ -96,7 +96,7 @@ namespace RankingListTestNew
                     case TestOperationType.UpdateUser:
                         operation.UserId = random.Next(1, _currentUserId);
                         int score = _userIdToScore[operation.UserId];
-                        operation.ScoreOrN = score + GeneratePowerLawScore(random, 100);
+                        operation.ScoreOrN = GeneratePowerLawScore(random, 100);
                         break;
                     case TestOperationType.GetUserRank:
                         operation.UserId = random.Next(1, _currentUserId + 1);
@@ -154,9 +154,10 @@ namespace RankingListTestNew
         // 生成幂律分布的分数
         private static int GeneratePowerLawScore(Random random, int maxScore = 1000000)
         {
-            // 简单的幂律分布生成
-            double uniform = random.NextDouble();
-            return (int)(Math.Pow(uniform, 2) * maxScore);
+            //// 简单的幂律分布生成
+            //double uniform = random.NextDouble();
+            //return (int)(Math.Pow(uniform, 2) * maxScore);
+            return random.Next(1, 1000000);
         }
     }
 }

@@ -2,7 +2,7 @@
   "profiles": {
     "RankingListTestNew": {
       "commandName": "Project",
-      "commandLineArgs": "generate t10w_100w 100000 1000000\r\n\r\n",
+      "commandLineArgs": "test BucketSkipListRankingList --base ListRankingList",
       "remoteDebugEnabled": false
     },
     "WSL": {

@@ -319,7 +319,7 @@ namespace RankingListNew
                 {
                     if(previous.UserBucket.UserCount == 0)
                     {
-                        // 前方是空桶
+                        // 头部空节点特判
                         previous.MinUser = current.MinUser;
                     }
                     previous.UserBucket.Combine(current.UserBucket);

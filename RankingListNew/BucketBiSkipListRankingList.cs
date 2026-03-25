@@ -297,7 +297,7 @@ namespace RankingListNew
                 {
                     if (current.Level[0].Previous!.UserBucket.UserCount == 0)
                     {
-                        // 空节点
+                        // 头部空节点特判
                         current.Level[0].Previous!.MinUser = userBucket.MinUser;
                     }
                     current.Level[0].Previous!.UserBucket.Combine(current.UserBucket);
