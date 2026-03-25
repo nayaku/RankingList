@@ -1,0 +1,38 @@
+digraph Tree {
+    // 节点样式设置
+    node [
+        shape=rectangle,
+        style="filled,rounded",
+        fillcolor=lightblue,
+        fontname="Microsoft YaHei",
+        fontsize=12
+    ];
+    
+    // 边样式设置
+    edge [
+        color=gray50,
+        penwidth=2
+    ];
+    
+    // 定义节点
+    root [label="根节点\nLeftUser=A, RightUser=H\nCount=8"];
+    left_subtree [label="左子树\nLeftUser=A, RightUser=D\nCount=4"];
+    right_subtree [label="右子树\nLeftUser=E, RightUser=H\nCount=4"];
+    bucket1 [label="桶1\n[A,B]\nCount=2"];
+    bucket2 [label="桶2\n[C,D]\nCount=2"];
+    bucket3 [label="桶3\n[E,F]\nCount=2"];
+    bucket4 [label="桶4\n[G,H]\nCount=2"];
+    
+    // 定义边关系
+    root -> left_subtree;
+    root -> right_subtree;
+    left_subtree -> bucket1;
+    left_subtree -> bucket2;
+    right_subtree -> bucket3;
+    right_subtree -> bucket4;
+    
+    // 布局设置
+    rankdir=TB;
+    nodesep=0.5;
+    ranksep=1.0;
+}

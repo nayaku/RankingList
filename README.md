@@ -271,7 +271,7 @@ public readonly struct User : IComparable<User>
 }
 ```
 
-用户数据结构采用结构体（struct）而非类（class），避免频繁的堆内存分配。结构体数组在内存中连续存储，提高缓存命中率；玩家信息不会改变，使用值类型更安全。
+用户数据结构采用结构体（struct）而非类（class），从而避免频繁的堆内存分配。结构体数组在内存中连续存储，提高缓存命中率；玩家信息不会改变，使用值类型更安全。
 
 ## 2.3 用户桶
 
@@ -330,12 +330,18 @@ class UserBucket
 }
 ```
 
-根据性能测试结果，将每个桶的最大玩家数量设置为256时，系统整体操作效率达到最优。
+根据性能测试结果，将每个桶的最大玩家数量设置为256时，整体效率达到最优。
+
+桶内存储用的是 `User[]` 数组，而不是 `List<User>`。原因为：
+
+- 1. 内存布局最优：List 内部虽然也是数组，但多了一层封装。对于固定大小的桶来说，数组更直接。少一次间接访问，性能更好。
+- 2. 桶大小固定：桶的大小是固定的，不需要动态扩容。List 的动态扩容能力在这里用不上，反而增加了每次判断`EnsureCapacity`的开销。
+- 3. 减少对象分配：数组直接分配，List 还要分配一个包装对象。在高频操作场景下，少一个对象就少一次 GC 压力。
 
 
 ### 2.3.2 核心操作详解
 
-#### 插入玩家 (Insert)
+#### 插入玩家
 
 插入操作需要在保持数组有序性的前提下添加新玩家：
 
@@ -367,7 +373,7 @@ public int Insert(User user)
 }
 ```
 
-#### 删除玩家 (Remove)
+#### 删除玩家
 
 删除操作需要从数组中移除指定玩家，并保持剩余玩家的有序性和数组的连续性：
 
@@ -395,7 +401,7 @@ public int Remove(User user)
 }
 ```
 
-#### 分裂桶 (Split)
+#### 分裂桶
 
 当桶满时，需要分裂为两个桶。分裂操作与插入操作合并进行，提升性能：
 
@@ -453,7 +459,7 @@ public UserBucket Split(User user, out int userIndex)
     return newBucket;
 }
 ```
-#### 合并桶 (Combine)
+#### 合并桶
 
 当桶内玩家过少时，需要与相邻桶合并：
 
@@ -470,7 +476,7 @@ public void Combine(UserBucket other)
 }
 ```
 
-#### 完整代码：
+### 2.3.3 完整代码：
 
 ```csharp
 /// <summary>
@@ -638,21 +644,7 @@ internal class UserBucket
 }
 ```
 
-### 2.3.3 为什么选择Array而不是List？
 
-桶内存储用的是 `User[]` 数组，而不是 `List<User>`。原因有几个：
-
-**1. 内存布局**
-
-List 内部虽然也是数组，但多了一层封装。对于固定大小的桶来说，数组更直接。少一次间接访问，性能更好。
-
-**2. 桶大小固定**
-
-桶的大小是固定的，不需要动态扩容。List 的动态扩容能力在这里用不上，反而增加了每次判断`EnsureCapacity`的开销。
-
-**3. 减少对象分配**
-
-数组直接分配，List 还要分配一个包装对象。在高频操作场景下，少一个对象就少一次 GC 压力。
 
 # 三、红黑树设计
 
@@ -736,28 +728,39 @@ class TreeNode
 }
 ```
 
-### 3.1.2 区间信息的作用
-
 区间信息（LeftUser/RightUser）用于快速定位目标桶：
 
-```
-假设树结构如下：
-                根节点
-            LeftUser=A, RightUser=H
-            Count=8
-              /              \
-         左子树              右子树
-    LeftUser=A,RightUser=D  LeftUser=E,RightUser=H
-    Count=4                 Count=4
-       /    \                  /    \
-    桶1     桶2              桶3     桶4
-   [A,B]   [C,D]            [E,F]   [G,H]
 
-查找用户 C：
-1. 根节点：C < E（右子树最小值），进入左子树
-2. 左子树：C >= C（右子树最小值），进入右子树
-3. 到达桶2，在桶内查找 C
-```
+假设树结构如图所示：
+
+![](tree_structure.png)
+
+> 其中每个节点的数值为A=60，B=70，C=80，D=90，E=100，F=110，G=120，H=130（这里采用升序排序，有助于理解）
+
+查找用户 D：
+1. 根节点：D < E（右子树最小值），进入左子树
+2. 左子树：D > C（右子树最小值），进入右子树，累加左子树计数2
+3. 到达桶2，在桶内查找 D，找到后返回桶内索引（1）
+4. 返回总排名3（2+1）
+
+
+
+添加用户 I（分数=85）：
+
+1. 从根节点开始：I(85) < E(100)（右子树最小值），进入左子树
+2. 左子树：I(85) > C(80)（右子树最小值），进入右子树，累加左子树计数2
+3. 到达桶2，在桶内查找插入位置，I(85) 应插入到C(80) 和 D(90) 之间，桶内索引为1
+4. 桶未满，直接插入，更新桶内数组为 [C(80), I(85), D(90)]
+5. 更新桶2的 RightUser 为 D(90)（不变），无需向上更新
+6. 返回总排名3（2+1）
+
+如果桶已满，则需要分裂桶：
+- 创建两个新子节点，将桶分裂为两个
+- 根据 I 的位置决定放入左桶还是右桶
+- 调整红黑树平衡（可能需要旋转和变色）
+- 重新计算排名
+
+
 
 ### 3.1.3 核心操作详解
 
@@ -1248,7 +1251,7 @@ private static TreeNode BuildTree(int l, int r, int depth, int maxDepth, UserBuc
 构造函数
 
 ```csharp
-public BucketBRTreeRankingList(Span<User> users)
+public BucketRBTreeRankingList(Span<User> users)
 {
     UserBucket[] buckets = BuildBucket(users);
     int maxDepth = (int)Math.Ceiling(Math.Log(buckets.Length - 1, 2)) + 1;
@@ -1465,6 +1468,7 @@ public void RemoveUser(User user)
     {
         // 桶太小，需要合并
         parent.CombineChild();
+        needDelete = true;
     }
     
     if(needDelete)
@@ -1855,12 +1859,12 @@ public (User[], int) GetAroundUser(User user, int aroundN)
 
 #### 完整代码
 ```csharp
-public class BucketBRTreeRankingList : IRankingList
+public class BucketRBTreeRankingList : IRankingList
 {
     private Tree _tree;
     private Dictionary<int, User> _userMap;
 
-    public BucketBRTreeRankingList(Span<User> users)
+    public BucketRBTreeRankingList(Span<User> users)
     {
         users.Sort();
         _tree = new Tree(users);
@@ -1872,7 +1876,7 @@ public class BucketBRTreeRankingList : IRankingList
         }
     }
 
-    public BucketBRTreeRankingList(List<User> users) :
+    public BucketRBTreeRankingList(List<User> users) :
         this(CollectionsMarshal.AsSpan(users))
     {
     }
@@ -4981,11 +4985,11 @@ List<UserBucket> 的 连续内存结构 带来更高的 CPU 缓存命中率，�
 ## 5.5.3 红黑树和双向跳表对比
 
 AMDuProf测试显示：
-test BucketBRTreeListRankingList -t 02-t100w_100 L1_DC_MISS_RATIO 0.009
+test BucketRBTreeListRankingList -t 02-t100w_100 L1_DC_MISS_RATIO 0.009
 test BucketBiSkipListRankingList -t 02-t100w_100 L1_DC_MISS_RATIO 0.017
 L1数据缓冲占所有L1缓存访问的比例，数值越小表示内存局部性越好。
 BucketSkipListRankingList3的L1数据缓冲命中率较低，可能是因为跳表节点的内存分布较为分散，导致CPU缓存效率较低。
-相比之下，BucketBRTreeListRankingList的内存布局可能更有利于缓存，从而表现出更好的性能。
+相比之下，BucketRBTreeListRankingList的内存布局可能更有利于缓存，从而表现出更好的性能。
 
 # 六、总结与展望
 
