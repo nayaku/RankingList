@@ -5,9 +5,6 @@ namespace RankingListNew
 {
     public class BucketSkipListRankingList : IRankingList
     {
-        private const int MaxLevel = 32; // 跳表的最大层数
-        private const double P = 0.25; // 跳表的概率
-
         private SkipList _userList;
         private Dictionary<int, User> _userMap;
 
@@ -82,6 +79,8 @@ namespace RankingListNew
         // 源码：https://github.com/tedcy/algorithm_test/blob/master/order_set/t_zset.h
         class SkipList
         {
+            private const int MaxLevel = 32; // 跳表的最大层数
+            private const double P = 0.5; // 跳表的概率
             public SkipListNode Head;
             public int Count;
 #if DEBUG
