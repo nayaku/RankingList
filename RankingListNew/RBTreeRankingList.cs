@@ -3,12 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace RankingListNew
 {
-    public class BRTreeRankingList : IRankingList
+    public class RBTreeRankingList : IRankingList
     {
         private TreeNode _root;
         private Dictionary<int, User> _userMap;
 
-        public BRTreeRankingList(Span<User> users)
+        public RBTreeRankingList(Span<User> users)
         {
             users.Sort();
             int maxDepth = (int)Math.Ceiling(Math.Log(users.Length - 1, 2)) + 1;
@@ -25,7 +25,7 @@ namespace RankingListNew
 #endif
         }
 
-        public BRTreeRankingList(List<User> users) :
+        public RBTreeRankingList(List<User> users) :
             this(CollectionsMarshal.AsSpan(users))
         {
         }
