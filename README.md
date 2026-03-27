@@ -1106,8 +1106,11 @@ _root 是树的根节点。
 #### 初始化
 
 **算法流程**：
+
+```
 1. 用户分桶
 2. 构建红黑树
+```
 
 构建一个桶数组
 ```csharp
@@ -1184,7 +1187,7 @@ public BucketRBTreeRankingList(Span<User> users)
 添加玩家是最复杂的操作，涉及树的遍历、桶的插入、桶的分裂和红黑树的调整。
 
 **算法流程**：
-```
+
 1. 如果树为空，直接添加到根节点
 2. 遍历红黑树，找到目标叶子节点（桶）
    - 同时更新路径上每个节点的计数
@@ -1194,7 +1197,7 @@ public BucketRBTreeRankingList(Span<User> users)
    - 调整红黑树平衡
 4. 如果桶未满，直接插入
 5. 返回玩家排名
-```
+
 
 **代码实现**：
 
@@ -1495,9 +1498,12 @@ private void FixAfterDel(TreeNode node)
 获取玩家排名是排行榜的核心操作之一，利用红黑树的维护的区间计数，就可以快速计算玩家的排名。
 
 **算法流程**：
-- 红黑树按分数有序
-- 当进入右子树时，说明左子树所有用户都在目标用户之前
-- 累加所有左子树的 Count，再加上桶内索引，得到最终排名
+
+```
+1. 红黑树按分数有序
+2. 当进入右子树时，说明左子树所有用户都在目标用户之前
+3. 累加所有左子树的 Count，再加上桶内索引，得到最终排名
+```
 
 **代码实现**：
 
@@ -2617,8 +2623,11 @@ class BiSkipList
 ### 4.2.2 初始化与构建
 
 跳表初始化包括两个主要步骤：
+
+```
 1. 将初始用户数据分配到桶中
 2. 构建跳表的多层索引结构
+```
 
 ```csharp
 private static UserBucket[] BuildBucket(Span<User> users)
@@ -2724,10 +2733,12 @@ private int RandomLevel()
 
 添加用户的流程：
 
+```
 1. 找到目标桶的位置
 2. 在桶内插入用户
 3. 如果桶满了，分裂桶并加在目标桶后面
 4. 更新跳表的层级信息
+```
 
 ```csharp
 public int AddUser(User user)
@@ -2806,11 +2817,13 @@ public int AddUser(User user)
 
 删除用户的流程：
 
+```
 1. 找到目标桶的位置
 2. 从桶内删除用户
 3. 如果删除后桶过小，合并到前一个桶
 4. 如果删除后桶为空，删除桶节点
 5. 更新跳表的层级信息
+```
 
 ```csharp
 public void RemoveUser(User user)
@@ -2884,8 +2897,11 @@ public void RemoveUser(User user)
 #### 获取玩家排名
 
 获取玩家排名的流程：
+
+```
 1. 找到目标桶的位置
 2. 在桶内定位玩家
+```
 
 ```csharp
 public int GetUserRank(User user)
@@ -2910,9 +2926,12 @@ public int GetUserRank(User user)
 #### 获取前N名
 
 获取前N名玩家的流程：
+
+```
 1. 从头节点开始遍历
 2. 依次将桶内玩家添加到结果中
 3. 直到获取足够数量的玩家
+```
 
 ```csharp
 public User[] GetTopN(int topN)
@@ -2935,9 +2954,12 @@ public User[] GetTopN(int topN)
 #### 获取周围玩家
 
 获取目标玩家周围的玩家的核心流程是：
+
+```
 1. 找到目标玩家的位置
 2. 获取目标玩家在桶内的左右玩家
 3. 不足时从相邻桶获取补充
+```
 
 ```csharp
 public (User[], int) GetAroundUser(User user, int aroundN)
